@@ -1,0 +1,16 @@
+server:
+  port: 19002
+
+spring:
+  application:
+    name: config-service
+  cloud:
+    config:
+      server:
+        native:
+          search-locations: classpath:/config-repo  # 리소스 폴더의 디렉토리 경로
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:19000/eureka/

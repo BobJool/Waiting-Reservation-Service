@@ -1,31 +1,12 @@
 bootJar.enabled = true
 
-ext {
-    set('querydslVersion', "5.0.0")  // QueryDSL 버전 명시적으로 설정
-}
-
 dependencies {
-    // 필요한 건 여기다가 더 추가하시면 됩니다.
-    // 예를 들면, 시큐리티
-    implementation project(':common')
-    api 'org.springframework.boot:spring-boot-starter-data-jpa'
+    // implementation project(':common')
+    // api 'org.springframework.boot:spring-boot-starter-data-jpa'
     api 'org.springframework.boot:spring-boot-starter-validation'
     api 'org.springframework.boot:spring-boot-starter-actuator'
     api 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
     api 'org.springframework.cloud:spring-cloud-starter-openfeign'
 
-    runtimeOnly 'com.h2database:h2'
-    // 아래도 주석 해제 해야 합니다
     // runtimeOnly 'org.postgresql:postgresql'
-
-    // queryDsl
-    implementation "com.querydsl:querydsl-jpa:${querydslVersion}:jakarta"
-    annotationProcessor "com.querydsl:querydsl-apt:${querydslVersion}:jakarta"
-    annotationProcessor "jakarta.annotation:jakarta.annotation-api"
-    annotationProcessor "jakarta.persistence:jakarta.persistence-api"
-}
-
-def querydslSrcDir = 'src/main/generated'
-clean {
-    delete file(querydslSrcDir)
 }

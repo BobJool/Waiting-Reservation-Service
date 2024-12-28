@@ -1,5 +1,5 @@
 server:
-  port: 19095
+  port: 19005
 
 spring:
   application:
@@ -37,7 +37,7 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:19090/eureka/
+      defaultZone: http://localhost:19000/eureka/
 
 #service:
 #  jwt:
