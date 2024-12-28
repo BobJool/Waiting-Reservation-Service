@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: product-service
+    name: reservation-service
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/reservation_db
