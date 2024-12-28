@@ -7,4 +7,5 @@ include 'auth'
 include 'reservation'
 include 'restaurant'
 include 'queue'
+include 'notification'
 
