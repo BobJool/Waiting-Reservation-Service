@@ -6,4 +6,5 @@ include 'config'
 include 'auth'
 include 'reservation'
 include 'restaurant'
+include 'queue'
 
