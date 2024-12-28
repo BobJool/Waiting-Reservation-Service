@@ -3,4 +3,5 @@ include 'common'
 include 'eureka-server'
 include 'gateway'
 include 'config'
+include 'auth'
 
