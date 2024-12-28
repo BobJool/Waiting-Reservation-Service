@@ -1,4 +1,5 @@
 rootProject.name = 'waiting-reservation'
 include 'common'
 include 'eureka-server'
+include 'gateway'
 
