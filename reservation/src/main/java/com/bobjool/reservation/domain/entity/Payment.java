@@ -60,7 +60,7 @@ public class Payment extends BaseEntity {
 
     public static Payment create(UUID reservationId, Long userId, Integer amount,
                           PaymentMethod method, PgName pgName) {
-        return create(reservationId, userId, amount, PaymentStatus.PENDING, method, pgName);
+        return create(reservationId, userId, amount, PaymentStatus.COMPLETE, method, pgName);
     }
 
     /**

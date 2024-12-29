@@ -27,6 +27,7 @@ public class PaymentService {
      * 1. PaymentMethod.of()
      * 2. PgName.of()
      * 3. pgClient.requestPayment()
+     * 4. amount 가 음수 또는 0 일때 - 이거는 컨트롤러에서 검증 하니까 해도 되고 안 해도 되긴 합니다. 하는 게 좋긴 하겠죠?
      * */
     @Transactional
     public PaymentResponse createPayment(PaymentCreateDto paymentCreateDto) {

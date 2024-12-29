@@ -67,7 +67,7 @@ class PaymentServiceTest {
         assertThat(response.amount()).isEqualTo(amount);
         assertThat(response.method()).isEqualTo(PaymentMethod.CARD.name());
         assertThat(response.pgName()).isEqualTo(PgName.TOSS.name());
-        assertThat(response.status()).isEqualTo(PaymentStatus.PENDING.name());
+        assertThat(response.status()).isEqualTo(PaymentStatus.COMPLETE.name());
         assertThat(response.createdAt()).isNotNull();
         assertThat(response.updatedAt()).isNotNull();
 
@@ -80,7 +80,7 @@ class PaymentServiceTest {
         assertThat(payment.getAmount()).isEqualTo(amount);
         assertThat(payment.getMethod()).isEqualTo(PaymentMethod.CARD);
         assertThat(payment.getPgName()).isEqualTo(PgName.TOSS);
-        assertThat(payment.getStatus()).isEqualTo(PaymentStatus.PENDING);
+        assertThat(payment.getStatus()).isEqualTo(PaymentStatus.COMPLETE);
         assertThat(payment.getCreatedAt()).isNotNull();
         assertThat(payment.getUpdatedAt()).isNotNull();
         assertThat(payment.getIsDeleted()).isFalse();

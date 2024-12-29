@@ -9,7 +9,6 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -31,48 +30,45 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleNoResourceFoundException(NoResourceFoundException e) {
         log.error(String.format(ERROR_LOG, e.getMessage(), e.getClass().getName()));
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.fail(HttpStatus.BAD_REQUEST, "지원하지 않는 경로입니다."));
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.fail(HttpStatus.NOT_FOUND, "요청하신 경로를 찾을 수 없습니다."));
     }
 
-    @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<ApiResponse<Void>> httpReqMethodNotSupportException(final HttpRequestMethodNotSupportedException e){
         log.error(String.format(ERROR_LOG, e.getMessage(), Arrays.toString(e.getSupportedMethods())));
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
-                .body(ApiResponse.fail(HttpStatus.METHOD_NOT_ALLOWED, "지원하지 않는 요청 방법입니다."));
+                .body(ApiResponse.fail(HttpStatus.METHOD_NOT_ALLOWED, "요청 방법(GET/POST 등)이 지원되지 않습니다."));
     }
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<ApiResponse<Void>> missingServletRequestParameter(final MissingServletRequestParameterException e) {
         log.error(String.format(ERROR_LOG, e.getParameterName(), e.getMessage()));
-        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
-                .body(ApiResponse.fail(HttpStatus.METHOD_NOT_ALLOWED, "필요한 파라미터가 입력되지 않았습니다."));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.fail(HttpStatus.BAD_REQUEST, "필요한 파라미터가 입력되지 않았습니다."));
     }
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    // @Valid 에 의해 유효성 검증을 거치고 난 후 에러
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Void>> methodArgumentNotValidException(final MethodArgumentNotValidException e){
         log.error(String.format(ERROR_LOG, e.getParameter(), e.getStatusCode()));
-        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
-                .body(ApiResponse.fail(HttpStatus.METHOD_NOT_ALLOWED, "요청하신 경로를 찾을 수 없습니다."));
+        String errorMessage = e.getBindingResult().getAllErrors().get(0).getDefaultMessage();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.fail(HttpStatus.BAD_REQUEST, errorMessage));
     }
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ApiResponse<Void>> methodArgumentTypeMismatchException(final MethodArgumentTypeMismatchException e){
         log.error(String.format(ERROR_LOG, e.getParameter(), HttpStatus.BAD_REQUEST));
-        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
-                .body(ApiResponse.fail(HttpStatus.METHOD_NOT_ALLOWED, "해당 요청 방식은 지원되지 않습니다."));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.fail(HttpStatus.BAD_REQUEST, "파라미터의 타입이 일치하지 않습니다."));
     }
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(BindException.class)
     public ResponseEntity<ApiResponse<Void>> handleBindException(final BindException e) {
         log.error(String.format(ERROR_LOG, e.getObjectName(), e.getFieldErrors()));
         String errorMessage = e.getBindingResult().getAllErrors().get(0).getDefaultMessage();
-        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
-                .body(ApiResponse.fail(HttpStatus.METHOD_NOT_ALLOWED, errorMessage));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.fail(HttpStatus.BAD_REQUEST, errorMessage));
     }
 }
