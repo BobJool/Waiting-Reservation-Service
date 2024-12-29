@@ -9,3 +9,7 @@ Content-Type: application/json
   "method": "CARD",
   "pgName": "TOSS"
 }
+
+### 결제 검색
+GET localhost:19005/api/v1/payments?page=0&size=5&sort=createdAt,DESC
+Content-Type:

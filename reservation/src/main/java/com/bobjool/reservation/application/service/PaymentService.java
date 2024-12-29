@@ -54,8 +54,12 @@ public class PaymentService {
     public Page<PaymentResponse> search(PaymentSearchDto paymentSearchDto, Pageable pageable) {
         log.info("search.PaymentSearchDto = {}, pageable = {}", paymentSearchDto, pageable);
 
+        PaymentStatus status = null;
+        if (paymentSearchDto.status() != null) {
+            status = PaymentStatus.of(paymentSearchDto.status());
+        }
         Page<Payment> paymentPage = paymentRepository.search(paymentSearchDto.userId(),
-                PaymentStatus.of(paymentSearchDto.status()),
+                status,
                 paymentSearchDto.startDate(),
                 paymentSearchDto.endDate(),
                 pageable);
