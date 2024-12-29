@@ -22,8 +22,8 @@ public class GlobalExceptionHandler {
 
     private final String ERROR_LOG = "[ERROR] %s %s";
 
-    @ExceptionHandler(CustomException.class)
-    public ResponseEntity<ApiResponse<Void>> applicationException(final CustomException e){
+    @ExceptionHandler(BobJoolException.class)
+    public ResponseEntity<ApiResponse<Void>> applicationException(final BobJoolException e){
         log.error(String.format(ERROR_LOG, e.getHttpStatus(), e.getMessage()));
         return ApiResponse.fail(e);
     }

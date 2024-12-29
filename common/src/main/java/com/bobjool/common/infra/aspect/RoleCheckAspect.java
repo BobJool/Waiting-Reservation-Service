@@ -1,6 +1,6 @@
 package com.bobjool.common.infra.aspect;
 
-import com.bobjool.common.exception.CustomException;
+import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -24,14 +24,14 @@ public class RoleCheckAspect {
         // 헤더에서 role 정보 가져오기
         String role = request.getHeader("X-Role");
         if (role == null) {
-            throw new CustomException(ErrorCode.MISSING_ROLE);
+            throw new BobJoolException(ErrorCode.MISSING_ROLE);
         }
 
         log.debug("Checking role {}", role);
         // 허용된 권한 체크
         List<String> allowedRoles = List.of(requireRole.value());
         if (!allowedRoles.contains(role)) {
-            throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
+            throw new BobJoolException(ErrorCode.FORBIDDEN_ACCESS);
         }
     }
 }

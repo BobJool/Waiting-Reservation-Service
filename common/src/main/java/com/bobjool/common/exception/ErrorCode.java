@@ -18,6 +18,23 @@ public enum ErrorCode {
     MISSING_ROLE(HttpStatus.BAD_REQUEST, "권한 정보가 없습니다."),
     INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, "유저 ID 또는 비밀번호 정보가 일치하지 않습니다."),
 
+    // 레스토랑
+
+    // 대기열
+
+    // 예약
+
+    // 결제
+    UNSUPPORTED_PAYMENT_METHOD(HttpStatus.BAD_REQUEST, "지원하지 않는 결제 방식입니다."),
+    UNSUPPORTED_PAYMENT_STATUS(HttpStatus.BAD_REQUEST, "지원하지 않는 결제 상태입니다."),
+    UNSUPPORTED_PG_NAME(HttpStatus.BAD_REQUEST, "지원하지 않는 PG사 이름입니다."),
+
+
+    // 알림
+
+    // AI
+
+
     ;
 
     private final HttpStatus httpStatus;
