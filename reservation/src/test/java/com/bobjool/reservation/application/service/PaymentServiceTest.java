@@ -3,6 +3,7 @@ package com.bobjool.reservation.application.service;
 import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.reservation.application.dto.PaymentCreateDto;
 import com.bobjool.reservation.application.dto.PaymentResponse;
+import com.bobjool.reservation.application.dto.PaymentSearchDto;
 import com.bobjool.reservation.application.interfaces.PgClient;
 import com.bobjool.reservation.domain.entity.Payment;
 import com.bobjool.reservation.domain.enums.PaymentMethod;
@@ -16,9 +17,14 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
@@ -155,5 +161,51 @@ class PaymentServiceTest {
         assertThatThrownBy(() -> paymentService.createPayment(paymentCreateDto))
             .isInstanceOf(BobJoolException.class)
                 .hasMessage("알 수 없는 이유로 결제에 실패했습니다.");
+    }
+
+    /**
+     * search 테스트 - 2개
+     * */
+    @DisplayName("search - 성공")
+    @Test
+    void search_success() {
+        // given - 3개의 결제
+        Long userId = 123L;
+        String status = "COMPLETE";
+        Payment payment1 = Payment.create(UUID.randomUUID(), userId, 1000, PaymentStatus.COMPLETE, PaymentMethod.CARD, PgName.TOSS);
+        Payment payment2 = Payment.create(UUID.randomUUID(), 345L, 2000, PaymentStatus.COMPLETE, PaymentMethod.CASH, PgName.NHN);
+        Payment payment3 = Payment.create(UUID.randomUUID(), 456L, 3000, PaymentStatus.PENDING, PaymentMethod.CARD, PgName.TOSS);
+        paymentRepository.saveAll(List.of(payment1, payment2, payment3));
+        PaymentSearchDto paymentSearchDto = new PaymentSearchDto(userId, status, null, null);
+        Pageable pageable = PageRequest.of(0, 5);
+
+        // when
+        Page<PaymentResponse> result = paymentService.search(paymentSearchDto, pageable);
+
+        // then
+        assertThat(result.getContent()).hasSize(1)
+                .extracting("userId", "amount", "status", "method", "pgName")
+                .contains(
+                        tuple(userId, 1000, "COMPLETE", "CARD", "TOSS")
+                );
+    }
+
+    @DisplayName("search - status가 지원하지 않는 값이면 예외 발생")
+    @Test
+    void search_whenInvalidStatus() {
+        // given - 잘못된 status 값
+        Long userId = 12345L;
+        String invalidStatus = "INVALID";
+        LocalDate startDate = LocalDate.of(2024, 12, 28);
+        LocalDate endDate = LocalDate.of(2024, 12, 31);
+        Pageable pageable = Pageable.ofSize(10);
+
+        // 검색 DTO 생성
+        PaymentSearchDto searchDto = new PaymentSearchDto(userId, invalidStatus, startDate, endDate);
+
+        // when & then - 예외 발생 확인
+        assertThatThrownBy(() -> paymentService.search(searchDto, pageable))
+                .isInstanceOf(BobJoolException.class)
+                .hasMessage("지원하지 않는 결제 상태입니다.");
     }
 }

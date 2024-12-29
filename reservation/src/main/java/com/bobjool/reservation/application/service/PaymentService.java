@@ -4,13 +4,17 @@ import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
 import com.bobjool.reservation.application.dto.PaymentCreateDto;
 import com.bobjool.reservation.application.dto.PaymentResponse;
+import com.bobjool.reservation.application.dto.PaymentSearchDto;
 import com.bobjool.reservation.application.interfaces.PgClient;
 import com.bobjool.reservation.domain.entity.Payment;
 import com.bobjool.reservation.domain.enums.PaymentMethod;
+import com.bobjool.reservation.domain.enums.PaymentStatus;
 import com.bobjool.reservation.domain.enums.PgName;
 import com.bobjool.reservation.domain.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,12 +26,12 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final PgClient pgClient;
 
+    // todo 예외 발생 가능한 곳은 테스트 합니다.
     /**
-     * 예외 발생 가능 한 곳은 테스트 합니다.
      * 1. PaymentMethod.of()
      * 2. PgName.of()
      * 3. pgClient.requestPayment()
-     * 4. amount 가 음수 또는 0 일때 - 이거는 컨트롤러에서 검증 하니까 해도 되고 안 해도 되긴 합니다. 하는 게 좋긴 하겠죠?
+     * 4. amount 가 음수 또는 0 일때
      * */
     @Transactional
     public PaymentResponse createPayment(PaymentCreateDto paymentCreateDto) {
@@ -45,5 +49,16 @@ public class PaymentService {
             throw new BobJoolException(ErrorCode.PAYMENT_FAIL);
         }
         return PaymentResponse.from(paymentRepository.save(payment));
+    }
+
+    public Page<PaymentResponse> search(PaymentSearchDto paymentSearchDto, Pageable pageable) {
+        log.info("search.PaymentSearchDto = {}, pageable = {}", paymentSearchDto, pageable);
+
+        Page<Payment> paymentPage = paymentRepository.search(paymentSearchDto.userId(),
+                PaymentStatus.of(paymentSearchDto.status()),
+                paymentSearchDto.startDate(),
+                paymentSearchDto.endDate(),
+                pageable);
+        return paymentPage.map(PaymentResponse::from);
     }
 }
