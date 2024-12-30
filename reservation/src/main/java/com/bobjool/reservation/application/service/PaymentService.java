@@ -90,4 +90,13 @@ public class PaymentService {
         payment.updateStatus(PaymentStatus.REFUND);
         return PaymentResponse.from(payment);
     }
+
+    public PaymentResponse getPayment(UUID paymentId) {
+        log.info("getPayment.PaymentId = {}", paymentId);
+
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND));
+
+        return PaymentResponse.from(payment);
+    }
 }

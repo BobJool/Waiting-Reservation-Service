@@ -25,3 +25,7 @@ Content-Type: application/json
 ### 환불 요청
 POST localhost:19005/api/v1/payments/refund/393fcd8f-9895-4f4f-9ea8-46ba6e9cd2e2
 Content-Type: application/json
+
+### 결제 단건 조회
+GET localhost:19005/api/v1/payments
+Content-Type: application/json

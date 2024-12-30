@@ -15,8 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.UUID;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -257,6 +256,19 @@ class PaymentControllerTest {
         // when & then - 200 상태코드 반환하는지 본다
         mockMvc.perform(post("/api/v1/payments/refund/{paymentId}", paymentId)
                         .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @DisplayName("getPayment - 성공")
+    @Test
+    void getPayment_success() throws Exception {
+        // given - 정상 요청일 때
+        UUID paymentId = UUID.randomUUID();
+
+        //whn & then - 200 상태코드 반환하는지 본다.
+        mockMvc.perform(get("/api/v1/payments/{paymentId}", paymentId)
+                .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk());
     }

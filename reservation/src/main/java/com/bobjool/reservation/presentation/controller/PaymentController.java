@@ -19,7 +19,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -30,7 +29,7 @@ public class PaymentController {
     private final PaymentService paymentService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<PaymentResponse>> createProduct(@Valid @RequestBody PaymentCreateReqDto paymentCreateReqDto) {
+    public ResponseEntity<ApiResponse<PaymentResponse>> createPayment(@Valid @RequestBody PaymentCreateReqDto paymentCreateReqDto) {
         log.info("createProduct.paymentCreateReqDto={}", paymentCreateReqDto);
         PaymentResponse response = paymentService.createPayment(paymentCreateReqDto.toServiceDto());
         return ApiResponse.success(SuccessCode.SUCCESS_INSERT, response);
@@ -62,5 +61,11 @@ public class PaymentController {
         return ApiResponse.success(SuccessCode.SUCCESS, response);
     }
 
+    @GetMapping("/{paymentId}")
+    public ResponseEntity<ApiResponse<PaymentResponse>> getPayment(@PathVariable("paymentId") UUID paymentId) {
+        log.info("getPayment.paymentId={}", paymentId);
+        PaymentResponse response = paymentService.getPayment(paymentId);
+        return ApiResponse.success(SuccessCode.SUCCESS, response);
+    }
 
 }
