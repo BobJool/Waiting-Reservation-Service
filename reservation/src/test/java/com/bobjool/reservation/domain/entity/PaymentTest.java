@@ -71,4 +71,26 @@ class PaymentTest {
                 .hasMessage("결제 금액은 양수여야 합니다."); // validateAmount 메서드에서 정의한 메시지와 일치해야 함
     }
 
+    @DisplayName("updateStatus - 결제 상태를 변경한다.")
+    @Test
+    void updateStatus_success() {
+        // given - status 가 COMPLETE 인 Payment 가 있을 때
+        UUID reservationId = UUID.randomUUID();
+        Long userId = 12345L;
+        Integer amount = 1000;
+        PaymentStatus status = PaymentStatus.COMPLETE;
+        PaymentMethod method = PaymentMethod.CARD;
+        PgName toss = PgName.TOSS;
+
+        Payment payment = Payment.create(reservationId, userId, amount, status, method, toss);
+        PaymentStatus targetStatus = PaymentStatus.REFUND;
+
+        // when - updateStatus 를 호출 하면,
+        payment.updateStatus(targetStatus);
+
+        assertThat(payment.getStatus()).isEqualTo(targetStatus);
+        assertThat(payment.getUserId()).isEqualTo(userId);
+
+    }
+
 }

@@ -73,4 +73,8 @@ public class Payment extends BaseEntity {
             throw new BobJoolException(ErrorCode.INVALID_PAYMENT_AMOUNT);
         }
     }
+
+    public void updateStatus(PaymentStatus status) {
+        this.status = status;
+    }
 }

@@ -12,4 +12,12 @@ Content-Type: application/json
 
 ### 결제 검색
 GET localhost:19005/api/v1/payments?page=0&size=5&sort=createdAt,DESC
-Content-Type:
+Content-Type: application/json
+
+### 결제 상태 변경
+PATCH localhost:19005/api/v1/payments/status/9f24d789-6e40-42fc-af7a-f2c03cfd5bff
+Content-Type: application/json
+
+{
+  "status": "REFUND"
+}
