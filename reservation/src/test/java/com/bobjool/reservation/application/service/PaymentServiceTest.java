@@ -1,9 +1,11 @@
 package com.bobjool.reservation.application.service;
 
 import com.bobjool.common.exception.BobJoolException;
+import com.bobjool.common.exception.ErrorCode;
 import com.bobjool.reservation.application.dto.PaymentCreateDto;
 import com.bobjool.reservation.application.dto.PaymentResponse;
 import com.bobjool.reservation.application.dto.PaymentSearchDto;
+import com.bobjool.reservation.application.dto.PaymentUpdateDto;
 import com.bobjool.reservation.application.interfaces.PgClient;
 import com.bobjool.reservation.domain.entity.Payment;
 import com.bobjool.reservation.domain.enums.PaymentMethod;
@@ -25,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
@@ -207,5 +210,114 @@ class PaymentServiceTest {
         assertThatThrownBy(() -> paymentService.search(searchDto, pageable))
                 .isInstanceOf(BobJoolException.class)
                 .hasMessage("지원하지 않는 결제 상태입니다.");
+    }
+
+    /**
+     * updatePaymentStatus 테스트 2개
+     * */
+    @DisplayName("updatePaymentStatus - 결제 상태를 업데이트한다.")
+    @Test
+    void updatePaymentStatus_success() {
+        // given - Payment 엔티티가 저장 되어 있을 때
+        UUID reservationId = UUID.randomUUID();
+        Long userId = 12345L;
+        Integer amount = 10_000;
+        PaymentStatus completeStatus = PaymentStatus.COMPLETE;
+        PaymentMethod method = PaymentMethod.CARD;
+        PgName pgName = PgName.TOSS;
+        Payment payment = Payment.create(reservationId, userId, amount, completeStatus, method, pgName);
+        paymentRepository.save(payment);
+
+        // and - 업데이트할 상태와 DTO 생성
+        String newStatus = "REFUND";
+        PaymentUpdateDto updateDto = new PaymentUpdateDto(newStatus);
+
+        // when - 결제 상태 업데이트 호출
+        PaymentResponse response = paymentService.updatePaymentStatus(updateDto, payment.getId());
+
+        // then - 응답 및 데이터베이스 상태 검증
+        assertThat(response.status()).isEqualTo(newStatus);
+        assertThat(response.PaymentId()).isEqualTo(payment.getId());
+
+        // and - 데이터베이스에서 업데이트된 Payment 확인
+        Payment updatedPayment = paymentRepository.findById(payment.getId()).orElse(null);
+        assertThat(updatedPayment.getStatus()).isEqualTo(PaymentStatus.of(newStatus));
+    }
+
+    @DisplayName("updatePaymentStatus - 지원하지 않는 결제 상태이면 예외 발생한다.")
+    @Test
+    void updatePaymentStatus_whenInvalidStatus() {
+        // given - Payment 엔티티가 저장 되어 있을 때
+        UUID reservationId = UUID.randomUUID();
+        Long userId = 12345L;
+        Integer amount = 10_000;
+        PaymentStatus completeStatus = PaymentStatus.COMPLETE;
+        PaymentMethod method = PaymentMethod.CARD;
+        PgName pgName = PgName.TOSS;
+        Payment payment = Payment.create(reservationId, userId, amount, completeStatus, method, pgName);
+        paymentRepository.save(payment);
+
+        // and - 업데이트할 상태가 이상하면
+        String newStatus = "INVALID";
+        PaymentUpdateDto updateDto = new PaymentUpdateDto(newStatus);
+
+        // when & then
+        assertThatThrownBy(() -> paymentService.updatePaymentStatus(updateDto, payment.getId()))
+                .isInstanceOf(BobJoolException.class)
+                .hasMessage("지원하지 않는 결제 상태입니다.");
+    }
+
+    @DisplayName("refundPayment - 성공적으로 REFUND 상태로 변경된다")
+    @Test
+    void refundPayment_success() {
+        // given - 상태가 COMPLETE인 Payment 엔티티가 존재할 때
+        Payment payment = Payment.create(
+                UUID.randomUUID(),
+                12345L,
+                1000,
+                PaymentStatus.COMPLETE,
+                PaymentMethod.CARD,
+                PgName.TOSS
+        );
+        paymentRepository.save(payment);
+
+        // when - refundPayment 메서드 호출
+        PaymentResponse response = paymentService.refundPayment(payment.getId());
+
+        // then - 상태가 REFUND로 변경되었는지 확인
+        assertThat(response.status()).isEqualTo(PaymentStatus.REFUND.name());
+    }
+
+    @DisplayName("refundPayment - Payment 엔티티를 찾을 수 없을 때 예외 발생")
+    @Test
+    void refundPayment_notFound() {
+        // given - 존재하지 않는 paymentId
+        UUID paymentId = UUID.randomUUID();
+
+        // when & then - ENTITY_NOT_FOUND 예외 발생 확인
+        assertThatThrownBy(() -> paymentService.refundPayment(paymentId))
+                .isInstanceOf(BobJoolException.class)
+                .hasMessage(ErrorCode.ENTITY_NOT_FOUND.getMessage());
+    }
+
+    @DisplayName("refundPayment - REFUND 불가능한 상태일 때 예외 발생")
+    @ParameterizedTest
+    @ValueSource(strings = {"PENDING", "FAIL", "REFUND"})
+    void refundPayment_invalidStatus(String statusStr) {
+        // given - 상태가 PENDING인 Payment 엔티티가 존재할 때
+        Payment payment = Payment.create(
+                UUID.randomUUID(),
+                12345L,
+                1000,
+                PaymentStatus.of(statusStr),
+                PaymentMethod.CARD,
+                PgName.TOSS
+        );
+        paymentRepository.save(payment);
+
+        // when & then - CANNOT_REFUND 예외 발생 확인
+        assertThatThrownBy(() -> paymentService.refundPayment(payment.getId()))
+                .isInstanceOf(BobJoolException.class)
+                .hasMessage(ErrorCode.CANNOT_REFUND.getMessage());
     }
 }

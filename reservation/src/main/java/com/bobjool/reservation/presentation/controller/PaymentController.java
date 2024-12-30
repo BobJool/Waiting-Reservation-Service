@@ -7,6 +7,7 @@ import com.bobjool.reservation.application.dto.PaymentResponse;
 import com.bobjool.reservation.application.dto.PaymentSearchDto;
 import com.bobjool.reservation.application.service.PaymentService;
 import com.bobjool.reservation.presentation.dto.PaymentCreateReqDto;
+import com.bobjool.reservation.presentation.dto.PaymentUpdateReqDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -45,5 +47,20 @@ public class PaymentController {
                 = paymentService.search(new PaymentSearchDto(userId, status, startDate, endDate), pageable);
         return ApiResponse.success(SuccessCode.SUCCESS, PageResponse.of(responsePage));
     }
+
+    @PatchMapping("/status/{paymentId}")
+    public ResponseEntity<ApiResponse<PaymentResponse>> updatePaymentStatus(@Valid @RequestBody PaymentUpdateReqDto paymentUpdateReqDto,
+                                    @PathVariable("paymentId") UUID paymentId) {
+        PaymentResponse response = paymentService.updatePaymentStatus(paymentUpdateReqDto.toServiceDto(), paymentId);
+        return ApiResponse.success(SuccessCode.SUCCESS_UPDATE, response);
+    }
+
+    @PostMapping("/refund/{paymentId}")
+    public ResponseEntity<ApiResponse<PaymentResponse>> refundPayment(@PathVariable("paymentId") UUID paymentId) {
+        log.info("refundPayment.paymentId={}", paymentId);
+        PaymentResponse response = paymentService.refundPayment(paymentId);
+        return ApiResponse.success(SuccessCode.SUCCESS, response);
+    }
+
 
 }

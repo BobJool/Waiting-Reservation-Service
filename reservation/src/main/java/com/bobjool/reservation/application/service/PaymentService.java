@@ -5,6 +5,7 @@ import com.bobjool.common.exception.ErrorCode;
 import com.bobjool.reservation.application.dto.PaymentCreateDto;
 import com.bobjool.reservation.application.dto.PaymentResponse;
 import com.bobjool.reservation.application.dto.PaymentSearchDto;
+import com.bobjool.reservation.application.dto.PaymentUpdateDto;
 import com.bobjool.reservation.application.interfaces.PgClient;
 import com.bobjool.reservation.domain.entity.Payment;
 import com.bobjool.reservation.domain.enums.PaymentMethod;
@@ -17,6 +18,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -64,5 +67,27 @@ public class PaymentService {
                 paymentSearchDto.endDate(),
                 pageable);
         return paymentPage.map(PaymentResponse::from);
+    }
+
+    @Transactional
+    public PaymentResponse updatePaymentStatus(PaymentUpdateDto paymentUpdateDto, UUID paymentId) {
+        log.info("updatePayment.PaymentUpdateDto = {}", paymentUpdateDto);
+
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND));
+
+        payment.updateStatus(PaymentStatus.of(paymentUpdateDto.status()));
+        return PaymentResponse.from(payment);
+    }
+
+    @Transactional
+    public PaymentResponse refundPayment(UUID paymentId) {
+        log.info("refundPayment.PaymentId = {}", paymentId);
+
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND));
+
+        payment.updateStatus(PaymentStatus.REFUND);
+        return PaymentResponse.from(payment);
     }
 }
