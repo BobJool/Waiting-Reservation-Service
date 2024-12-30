@@ -1,0 +1,15 @@
+### 결제 요청
+POST localhost:19005/api/v1/payments
+Content-Type: application/json
+
+{
+  "reservationId": "8b2fcc3a-2a7d-4a32-b679-d9bb39378b4d",
+  "userId": 12345,
+  "amount": 10000,
+  "method": "CARD",
+  "pgName": "TOSS"
+}
+
+### 결제 검색
+GET localhost:19005/api/v1/payments?page=0&size=5&sort=createdAt,DESC
+Content-Type:
