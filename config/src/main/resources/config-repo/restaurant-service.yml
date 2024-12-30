@@ -1,6 +1,6 @@
 server:
   port: 19020
-  
+
 spring:
   application:
     name: restaurant-service
@@ -33,3 +33,7 @@ management:
   tracing:
     sampling:
       probability: 1.0
+  endpoints:
+    web:
+      exposure:
+        include: refresh
