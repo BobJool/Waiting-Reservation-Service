@@ -29,9 +29,7 @@ public enum ErrorCode {
     UNSUPPORTED_PAYMENT_STATUS(HttpStatus.BAD_REQUEST, "지원하지 않는 결제 상태입니다."),
     UNSUPPORTED_PG_NAME(HttpStatus.BAD_REQUEST, "지원하지 않는 PG사 이름입니다."),
     INVALID_PAYMENT_AMOUNT(HttpStatus.BAD_REQUEST, "결제 금액은 양수여야 합니다."),
-    // 잔액이 부족하면 400이고, PG사 서버가 다운되거나하면 500 에러인데... 여러분들의 생각은 어떠신가요?
-    // 일단은 고객 문제는 없다고 가정하고 500으로 가겠습니다.
-    PAYMENT_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "알 수 없는 이유로 결제에 실패했습니다."),
+    PAYMENT_FAIL(HttpStatus.SERVICE_UNAVAILABLE, "알 수 없는 이유로 결제에 실패했습니다."),
 
 
     // 알림
