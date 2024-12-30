@@ -247,4 +247,17 @@ class PaymentControllerTest {
                 .andExpect(jsonPath("$.message").value("변경할 결제 상태는 필수 입력값입니다."))
                 .andExpect(jsonPath("$.data").isEmpty());
     }
+
+    @DisplayName("updatePaymentStatus - 성공")
+    @Test
+    void refundPayment_success() throws Exception {
+        // given - 정상 요청일 때
+        UUID paymentId = UUID.randomUUID();
+
+        // when & then - 200 상태코드 반환하는지 본다
+        mockMvc.perform(post("/api/v1/payments/refund/{paymentId}", paymentId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
 }

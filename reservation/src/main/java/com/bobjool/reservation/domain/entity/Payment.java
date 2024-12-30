@@ -75,6 +75,23 @@ public class Payment extends BaseEntity {
     }
 
     public void updateStatus(PaymentStatus status) {
+        if (status == PaymentStatus.REFUND) {
+            if (isNotRefundable()) {
+                throw new BobJoolException(ErrorCode.CANNOT_REFUND);
+            }
+        }
         this.status = status;
+    }
+
+    /**
+     * 도메인 규칙 - COMPLETE 상태만 REFUND 로 변경이 가능하다.
+     * 현재 상태(status) 검증 메서드
+     * */
+    private boolean isRefundable() {
+        return status == PaymentStatus.COMPLETE;
+    }
+
+    private boolean isNotRefundable() {
+        return !isRefundable();
     }
 }

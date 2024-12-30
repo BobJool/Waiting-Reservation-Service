@@ -3,11 +3,11 @@ POST localhost:19005/api/v1/payments
 Content-Type: application/json
 
 {
-  "reservationId": "8b2fcc3a-2a7d-4a32-b679-d9bb39378b4d",
-  "userId": 12345,
+  "reservation_id": "8b2fcc3a-2a7d-4a32-b679-d9bb39378b4d",
+  "user_id": 12345,
   "amount": 10000,
   "method": "CARD",
-  "pgName": "TOSS"
+  "pg_name": "TOSS"
 }
 
 ### 결제 검색
@@ -21,3 +21,7 @@ Content-Type: application/json
 {
   "status": "REFUND"
 }
+
+### 환불 요청
+POST localhost:19005/api/v1/payments/refund/393fcd8f-9895-4f4f-9ea8-46ba6e9cd2e2
+Content-Type: application/json

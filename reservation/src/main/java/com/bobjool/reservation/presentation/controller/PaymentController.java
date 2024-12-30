@@ -55,5 +55,12 @@ public class PaymentController {
         return ApiResponse.success(SuccessCode.SUCCESS_UPDATE, response);
     }
 
+    @PostMapping("/refund/{paymentId}")
+    public ResponseEntity<ApiResponse<PaymentResponse>> refundPayment(@PathVariable("paymentId") UUID paymentId) {
+        log.info("refundPayment.paymentId={}", paymentId);
+        PaymentResponse response = paymentService.refundPayment(paymentId);
+        return ApiResponse.success(SuccessCode.SUCCESS, response);
+    }
+
 
 }

@@ -79,4 +79,15 @@ public class PaymentService {
         payment.updateStatus(PaymentStatus.of(paymentUpdateDto.status()));
         return PaymentResponse.from(payment);
     }
+
+    @Transactional
+    public PaymentResponse refundPayment(UUID paymentId) {
+        log.info("refundPayment.PaymentId = {}", paymentId);
+
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND));
+
+        payment.updateStatus(PaymentStatus.REFUND);
+        return PaymentResponse.from(payment);
+    }
 }
