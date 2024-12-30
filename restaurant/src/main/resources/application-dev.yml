@@ -1,9 +1,16 @@
-server:
-  port: 19020
-
 spring:
   application:
     name: restaurant-service
+  config:
+    import: "configserver:"
+  cloud:
+    config:
+      discovery:
+        service-id: config-service
+        enabled: true
+#      discovery:
+#        enabled: true
+#        service-id: config-server
 #  datasource:
 #    driver-class-name: org.postgresql.Driver
 #    url: jdbc:postgresql://localhost:5432/restaurant_db
