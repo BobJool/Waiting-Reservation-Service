@@ -63,12 +63,4 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ApiResponse.fail(HttpStatus.BAD_REQUEST, "파라미터의 타입이 일치하지 않습니다."));
     }
-
-    @ExceptionHandler(BindException.class)
-    public ResponseEntity<ApiResponse<Void>> handleBindException(final BindException e) {
-        log.error(String.format(ERROR_LOG, e.getObjectName(), e.getFieldErrors()));
-        String errorMessage = e.getBindingResult().getAllErrors().get(0).getDefaultMessage();
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.fail(HttpStatus.BAD_REQUEST, errorMessage));
-    }
 }
