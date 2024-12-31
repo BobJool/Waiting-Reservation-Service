@@ -3,7 +3,7 @@ package com.bobjool.reservation.presentation.controller;
 import com.bobjool.common.presentation.ApiResponse;
 import com.bobjool.common.presentation.PageResponse;
 import com.bobjool.common.presentation.SuccessCode;
-import com.bobjool.reservation.application.dto.PaymentResponse;
+import com.bobjool.reservation.application.dto.PaymentResDto;
 import com.bobjool.reservation.application.dto.PaymentSearchDto;
 import com.bobjool.reservation.application.service.PaymentService;
 import com.bobjool.reservation.presentation.dto.PaymentCreateReqDto;
@@ -29,42 +29,42 @@ public class PaymentController {
     private final PaymentService paymentService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<PaymentResponse>> createPayment(@Valid @RequestBody PaymentCreateReqDto paymentCreateReqDto) {
+    public ResponseEntity<ApiResponse<PaymentResDto>> createPayment(@Valid @RequestBody PaymentCreateReqDto paymentCreateReqDto) {
         log.info("createProduct.paymentCreateReqDto={}", paymentCreateReqDto);
-        PaymentResponse response = paymentService.createPayment(paymentCreateReqDto.toServiceDto());
+        PaymentResDto response = paymentService.createPayment(paymentCreateReqDto.toServiceDto());
         return ApiResponse.success(SuccessCode.SUCCESS_INSERT, response);
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<PageResponse<PaymentResponse>>> search(@RequestParam(value = "userId", required = false) Long userId,
-                                                                          @RequestParam(value = "status", required = false) String status,
-                                                                          @RequestParam(value = "startDate", required = false) LocalDate startDate,
-                                                                          @RequestParam(value = "endDate", required = false) LocalDate endDate,
-                                                                          @SortDefault(sort = "createdAt", direction = Sort.Direction.DESC)
+    public ResponseEntity<ApiResponse<PageResponse<PaymentResDto>>> search(@RequestParam(value = "userId", required = false) Long userId,
+                                                                           @RequestParam(value = "status", required = false) String status,
+                                                                           @RequestParam(value = "startDate", required = false) LocalDate startDate,
+                                                                           @RequestParam(value = "endDate", required = false) LocalDate endDate,
+                                                                           @SortDefault(sort = "createdAt", direction = Sort.Direction.DESC)
                                                                           Pageable pageable){
-        Page<PaymentResponse> responsePage
+        Page<PaymentResDto> responsePage
                 = paymentService.search(new PaymentSearchDto(userId, status, startDate, endDate), pageable);
         return ApiResponse.success(SuccessCode.SUCCESS, PageResponse.of(responsePage));
     }
 
     @PatchMapping("/status/{paymentId}")
-    public ResponseEntity<ApiResponse<PaymentResponse>> updatePaymentStatus(@Valid @RequestBody PaymentUpdateReqDto paymentUpdateReqDto,
-                                    @PathVariable("paymentId") UUID paymentId) {
-        PaymentResponse response = paymentService.updatePaymentStatus(paymentUpdateReqDto.toServiceDto(), paymentId);
+    public ResponseEntity<ApiResponse<PaymentResDto>> updatePaymentStatus(@Valid @RequestBody PaymentUpdateReqDto paymentUpdateReqDto,
+                                                                          @PathVariable("paymentId") UUID paymentId) {
+        PaymentResDto response = paymentService.updatePaymentStatus(paymentUpdateReqDto.toServiceDto(), paymentId);
         return ApiResponse.success(SuccessCode.SUCCESS_UPDATE, response);
     }
 
     @PostMapping("/refund/{paymentId}")
-    public ResponseEntity<ApiResponse<PaymentResponse>> refundPayment(@PathVariable("paymentId") UUID paymentId) {
+    public ResponseEntity<ApiResponse<PaymentResDto>> refundPayment(@PathVariable("paymentId") UUID paymentId) {
         log.info("refundPayment.paymentId={}", paymentId);
-        PaymentResponse response = paymentService.refundPayment(paymentId);
+        PaymentResDto response = paymentService.refundPayment(paymentId);
         return ApiResponse.success(SuccessCode.SUCCESS, response);
     }
 
     @GetMapping("/{paymentId}")
-    public ResponseEntity<ApiResponse<PaymentResponse>> getPayment(@PathVariable("paymentId") UUID paymentId) {
+    public ResponseEntity<ApiResponse<PaymentResDto>> getPayment(@PathVariable("paymentId") UUID paymentId) {
         log.info("getPayment.paymentId={}", paymentId);
-        PaymentResponse response = paymentService.getPayment(paymentId);
+        PaymentResDto response = paymentService.getPayment(paymentId);
         return ApiResponse.success(SuccessCode.SUCCESS, response);
     }
 

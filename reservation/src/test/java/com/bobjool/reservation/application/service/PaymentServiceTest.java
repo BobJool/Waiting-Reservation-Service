@@ -3,7 +3,7 @@ package com.bobjool.reservation.application.service;
 import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
 import com.bobjool.reservation.application.dto.PaymentCreateDto;
-import com.bobjool.reservation.application.dto.PaymentResponse;
+import com.bobjool.reservation.application.dto.PaymentResDto;
 import com.bobjool.reservation.application.dto.PaymentSearchDto;
 import com.bobjool.reservation.application.dto.PaymentUpdateDto;
 import com.bobjool.reservation.application.interfaces.PgClient;
@@ -70,7 +70,7 @@ class PaymentServiceTest {
         given(pgClient.requestPayment(any(Payment.class))).willReturn(true);
 
         // when - paymentService.createPayment() 를 호출하면!
-        PaymentResponse response = paymentService.createPayment(paymentCreateDto);
+        PaymentResDto response = paymentService.createPayment(paymentCreateDto);
 
         // then - 적절한 응답
         assertThat(response.PaymentId()).isNotNull();
@@ -186,7 +186,7 @@ class PaymentServiceTest {
         Pageable pageable = PageRequest.of(0, 5);
 
         // when
-        Page<PaymentResponse> result = paymentService.search(paymentSearchDto, pageable);
+        Page<PaymentResDto> result = paymentService.search(paymentSearchDto, pageable);
 
         // then
         assertThat(result.getContent()).hasSize(1)
@@ -236,7 +236,7 @@ class PaymentServiceTest {
         PaymentUpdateDto updateDto = new PaymentUpdateDto(newStatus);
 
         // when - 결제 상태 업데이트 호출
-        PaymentResponse response = paymentService.updatePaymentStatus(updateDto, payment.getId());
+        PaymentResDto response = paymentService.updatePaymentStatus(updateDto, payment.getId());
 
         // then - 응답 및 데이터베이스 상태 검증
         assertThat(response.status()).isEqualTo(newStatus);
@@ -285,7 +285,7 @@ class PaymentServiceTest {
         paymentRepository.save(payment);
 
         // when - refundPayment 메서드 호출
-        PaymentResponse response = paymentService.refundPayment(payment.getId());
+        PaymentResDto response = paymentService.refundPayment(payment.getId());
 
         // then - 상태가 REFUND로 변경되었는지 확인
         assertThat(response.status()).isEqualTo(PaymentStatus.REFUND.name());
@@ -342,7 +342,7 @@ class PaymentServiceTest {
         em.clear();
 
         // when
-        PaymentResponse response = paymentService.getPayment(payment.getId());
+        PaymentResDto response = paymentService.getPayment(payment.getId());
         assertThat(response.PaymentId()).isEqualTo(payment.getId());
         assertThat(response.reservationId()).isEqualTo(payment.getReservationId());
         assertThat(response.userId()).isEqualTo(payment.getUserId());
