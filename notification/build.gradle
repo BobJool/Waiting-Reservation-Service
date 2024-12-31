@@ -1,12 +1,27 @@
 bootJar.enabled = true
 
+ext {
+    set('querydslVersion', "5.0.0")  // QueryDSL 버전 명시적으로 설정
+}
+
 dependencies {
-    // implementation project(':common')
-    // api 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation project(':common')
+    api 'org.springframework.boot:spring-boot-starter-data-jpa'
     api 'org.springframework.boot:spring-boot-starter-validation'
     api 'org.springframework.boot:spring-boot-starter-actuator'
     api 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
     api 'org.springframework.cloud:spring-cloud-starter-openfeign'
 
-    // runtimeOnly 'org.postgresql:postgresql'
+    runtimeOnly 'org.postgresql:postgresql'
+
+    // queryDsl
+    implementation "com.querydsl:querydsl-jpa:${querydslVersion}:jakarta"
+    annotationProcessor "com.querydsl:querydsl-apt:${querydslVersion}:jakarta"
+    annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+    annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+}
+
+def querydslSrcDir = 'src/main/generated'
+clean {
+    delete file(querydslSrcDir)
 }
