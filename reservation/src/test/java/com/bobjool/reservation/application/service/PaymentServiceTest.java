@@ -3,7 +3,7 @@ package com.bobjool.reservation.application.service;
 import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
 import com.bobjool.reservation.application.dto.PaymentCreateDto;
-import com.bobjool.reservation.application.dto.PaymentResponse;
+import com.bobjool.reservation.application.dto.PaymentResDto;
 import com.bobjool.reservation.application.dto.PaymentSearchDto;
 import com.bobjool.reservation.application.dto.PaymentUpdateDto;
 import com.bobjool.reservation.application.interfaces.PgClient;
@@ -12,6 +12,7 @@ import com.bobjool.reservation.domain.enums.PaymentMethod;
 import com.bobjool.reservation.domain.enums.PaymentStatus;
 import com.bobjool.reservation.domain.enums.PgName;
 import com.bobjool.reservation.domain.repository.PaymentRepository;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -27,7 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
@@ -44,6 +44,9 @@ class PaymentServiceTest {
 
     @Autowired
     private PaymentRepository paymentRepository;
+
+    @Autowired
+    private EntityManager em;
 
     // 얘는 가짜 객체입니다. 마음대로 조종 가능합니다.
     @MockBean
@@ -67,7 +70,7 @@ class PaymentServiceTest {
         given(pgClient.requestPayment(any(Payment.class))).willReturn(true);
 
         // when - paymentService.createPayment() 를 호출하면!
-        PaymentResponse response = paymentService.createPayment(paymentCreateDto);
+        PaymentResDto response = paymentService.createPayment(paymentCreateDto);
 
         // then - 적절한 응답
         assertThat(response.PaymentId()).isNotNull();
@@ -183,7 +186,7 @@ class PaymentServiceTest {
         Pageable pageable = PageRequest.of(0, 5);
 
         // when
-        Page<PaymentResponse> result = paymentService.search(paymentSearchDto, pageable);
+        Page<PaymentResDto> result = paymentService.search(paymentSearchDto, pageable);
 
         // then
         assertThat(result.getContent()).hasSize(1)
@@ -233,7 +236,7 @@ class PaymentServiceTest {
         PaymentUpdateDto updateDto = new PaymentUpdateDto(newStatus);
 
         // when - 결제 상태 업데이트 호출
-        PaymentResponse response = paymentService.updatePaymentStatus(updateDto, payment.getId());
+        PaymentResDto response = paymentService.updatePaymentStatus(updateDto, payment.getId());
 
         // then - 응답 및 데이터베이스 상태 검증
         assertThat(response.status()).isEqualTo(newStatus);
@@ -282,7 +285,7 @@ class PaymentServiceTest {
         paymentRepository.save(payment);
 
         // when - refundPayment 메서드 호출
-        PaymentResponse response = paymentService.refundPayment(payment.getId());
+        PaymentResDto response = paymentService.refundPayment(payment.getId());
 
         // then - 상태가 REFUND로 변경되었는지 확인
         assertThat(response.status()).isEqualTo(PaymentStatus.REFUND.name());
@@ -319,5 +322,43 @@ class PaymentServiceTest {
         assertThatThrownBy(() -> paymentService.refundPayment(payment.getId()))
                 .isInstanceOf(BobJoolException.class)
                 .hasMessage(ErrorCode.CANNOT_REFUND.getMessage());
+    }
+
+    @DisplayName("getProduct - paymentId 로 Payment 를 조회한다.")
+    @Test
+    void getProduct_success() {
+        // given - Payment 엔티티가 저장되어 있을 때
+        Payment payment = Payment.create(
+                UUID.randomUUID(),
+                12345L,
+                1000,
+                PaymentStatus.COMPLETE,
+                PaymentMethod.CARD,
+                PgName.TOSS);
+        paymentRepository.save(payment);
+
+        // and - Persistence Context 의 1차 캐시에 남아있을 거니 em.flush, clear 호출
+        em.flush();
+        em.clear();
+
+        // when
+        PaymentResDto response = paymentService.getPayment(payment.getId());
+        assertThat(response.PaymentId()).isEqualTo(payment.getId());
+        assertThat(response.reservationId()).isEqualTo(payment.getReservationId());
+        assertThat(response.userId()).isEqualTo(payment.getUserId());
+        assertThat(response.amount()).isEqualTo(payment.getAmount());
+        assertThat(response.status()).isEqualTo(PaymentStatus.COMPLETE.name());
+    }
+
+    @DisplayName("getProduct - 존재하지 않는 id로 조회하는 경우 예외 발생")
+    @Test
+    void getProduct_whenNonExistId() {
+        // given - 존재하지 않는 ID
+        UUID paymentId = UUID.randomUUID();
+
+        // when & then
+        assertThatThrownBy(() -> paymentService.getPayment(paymentId))
+                .isInstanceOf(BobJoolException.class)
+                .hasMessage(ErrorCode.ENTITY_NOT_FOUND.getMessage());
     }
 }
