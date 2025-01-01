@@ -1,6 +1,5 @@
 package com.bobjool.queue.domain.entity;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import com.bobjool.common.domain.entity.BaseEntity;
@@ -9,6 +8,7 @@ import com.bobjool.queue.domain.enums.QueueStatus;
 import com.bobjool.queue.domain.enums.QueueType;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Getter
@@ -30,10 +30,10 @@ public class Queue extends BaseEntity {
 	private Long userId;
 
 	@Column(name = "position", nullable = false)
-	private Integer position;
+	private int position;
 
 	@Column(name = "member", nullable = false)
-	private Integer member;
+	private int member;
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "status", nullable = false)
@@ -43,15 +43,11 @@ public class Queue extends BaseEntity {
 	@Column(name = "type", nullable = false)
 	private QueueType type;
 
-	@Column(name = "delay_position")
-	private Integer delayPosition;
-
 	@Column(name = "delay_count", nullable = false)
-	private Integer delayCount;
+	private int delayCount;
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "dining_option", nullable = false)
 	private DiningOption diningOption;
-
 
 }
