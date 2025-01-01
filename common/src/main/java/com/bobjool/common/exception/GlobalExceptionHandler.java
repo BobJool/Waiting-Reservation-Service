@@ -4,6 +4,7 @@ import com.bobjool.common.presentation.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -62,5 +63,12 @@ public class GlobalExceptionHandler {
         log.error(String.format(ERROR_LOG, e.getParameter(), HttpStatus.BAD_REQUEST));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ApiResponse.fail(HttpStatus.BAD_REQUEST, "파라미터의 타입이 일치하지 않습니다."));
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponse<Void>> httpMessageNotReadableException(final HttpMessageNotReadableException e){
+        log.error(String.format(ERROR_LOG, e.getMessage(), e.getClass().getName()));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.fail(HttpStatus.BAD_REQUEST, "JSON 요청이 이상합니다."));
     }
 }
