@@ -5,14 +5,14 @@ import com.bobjool.common.presentation.SuccessCode;
 import com.bobjool.reservation.application.dto.reservation.ReservationResDto;
 import com.bobjool.reservation.application.service.ReservationService;
 import com.bobjool.reservation.presentation.dto.reservation.ReservationCreateReqDto;
+import com.bobjool.reservation.presentation.dto.reservation.ReservationUpdateReqDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -22,9 +22,17 @@ public class ReservationController {
     private final ReservationService reservationService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<ReservationResDto>> createReservation(@Valid @RequestBody ReservationCreateReqDto reservationCreateReqDto) {
-        log.info("createReservation.reservationCreateReqDto: {}", reservationCreateReqDto);
-        ReservationResDto response = reservationService.createReservation(reservationCreateReqDto.toServiceDto());
+    public ResponseEntity<ApiResponse<ReservationResDto>> createReservation(@Valid @RequestBody ReservationCreateReqDto reqDto) {
+        log.info("createReservation.reservationCreateReqDto: {}", reqDto);
+        ReservationResDto response = reservationService.createReservation(reqDto.toServiceDto());
         return ApiResponse.success(SuccessCode.SUCCESS_INSERT, response);
+    }
+
+    @PatchMapping("/status/{reservationId}")
+    public ResponseEntity<ApiResponse<ReservationResDto>> updateReservationStatus(@Valid @RequestBody ReservationUpdateReqDto reqDto,
+                                                                                  @PathVariable("reservationId") UUID reservationId) {
+        log.info("updateReservationStatus.reservationUpdateReqDto: {}", reqDto);
+        ReservationResDto response = reservationService.updateReservationStatus(reqDto.toServiceDto(), reservationId);
+        return ApiResponse.success(SuccessCode.SUCCESS_UPDATE, response);
     }
 }

@@ -8,3 +8,11 @@ Content-Type: application/json
   "restaurant_schedule_id": "660e8400-e29b-41d4-a716-446655440000",
   "guest_count": 4
 }
+
+### 예약 상태 변경
+PATCH localhost:19005/api/v1/reservations/status/e47cf394-4a51-416c-a2d7-1b45dd17477b
+Content-Type: application/json
+
+{
+  "status": "COMPLETE"
+}

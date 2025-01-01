@@ -80,4 +80,22 @@ class ReservationTest {
         // then
         assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.PENDING);
     }
+
+    @DisplayName("updateStatus - status 를 변경한다.")
+    @Test
+    void updateStatus_success() {
+        // given - COMPLETE 상태의 예약
+        Long userId = 12345L;
+        UUID restaurantId = UUID.randomUUID();
+        UUID scheduleId = UUID.randomUUID();
+        ReservationStatus completeStatus = ReservationStatus.COMPLETE;
+        Integer guestCount = 3;
+
+        Reservation reservation = Reservation.create(userId, restaurantId, scheduleId, completeStatus ,guestCount);
+
+        // when - updateStatus 호출
+        reservation.updateStatus(ReservationStatus.CHECK_IN);
+
+        assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.CHECK_IN);
+    }
 }

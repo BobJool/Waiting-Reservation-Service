@@ -59,4 +59,8 @@ public class Reservation extends BaseEntity {
     private void validateGuestCount() {
         if (guestCount == null ||guestCount <= 0) throw new BobJoolException(ErrorCode.INVALID_GUEST_COUNT);
     }
+
+    public void updateStatus(ReservationStatus status) {
+        this.status = status;
+    }
 }

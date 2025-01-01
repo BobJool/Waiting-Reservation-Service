@@ -2,6 +2,7 @@ package com.bobjool.reservation.presentation.controller;
 
 import com.bobjool.reservation.application.service.ReservationService;
 import com.bobjool.reservation.presentation.dto.reservation.ReservationCreateReqDto;
+import com.bobjool.reservation.presentation.dto.reservation.ReservationUpdateReqDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.UUID;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -133,5 +135,41 @@ class ReservationControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
                 .andExpect(jsonPath("$.message").value("예약 인원수는 양수여야 합니다."));
+    }
+
+    @DisplayName("updateReservationStatus - 성공")
+    @Test
+    void updateReservationStatus_success() throws Exception {
+        // given
+        UUID reservationId = UUID.randomUUID();
+        String status = "COMPLETE";
+
+        ReservationUpdateReqDto requestDto = new ReservationUpdateReqDto(status);
+
+        // when & then
+        mockMvc.perform(patch("/api/v1/reservations/status/{reservationId}", reservationId)
+                        .content(objectMapper.writeValueAsString(requestDto))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @DisplayName("updateReservationStatus - status가 없을 때")
+    @Test
+    void updateReservationStatus_whenStatusIsNull() throws Exception {
+        // given
+        UUID reservationId = UUID.randomUUID();
+        String status = null; // status가 null
+
+        ReservationUpdateReqDto requestDto = new ReservationUpdateReqDto(status);
+
+        // when & then
+        mockMvc.perform(patch("/api/v1/reservations/status/{reservationId}", reservationId)
+                        .content(objectMapper.writeValueAsString(requestDto))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
+                .andExpect(jsonPath("$.message").value("예약 상태는 필수 입력값입니다."));
     }
 }

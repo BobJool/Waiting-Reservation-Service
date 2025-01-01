@@ -4,7 +4,9 @@ import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
 import com.bobjool.reservation.application.dto.reservation.ReservationCreateDto;
 import com.bobjool.reservation.application.dto.reservation.ReservationResDto;
+import com.bobjool.reservation.application.dto.reservation.ReservationUpdateDto;
 import com.bobjool.reservation.domain.entity.Reservation;
+import com.bobjool.reservation.domain.enums.ReservationStatus;
 import com.bobjool.reservation.domain.repository.ReservationRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,6 +33,9 @@ class ReservationServiceTest {
     @Autowired
     ReservationRepository reservationRepository;
 
+    /**
+     * createReservation - 2개 테스트
+     * */
     @DisplayName("createReservation - 성공적으로 예약을 생성하고 반환한다.")
     @Test
     void createReservation_whenValidInput() {
@@ -78,5 +83,68 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.createReservation(reservationCreateDto))
                 .isInstanceOf(BobJoolException.class)
                 .hasMessage(ErrorCode.INVALID_GUEST_COUNT.getMessage());
+    }
+
+    /**
+     * updateReservationStatus - 3개 테스트
+     * */
+    @DisplayName("updateReservationStatus - 성공적으로 상태를 업데이트한다.")
+    @Test
+    void updateReservationStatus_whenValidInput() {
+        // given - PENDING 상태의 예약이 존재할 때
+        UUID reservationId = UUID.randomUUID();
+        Reservation reservation = Reservation.create(
+                12345L,
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                5
+        );
+        reservationRepository.save(reservation);
+
+        ReservationUpdateDto updateDto = new ReservationUpdateDto("COMPLETE");
+
+        // when - 상태 업데이트 호출
+        var response = reservationService.updateReservationStatus(updateDto, reservation.getId());
+
+        // then - 상태가 업데이트되었는지 확인
+        assertThat(response.status()).isEqualTo("COMPLETE");
+
+        // and - 데이터베이스에서도 상태가 반영되었는지 확인
+        Reservation updatedReservation = reservationRepository.findById(reservation.getId()).orElse(null);
+        assertThat(updatedReservation.getStatus()).isEqualTo(ReservationStatus.COMPLETE);
+    }
+
+    @DisplayName("updateReservationStatus - 예약이 존재하지 않을 경우 BobJoolException 발생")
+    @Test
+    void updateReservationStatus_whenReservationNotFound() {
+        // given - 존재하지 않는 예약 ID와 상태값이 주어졌을 때
+        UUID nonExistentReservationId = UUID.randomUUID();
+        ReservationUpdateDto updateDto = new ReservationUpdateDto("COMPLETE");
+
+        // when & then - 예외 발생 확인
+        assertThatThrownBy(() -> reservationService.updateReservationStatus(updateDto, nonExistentReservationId))
+                .isInstanceOf(BobJoolException.class)
+                .hasMessage(ErrorCode.ENTITY_NOT_FOUND.getMessage());
+    }
+
+    @DisplayName("updateReservationStatus - 잘못된 상태값으로 BobJoolException 발생")
+    @Test
+    void updateReservationStatus_whenInvalidStatus() {
+        // given - 예약이 존재하지만 잘못된 상태값이 주어졌을 때
+        UUID reservationId = UUID.randomUUID();
+        Reservation reservation = Reservation.create(
+                12345L,
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                5
+        );
+        reservationRepository.save(reservation);
+
+        ReservationUpdateDto updateDto = new ReservationUpdateDto("INVALID_STATUS");
+
+        // when & then - 예외 발생 확인
+        assertThatThrownBy(() -> reservationService.updateReservationStatus(updateDto, reservation.getId()))
+                .isInstanceOf(BobJoolException.class)
+                .hasMessage(ErrorCode.UNSUPPORTED_RESERVATION_STATUS.getMessage());
     }
 }
