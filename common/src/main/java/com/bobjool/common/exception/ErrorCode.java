@@ -17,6 +17,14 @@ public enum ErrorCode {
     FORBIDDEN_ACCESS(HttpStatus.FORBIDDEN, "접근 권한이 존재하지 않습니다."),
     MISSING_ROLE(HttpStatus.BAD_REQUEST, "권한 정보가 없습니다."),
     INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, "유저 ID 또는 비밀번호 정보가 일치하지 않습니다."),
+    USER_DELETED(HttpStatus.BAD_REQUEST, "삭제된 사용자입니다."),
+    USER_NOT_APPROVED(HttpStatus.UNAUTHORIZED, "승인되지 않은 사용자입니다."),
+    DUPLICATE_USERNAME(HttpStatus.BAD_REQUEST, "이미 존재하는 유저 ID 입니다."),
+    DUPLICATE_NICKNAME(HttpStatus.BAD_REQUEST, "이미 존재하는 닉네임입니다."),
+    DUPLICATE_EMAIL(HttpStatus.BAD_REQUEST, "이미 존재하는 이메일입니다."),
+    DUPLICATE_PHONE_NUMBER(HttpStatus.BAD_REQUEST, "이미 존재하는 전화번호입니다."),
+    DUPLICATE_SLACK_ID(HttpStatus.BAD_REQUEST, "이미 존재하는 Slack ID입니다."),
+
 
     // 레스토랑
 

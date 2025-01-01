@@ -29,6 +29,9 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private String nickname;
 
+    @Column(nullable = false)
+    private String email;
+
     @Column(name = "slack_id", nullable = false)
     private String slackId;
 
@@ -42,5 +45,48 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private UserRole role;
 
+    private User(
+            String username,
+            String password,
+            String name,
+            String nickname,
+            String email,
+            String slackId,
+            String phoneNumber,
+            Boolean isApproved,
+            UserRole role) {
+        this.username = username;
+        this.password = password;
+        this.name = name;
+        this.nickname = nickname;
+        this.email = email;
+        this.slackId = slackId;
+        this.phoneNumber = phoneNumber;
+        this.isApproved = isApproved;
+        this.role = role;
+    }
+
+    public static User create(
+            String username,
+            String password,
+            String name,
+            String nickname,
+            String email,
+            String slackId,
+            String phoneNumber,
+            Boolean isApproved,
+            UserRole role) {
+        return new User(
+                username,
+                password,
+                name,
+                nickname,
+                email,
+                slackId,
+                phoneNumber,
+                isApproved,
+                role
+        );
+    }
 }
 
