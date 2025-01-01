@@ -34,4 +34,59 @@ class ReservationStatusTest {
                 .hasMessage("지원하지 않는 결제 상태입니다.");
     }
 
+    @DisplayName("canCancel - PENDING, COMPLETE, CANCEL 에서는 예약 취소할 수 있다.")
+    @ParameterizedTest
+    @ValueSource(strings = {"PENDING", "COMPLETE", "CANCEL"})
+    void canCancel_whenValidStringRequest(String request) {
+        // given - 유효한 상태값이 주어졌을 때
+        ReservationStatus reservationStatus = ReservationStatus.of(request);
+
+        // when
+        boolean result = reservationStatus.canCancel();
+
+        // then
+        assertThat(result).isTrue();
+    }
+
+    @DisplayName("canCancel - CHECK_IN, NO_SHOW 에서는 예약 취소가 불가능하다.")
+    @ParameterizedTest
+    @ValueSource(strings = {"CHECK_IN", "NO_SHOW"})
+    void canCancel_whenInvalidStringRequest(String request) {
+        // given - 유효한 상태값이 주어졌을 때
+        ReservationStatus reservationStatus = ReservationStatus.of(request);
+
+        // when
+        boolean result = reservationStatus.canCancel();
+
+        // then
+        assertThat(result).isFalse();
+    }
+
+    @DisplayName("canNotCancel - !canCancel - PENDING, COMPLETE, CANCEL 은 false 반환")
+    @ParameterizedTest
+    @ValueSource(strings = {"PENDING", "COMPLETE", "CANCEL"})
+    void canNotCancel_whenValidStringRequest(String request) {
+        // given - 유효한 상태값이 주어졌을 때
+        ReservationStatus reservationStatus = ReservationStatus.of(request);
+
+        // when
+        boolean result = reservationStatus.canNotCancel();
+
+        // then
+        assertThat(result).isFalse();
+    }
+
+    @DisplayName("canNotCancel - !canCancel - CHECK_IN, NO_SHOW 은 true 반환")
+    @ParameterizedTest
+    @ValueSource(strings = {"CHECK_IN", "NO_SHOW"})
+    void canNotCancel_whenInvalidStringRequest(String request) {
+        // given - 유효한 상태값이 주어졌을 때
+        ReservationStatus reservationStatus = ReservationStatus.of(request);
+
+        // when
+        boolean result = reservationStatus.canNotCancel();
+
+        // then
+        assertThat(result).isTrue();
+    }
 }

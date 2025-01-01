@@ -46,4 +46,15 @@ public class ReservationService {
         reservation.updateStatus(ReservationStatus.of(reservationUpdateDto.status()));
         return ReservationResDto.from(reservation);
     }
+
+    @Transactional
+    public ReservationResDto cancelReservation(UUID reservationId) {
+        log.info("cancelReservation.reservationId = {}", reservationId);
+
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND));
+
+        reservation.cancel();
+        return ReservationResDto.from(reservation);
+    }
 }

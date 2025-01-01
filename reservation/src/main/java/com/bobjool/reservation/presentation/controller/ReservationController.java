@@ -35,4 +35,11 @@ public class ReservationController {
         ReservationResDto response = reservationService.updateReservationStatus(reqDto.toServiceDto(), reservationId);
         return ApiResponse.success(SuccessCode.SUCCESS_UPDATE, response);
     }
+
+    @PostMapping("/cancel/{reservationId}")
+    public ResponseEntity<ApiResponse<ReservationResDto>> cancelReservation(@PathVariable("reservationId") UUID reservationId) {
+        log.info("cancelReservation.reservationCancelReqDto: {}", reservationId);
+        ReservationResDto response = reservationService.cancelReservation(reservationId);
+        return ApiResponse.success(SuccessCode.SUCCESS, response);
+    }
 }

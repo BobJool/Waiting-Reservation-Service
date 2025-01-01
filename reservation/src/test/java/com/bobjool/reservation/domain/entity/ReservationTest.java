@@ -98,4 +98,60 @@ class ReservationTest {
 
         assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.CHECK_IN);
     }
+
+    @DisplayName("cancel - 예약 상태가 CANCEL 로 변경된다")
+    @Test
+    void cancel_success() {
+        // given - PENDING 상태의 예약
+        Long userId = 12345L;
+        UUID restaurantId = UUID.randomUUID();
+        UUID scheduleId = UUID.randomUUID();
+        ReservationStatus pendingStatus = ReservationStatus.PENDING;
+        Integer guestCount = 3;
+
+        Reservation reservation = Reservation.create(userId, restaurantId, scheduleId, pendingStatus, guestCount);
+
+        // when - cancel 호출
+        reservation.cancel();
+
+        // then - 상태가 CANCEL 로 변경되었는지 확인
+        assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.CANCEL);
+    }
+
+    @DisplayName("cancel - CHECK_IN 상태에서는 BobJoolException 발생")
+    @Test
+    void cancel_failWhenCheckIn() {
+        // given - CHECK_IN 상태의 예약
+        Long userId = 12345L;
+        UUID restaurantId = UUID.randomUUID();
+        UUID scheduleId = UUID.randomUUID();
+        ReservationStatus checkInStatus = ReservationStatus.CHECK_IN;
+        Integer guestCount = 3;
+
+        Reservation reservation = Reservation.create(userId, restaurantId, scheduleId, checkInStatus, guestCount);
+
+        // when & then - 예외 발생 확인
+        assertThatThrownBy(reservation::cancel)
+                .isInstanceOf(BobJoolException.class)
+                .hasMessage("취소할 수 없는 예약 상태입니다.");
+    }
+
+    @DisplayName("cancel - NO_SHOW 상태에서는 BobJoolException 발생")
+    @Test
+    void cancel_failWhenNoShow() {
+        // given - NO_SHOW 상태의 예약
+        Long userId = 12345L;
+        UUID restaurantId = UUID.randomUUID();
+        UUID scheduleId = UUID.randomUUID();
+        ReservationStatus noShowStatus = ReservationStatus.NO_SHOW;
+        Integer guestCount = 3;
+
+        Reservation reservation = Reservation.create(userId, restaurantId, scheduleId, noShowStatus, guestCount);
+
+        // when & then - 예외 발생 확인
+        assertThatThrownBy(reservation::cancel)
+                .isInstanceOf(BobJoolException.class)
+                .hasMessage("취소할 수 없는 예약 상태입니다.");
+    }
+
 }

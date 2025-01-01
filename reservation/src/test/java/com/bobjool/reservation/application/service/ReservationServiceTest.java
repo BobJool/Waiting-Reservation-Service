@@ -147,4 +147,61 @@ class ReservationServiceTest {
                 .isInstanceOf(BobJoolException.class)
                 .hasMessage(ErrorCode.UNSUPPORTED_RESERVATION_STATUS.getMessage());
     }
+
+    @DisplayName("cancelReservation - 성공적으로 예약을 취소한다.")
+    @Test
+    void cancelReservation_success() {
+        // given - PENDING 상태의 예약이 존재할 때
+        Reservation reservation = Reservation.create(
+                12345L,
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                5
+        );
+        reservationRepository.save(reservation);
+
+        // when - cancelReservation 호출
+        var response = reservationService.cancelReservation(reservation.getId());
+
+        // then - 상태가 CANCEL 로 변경되었는지 확인
+        assertThat(response.status()).isEqualTo("CANCEL");
+
+        // and - 데이터베이스에서도 상태가 반영되었는지 확인
+        Reservation canceledReservation = reservationRepository.findById(reservation.getId()).orElse(null);
+        assertThat(canceledReservation.getStatus()).isEqualTo(ReservationStatus.CANCEL);
+    }
+
+    @DisplayName("cancelReservation - 예약이 존재하지 않을 경우 BobJoolException 발생")
+    @Test
+    void cancelReservation_whenReservationNotFound() {
+        // given - 존재하지 않는 예약 ID
+        UUID nonExistentReservationId = UUID.randomUUID();
+
+        // when & then - 예외 발생 확인
+        assertThatThrownBy(() -> reservationService.cancelReservation(nonExistentReservationId))
+                .isInstanceOf(BobJoolException.class)
+                .hasMessage(ErrorCode.ENTITY_NOT_FOUND.getMessage());
+    }
+
+    @DisplayName("cancelReservation - 취소할 수 없는 상태일 경우 BobJoolException 발생")
+    @ParameterizedTest
+    @ValueSource(strings = {"CHECK_IN", "NO_SHOW"})
+    void cancelReservation_whenCannotCancel(String status) {
+        // given - 취소 불가능한 상태의 예약이 존재할 때
+        ReservationStatus reservationStatus = ReservationStatus.of(status);
+        Reservation reservation = Reservation.create(
+                12345L,
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                reservationStatus,
+                5
+        );
+        reservationRepository.save(reservation);
+
+        // when & then - 예외 발생 확인
+        assertThatThrownBy(() -> reservationService.cancelReservation(reservation.getId()))
+                .isInstanceOf(BobJoolException.class)
+                .hasMessage(ErrorCode.CANNOT_CANCEL.getMessage());
+    }
+
 }

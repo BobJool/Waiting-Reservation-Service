@@ -27,4 +27,19 @@ public enum ReservationStatus {
             default -> throw new BobJoolException(ErrorCode.UNSUPPORTED_RESERVATION_STATUS);
         };
     }
+
+    /**
+     * 예약 상태가 취소 가능한지 확인
+     * CHECK_IN, NO_SHOW 상태에서는 취소 불가
+     */
+    public boolean canCancel() {
+        return this != CHECK_IN && this != NO_SHOW;
+    }
+
+    /**
+     * 읽기 좋은 코드를 위해 !canCancel 은 canNotCancel 로 감싸서 클라이언트에게 제공합니다.
+     * */
+    public boolean canNotCancel() {
+        return !canCancel();
+    }
 }

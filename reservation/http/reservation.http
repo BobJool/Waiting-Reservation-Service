@@ -16,3 +16,8 @@ Content-Type: application/json
 {
   "status": "COMPLETE"
 }
+
+### 예약 취소
+POST localhost:19005/api/v1/reservations/cancel/e47cf394-4a51-416c-a2d7-1b45dd17477b
+Content-Type: application/json
+

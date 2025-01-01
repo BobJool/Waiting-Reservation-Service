@@ -172,4 +172,18 @@ class ReservationControllerTest {
                 .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
                 .andExpect(jsonPath("$.message").value("예약 상태는 필수 입력값입니다."));
     }
+
+    @DisplayName("cancelReservation - 성공")
+    @Test
+    void cancelReservation_success() throws Exception {
+        // given
+        UUID reservationId = UUID.randomUUID();
+
+        // when & then
+        mockMvc.perform(post("/api/v1/reservations/cancel/{reservationId}", reservationId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
 }
