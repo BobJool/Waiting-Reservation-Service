@@ -69,6 +69,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> httpMessageNotReadableException(final HttpMessageNotReadableException e){
         log.error(String.format(ERROR_LOG, e.getMessage(), e.getClass().getName()));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.fail(HttpStatus.BAD_REQUEST, "JSON 요청이 이상합니다."));
+                .body(ApiResponse.fail(HttpStatus.BAD_REQUEST, "잘못된 JSON 형식입니다."));
     }
 }
