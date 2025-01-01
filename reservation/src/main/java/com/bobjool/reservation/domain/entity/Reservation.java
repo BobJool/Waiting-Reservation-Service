@@ -1,11 +1,12 @@
 package com.bobjool.reservation.domain.entity;
 
 import com.bobjool.common.domain.entity.BaseEntity;
+import com.bobjool.common.exception.BobJoolException;
+import com.bobjool.common.exception.ErrorCode;
 import com.bobjool.reservation.domain.enums.ReservationStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
@@ -13,7 +14,7 @@ import java.util.UUID;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder(access = AccessLevel.PRIVATE)
 @Entity
-@Table(name = "p_payment")
+@Table(name = "p_reservation")
 public class Reservation extends BaseEntity {
 
     @Id
@@ -30,9 +31,6 @@ public class Reservation extends BaseEntity {
     @Column(name = "restaurant_schedule_id", nullable = false)
     private UUID restaurantScheduleId;
 
-//    @Column(name = "reservation_date", nullable = false)
-//    private LocalDateTime reservationDate;
-
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;
@@ -42,12 +40,23 @@ public class Reservation extends BaseEntity {
 
     public static Reservation create(Long userId, UUID restaurantId, UUID restaurantScheduleId,
                                      ReservationStatus status, Integer guestCount) {
-        return Reservation.builder()
+        Reservation reservation = Reservation.builder()
                 .userId(userId)
                 .restaurantId(restaurantId)
                 .restaurantScheduleId(restaurantScheduleId)
                 .status(status)
                 .guestCount(guestCount)
                 .build();
+        reservation.validateGuestCount();
+        return reservation;
+
+    }
+
+    public static Reservation create(Long userId, UUID restaurantId, UUID restaurantScheduleId, Integer guestCount) {
+        return create(userId, restaurantId, restaurantScheduleId, ReservationStatus.PENDING, guestCount);
+    }
+
+    private void validateGuestCount() {
+        if (guestCount == null ||guestCount <= 0) throw new BobJoolException(ErrorCode.INVALID_GUEST_COUNT);
     }
 }

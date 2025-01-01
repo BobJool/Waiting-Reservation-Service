@@ -23,6 +23,7 @@ public enum ErrorCode {
     // 대기열
 
     // 예약
+    INVALID_GUEST_COUNT(HttpStatus.BAD_REQUEST, "예약 인원수는 양수여야 합니다."),
 
     // 결제
     UNSUPPORTED_PAYMENT_METHOD(HttpStatus.BAD_REQUEST, "지원하지 않는 결제 방식입니다."),

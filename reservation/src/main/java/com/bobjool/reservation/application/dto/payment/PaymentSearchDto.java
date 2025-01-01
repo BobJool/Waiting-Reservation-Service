@@ -1,4 +1,4 @@
-package com.bobjool.reservation.application.dto;
+package com.bobjool.reservation.application.dto.payment;
 
 import java.time.LocalDate;
 
