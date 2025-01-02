@@ -63,4 +63,13 @@ public class ReservationService {
         reservation.cancel();
         return ReservationResDto.from(reservation);
     }
+
+    public ReservationResDto getReservation(UUID reservationId) {
+        log.info("getReservation.reservationId = {}", reservationId);
+
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND));
+
+        return ReservationResDto.from(reservation);
+    }
 }

@@ -1,5 +1,6 @@
 package com.bobjool.reservation.presentation.controller;
 
+import com.bobjool.reservation.application.dto.reservation.ReservationResDto;
 import com.bobjool.reservation.application.service.ReservationService;
 import com.bobjool.reservation.presentation.dto.reservation.ReservationCreateReqDto;
 import com.bobjool.reservation.presentation.dto.reservation.ReservationUpdateReqDto;
@@ -14,10 +15,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -181,6 +182,19 @@ class ReservationControllerTest {
 
         // when & then
         mockMvc.perform(post("/api/v1/reservations/cancel/{reservationId}", reservationId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @DisplayName("getReservation - 성공적으로 예약 정보를 반환한다.")
+    @Test
+    void getReservation_success() throws Exception {
+        // given - reservationId
+        UUID reservationId = UUID.randomUUID();
+
+        // when & then - API 호출 및 검증
+        mockMvc.perform(get("/api/v1/reservations/{reservationId}", reservationId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk());
