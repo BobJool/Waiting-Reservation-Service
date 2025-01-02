@@ -1,6 +1,6 @@
-package com.bobjool.reservation.presentation.dto;
+package com.bobjool.reservation.presentation.dto.payment;
 
-import com.bobjool.reservation.application.dto.PaymentCreateDto;
+import com.bobjool.reservation.application.dto.payment.PaymentCreateDto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;

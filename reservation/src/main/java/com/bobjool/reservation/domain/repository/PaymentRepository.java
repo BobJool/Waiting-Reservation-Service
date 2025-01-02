@@ -16,10 +16,8 @@ public interface PaymentRepository {
 
     Payment save(Payment payment);
 
-    // todo JpaRepository 에 있는 시그니쳐와 정확하게 동일해야 합니다.
     <S extends Payment> List<S> saveAll(Iterable<S> entities);
 
-    // todo 직접 만든 메서드는 테스트 해봐야 합니다.
     Page<Payment> search(Long userId,
                          PaymentStatus status,
                          LocalDate startDate,

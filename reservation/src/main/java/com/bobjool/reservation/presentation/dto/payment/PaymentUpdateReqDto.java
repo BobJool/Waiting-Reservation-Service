@@ -1,6 +1,6 @@
-package com.bobjool.reservation.presentation.dto;
+package com.bobjool.reservation.presentation.dto.payment;
 
-import com.bobjool.reservation.application.dto.PaymentUpdateDto;
+import com.bobjool.reservation.application.dto.payment.PaymentUpdateDto;
 import jakarta.validation.constraints.NotBlank;
 
 public record PaymentUpdateReqDto(

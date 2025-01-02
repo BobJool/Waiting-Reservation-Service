@@ -23,6 +23,9 @@ public enum ErrorCode {
     // 대기열
 
     // 예약
+    INVALID_GUEST_COUNT(HttpStatus.BAD_REQUEST, "예약 인원수는 양수여야 합니다."),
+    UNSUPPORTED_RESERVATION_STATUS(HttpStatus.BAD_REQUEST, "지원하지 않는 예약 상태입니다."),
+    CANNOT_CANCEL(HttpStatus.CONFLICT, "취소할 수 없는 예약 상태입니다."),
 
     // 결제
     UNSUPPORTED_PAYMENT_METHOD(HttpStatus.BAD_REQUEST, "지원하지 않는 결제 방식입니다."),
