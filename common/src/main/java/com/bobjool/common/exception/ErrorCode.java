@@ -34,6 +34,9 @@ public enum ErrorCode {
     // 대기열
 
     // 예약
+    INVALID_GUEST_COUNT(HttpStatus.BAD_REQUEST, "예약 인원수는 양수여야 합니다."),
+    UNSUPPORTED_RESERVATION_STATUS(HttpStatus.BAD_REQUEST, "지원하지 않는 예약 상태입니다."),
+    CANNOT_CANCEL(HttpStatus.CONFLICT, "취소할 수 없는 예약 상태입니다."),
 
     // 결제
     UNSUPPORTED_PAYMENT_METHOD(HttpStatus.BAD_REQUEST, "지원하지 않는 결제 방식입니다."),
@@ -41,7 +44,7 @@ public enum ErrorCode {
     UNSUPPORTED_PG_NAME(HttpStatus.BAD_REQUEST, "지원하지 않는 PG사 이름입니다."),
     INVALID_PAYMENT_AMOUNT(HttpStatus.BAD_REQUEST, "결제 금액은 양수여야 합니다."),
     PAYMENT_FAIL(HttpStatus.SERVICE_UNAVAILABLE, "알 수 없는 이유로 결제에 실패했습니다."),
-
+    CANNOT_REFUND(HttpStatus.CONFLICT, "환불할 수 없는 상태입니다."),
 
     // 알림
 

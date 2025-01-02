@@ -1,10 +1,13 @@
 package com.bobjool.reservation.presentation.controller;
 
 import com.bobjool.reservation.application.service.PaymentService;
-import com.bobjool.reservation.presentation.dto.PaymentCreateReqDto;
+import com.bobjool.reservation.presentation.dto.payment.PaymentCreateReqDto;
+import com.bobjool.reservation.presentation.dto.payment.PaymentUpdateReqDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -14,7 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.UUID;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -145,13 +148,13 @@ class PaymentControllerTest {
                 .andExpect(jsonPath("$.data").isEmpty());
     }
 
-    @DisplayName("createPayment - amount가 음수일 때")
-    @Test
-    void createPayment_whenNegativeAmount() throws Exception {
+    @DisplayName("createPayment - amount가 0 또는 음수일 때")
+    @ParameterizedTest
+    @ValueSource(ints = {0, -1})
+    void createPayment_whenNegativeAmount(Integer amount) throws Exception {
         // given - amount가 음수인 요청 생성
         UUID reservationId = UUID.randomUUID();
         Long userId = 12345L;
-        Integer amount = -1000;
         String method = "CARD";
         String pgName = "TOSS";
         PaymentCreateReqDto paymentCreateReqDto = new PaymentCreateReqDto(reservationId, userId, amount, method, pgName);
@@ -211,4 +214,64 @@ class PaymentControllerTest {
                 .andExpect(jsonPath("$.data").isEmpty());
     }
 
+    @DisplayName("updatePaymentStatus - 성공")
+    @Test
+    void updatePaymentStatus() throws Exception {
+        // given - 정상 요청일 때
+        String status = "REFUND";
+        PaymentUpdateReqDto paymentUpdateReqDto = new PaymentUpdateReqDto(status);
+        UUID paymentId = UUID.randomUUID();
+
+        // when & then - 200 상태코드 반환하는지 본다
+        mockMvc.perform(patch("/api/v1/payments/status/{paymentId}", paymentId)
+                        .content(objectMapper.writeValueAsString(paymentUpdateReqDto))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @DisplayName("updatePaymentStatus - status가 없는 경우 400 상태코드")
+    @Test
+    void updatePaymentStatus_whenNonStatus() throws Exception {
+        // given - 정상 요청일 때
+        String status = null;
+        PaymentUpdateReqDto paymentUpdateReqDto = new PaymentUpdateReqDto(status);
+        UUID paymentId = UUID.randomUUID();
+
+        // when & then - 200 상태코드 반환하는지 본다
+        mockMvc.perform(patch("/api/v1/payments/status/{paymentId}", paymentId)
+                        .content(objectMapper.writeValueAsString(paymentUpdateReqDto))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value("BAD_REQUEST"))
+                .andExpect(jsonPath("$.message").value("변경할 결제 상태는 필수 입력값입니다."))
+                .andExpect(jsonPath("$.data").isEmpty());
+    }
+
+    @DisplayName("updatePaymentStatus - 성공")
+    @Test
+    void refundPayment_success() throws Exception {
+        // given - 정상 요청일 때
+        UUID paymentId = UUID.randomUUID();
+
+        // when & then - 200 상태코드 반환하는지 본다
+        mockMvc.perform(post("/api/v1/payments/refund/{paymentId}", paymentId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @DisplayName("getPayment - 성공")
+    @Test
+    void getPayment_success() throws Exception {
+        // given - 정상 요청일 때
+        UUID paymentId = UUID.randomUUID();
+
+        //whn & then - 200 상태코드 반환하는지 본다.
+        mockMvc.perform(get("/api/v1/payments/{paymentId}", paymentId)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
 }

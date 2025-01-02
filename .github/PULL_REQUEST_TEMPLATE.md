@@ -4,7 +4,7 @@
 - [ ] 버그 수정
 - [ ] 의존성, 환경 변수, 빌드 관련 코드 업데이트
 ### 반영 브랜치
-- feature/이슈번호/(create · read · update · delete) - 도메인명 -> main
+- 브랜치 명 -> dev
 ### 이슈
 - 이슈 번호
 ### Description
