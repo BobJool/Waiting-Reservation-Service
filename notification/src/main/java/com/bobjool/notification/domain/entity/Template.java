@@ -1,5 +1,6 @@
 package com.bobjool.notification.domain.entity;
 
+import com.bobjool.common.domain.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,7 +12,7 @@ import java.util.UUID;
 @Builder(access = AccessLevel.PRIVATE)
 @Entity
 @Table(name = "p_notification_template")
-public class Template {
+public class Template extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", updatable = false, nullable = false)
@@ -37,4 +38,22 @@ public class Template {
 
     @Column(name = "variables")
     private String variables;
+
+    public static Template createTemplate(
+            BobjoolServiceType serviceType,
+            NotificationChannel channel,
+            NotificationType type,
+            String title,
+            String template,
+            String variables
+    ) {
+        return Template.builder()
+                .serviceType(serviceType)
+                .channel(channel)
+                .type(type)
+                .title(title)
+                .template(template)
+                .variables(variables)
+                .build();
+    }
 }
