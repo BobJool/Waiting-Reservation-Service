@@ -4,6 +4,7 @@ import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
 import com.bobjool.reservation.application.dto.reservation.ReservationCreateDto;
 import com.bobjool.reservation.application.dto.reservation.ReservationResDto;
+import com.bobjool.reservation.application.dto.reservation.ReservationSearchDto;
 import com.bobjool.reservation.application.dto.reservation.ReservationUpdateDto;
 import com.bobjool.reservation.domain.entity.Reservation;
 import com.bobjool.reservation.domain.enums.ReservationStatus;
@@ -14,13 +15,18 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 
 @ActiveProfiles("test")
 @Transactional
@@ -239,5 +245,47 @@ class ReservationServiceTest {
                 .isInstanceOf(BobJoolException.class)
                 .hasMessage(ErrorCode.ENTITY_NOT_FOUND.getMessage());
     }
+
+    @DisplayName("search - userId로 검색 시 성공적으로 결과를 반환한다.")
+    @Test
+    void search_whenUserIdProvided() {
+        // given - 특정 userId를 가진 예약 데이터가 존재할 때
+        Long userId = 12345L;
+        UUID restaurantId = UUID.randomUUID();
+        UUID scheduleId = UUID.randomUUID();
+        Reservation reservation1 = Reservation.create(userId, restaurantId, scheduleId, 2);
+        Reservation reservation2 = Reservation.create(userId, restaurantId, UUID.randomUUID(), 4);
+        Reservation reservation3 = Reservation.create(67890L, restaurantId, scheduleId, 3); // 다른 userId
+        reservationRepository.saveAll(List.of(reservation1, reservation2, reservation3));
+
+        Pageable pageable = PageRequest.of(0, 10);
+        ReservationSearchDto searchDto = new ReservationSearchDto(userId, null, null, null);
+
+        // when - search 메서드 호출
+        Page<ReservationResDto> result = reservationService.search(searchDto, pageable);
+
+        // then - 해당 userId의 예약만 반환되는지 확인
+        assertThat(result.getContent()).hasSize(2)
+                .extracting("userId", "restaurantScheduleId", "guestCount")
+                .containsExactlyInAnyOrder(
+                        tuple(userId, scheduleId, 2),
+                        tuple(userId, reservation2.getRestaurantScheduleId(), 4)
+                );
+    }
+
+    @DisplayName("search - 잘못된 status 값으로 BobJoolException 발생")
+    @Test
+    void search_whenInvalidStatusProvided() {
+        // given - 잘못된 status 값이 주어졌을 때
+        String invalidStatus = "INVALID";
+        ReservationSearchDto searchDto = new ReservationSearchDto(null, null, null, invalidStatus);
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // when & then - 예외 발생 검증
+        assertThatThrownBy(() -> reservationService.search(searchDto, pageable))
+                .isInstanceOf(BobJoolException.class)
+                .hasMessage(ErrorCode.UNSUPPORTED_RESERVATION_STATUS.getMessage());
+    }
+
 
 }

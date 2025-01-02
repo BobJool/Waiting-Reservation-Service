@@ -1,17 +1,25 @@
 package com.bobjool.reservation.presentation.controller;
 
 import com.bobjool.common.presentation.ApiResponse;
+import com.bobjool.common.presentation.PageResponse;
 import com.bobjool.common.presentation.SuccessCode;
+import com.bobjool.reservation.application.dto.payment.PaymentResDto;
 import com.bobjool.reservation.application.dto.reservation.ReservationResDto;
+import com.bobjool.reservation.application.dto.reservation.ReservationSearchDto;
 import com.bobjool.reservation.application.service.ReservationService;
 import com.bobjool.reservation.presentation.dto.reservation.ReservationCreateReqDto;
 import com.bobjool.reservation.presentation.dto.reservation.ReservationUpdateReqDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.SortDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Slf4j
@@ -47,6 +55,21 @@ public class ReservationController {
     public ResponseEntity<ApiResponse<ReservationResDto>> getReservation(@PathVariable("reservationId") UUID reservationId) {
         log.info("getReservation.reservationGetReqDto: {}", reservationId);
         ReservationResDto response = reservationService.getReservation(reservationId);
+        return ApiResponse.success(SuccessCode.SUCCESS, response);
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<PageResponse<ReservationResDto>>> search(@RequestParam(value = "userId", required = false) Long userId,
+                                                                          @RequestParam(value = "restaurantId", required = false) UUID restaurantId,
+                                                                          @RequestParam(value = "restaurantScheduleId", required = false) UUID restaurantScheduleId,
+                                                                          @RequestParam(value = "status", required = false) String status,
+                                                                          @SortDefault(sort = "createdAt", direction = Sort.Direction.DESC)
+                                                                           Pageable pageable) {
+
+        Page<ReservationResDto> result = reservationService.search(
+                new ReservationSearchDto(userId, restaurantId, restaurantScheduleId, status)
+                , pageable);
+        PageResponse<ReservationResDto> response = PageResponse.of(result);
         return ApiResponse.success(SuccessCode.SUCCESS, response);
     }
 }
