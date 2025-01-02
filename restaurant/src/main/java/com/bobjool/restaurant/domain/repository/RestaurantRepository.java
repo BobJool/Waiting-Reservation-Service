@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -23,6 +24,8 @@ public interface RestaurantRepository {
 
   // todo JpaRepository 에 있는 시그니쳐와 정확하게 동일해야 합니다.
   <S extends Restaurant> List<S> saveAll(Iterable<S> entities);
+
+  Page<Restaurant> findAllByIsDeletedFalse(Pageable pageable);
 
   // todo 직접 만든 메서드는 테스트 해봐야 합니다.
 //  Page<Restaurant> search(Long userId,
