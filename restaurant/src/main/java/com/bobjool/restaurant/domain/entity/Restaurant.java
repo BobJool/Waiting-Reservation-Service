@@ -1,6 +1,7 @@
 package com.bobjool.restaurant.domain.entity;
 
 import com.bobjool.common.domain.entity.BaseEntity;
+import com.bobjool.restaurant.application.dto.RestaurantUpdateDto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -97,6 +98,20 @@ public class Restaurant extends BaseEntity {
         .openTime(openTime)
         .closeTime(closeTime)
         .build();
+  }
+
+  public void update(RestaurantUpdateDto restaurantUpdateDto){
+    this.restaurantCategory = restaurantUpdateDto.restaurantCategory();
+    this.restaurantPhone = restaurantUpdateDto.restaurantPhone();
+    this.restaurantName = restaurantUpdateDto.restaurantName();
+    this.restaurantRegion = restaurantUpdateDto.restaurantRegion();
+    this.restaurantAddressDetail = restaurantUpdateDto.restaurantAddressDetail();
+    this.restaurantDescription = restaurantUpdateDto.restaurantDescription();
+    this.restaurantVolume = restaurantUpdateDto.restaurantVolume();
+    this.isReservation = restaurantUpdateDto.isReservation();
+    this.isQueue = restaurantUpdateDto.isQueue();
+    this.openTime = restaurantUpdateDto.openTime();
+    this.closeTime = restaurantUpdateDto.closeTime();
   }
 
 

@@ -20,7 +20,7 @@ public enum ErrorCode {
 
     // 레스토랑
     DUPLICATED_NAME(HttpStatus.BAD_REQUEST,"식당 이름이 이미 존재합니다."),
-    DUPLICATED_PHONE(HttpStatus.BAD_REQUEST, "식당 번호가 이미 존재합니다."),
+    DUPLICATED_PHONE(HttpStatus.BAD_REQUEST, "식당 연락처가 이미 존재합니다."),
     DUPPLICATED_Address(HttpStatus.BAD_REQUEST,"식당 주소가 이미 존재합니다."),
     // 대기열
 
