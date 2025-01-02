@@ -47,6 +47,11 @@ public class ReservationService {
         return ReservationResDto.from(reservation);
     }
 
+    /**
+     * CUSTOMER 는 CHECK_IN, NO_SHOW 상태에서 취소할 수 없고,
+     * OWNER 는 모든 상태에서 취소 가능
+     * 인증 로직이 완료되면, 파라미터에 role을 추가해서 각각 분기처리
+     * */
     @Transactional
     public ReservationResDto cancelReservation(UUID reservationId) {
         log.info("cancelReservation.reservationId = {}", reservationId);
@@ -54,6 +59,7 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND));
 
+        // todo CUSTOMER 의 경우 cancel() 호출, OWNER 의 경우 cancelForOwner() 호출
         reservation.cancel();
         return ReservationResDto.from(reservation);
     }

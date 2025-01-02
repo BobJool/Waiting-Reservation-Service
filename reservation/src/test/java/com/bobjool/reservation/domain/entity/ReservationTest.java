@@ -154,4 +154,23 @@ class ReservationTest {
                 .hasMessage("취소할 수 없는 예약 상태입니다.");
     }
 
+    @DisplayName("cancelForOwner - 어떤 상태에서든 취소가 가능하다.")
+    @Test
+    void cancelForOwner_success() {
+        // given - NO_SHOW 상태의 예약
+        Long userId = 12345L;
+        UUID restaurantId = UUID.randomUUID();
+        UUID scheduleId = UUID.randomUUID();
+        ReservationStatus noShowStatus = ReservationStatus.NO_SHOW;
+        Integer guestCount = 3;
+
+        Reservation reservation = Reservation.create(userId, restaurantId, scheduleId, noShowStatus, guestCount);
+
+        // when - cancel 호출
+        reservation.cancelForOwner();
+
+        // then - 상태가 CANCEL 로 변경되었는지 확인
+        assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.CANCEL);
+    }
+
 }

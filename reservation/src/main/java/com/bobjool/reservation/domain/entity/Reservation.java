@@ -65,6 +65,7 @@ public class Reservation extends BaseEntity {
     }
 
     /**
+     * CUSTOMER 용
      * 도메인 규칙: CHECK_IN, NO_SHOW 상태에서는 취소가 안됩니다.
      * 참고) enum 은 == 으로 비교합니다.
      * */
@@ -72,6 +73,14 @@ public class Reservation extends BaseEntity {
         if (this.status.canNotCancel()) {
             throw new BobJoolException(ErrorCode.CANNOT_CANCEL);
         }
-        this.status = ReservationStatus.CANCEL;
+        updateStatus(ReservationStatus.CANCEL);
+    }
+
+    /**
+     * OWNER 용
+     * 모든 상태에서 취소 가능합니다.
+     * */
+    public void cancelForOwner() {
+        updateStatus(ReservationStatus.CANCEL);
     }
 }
