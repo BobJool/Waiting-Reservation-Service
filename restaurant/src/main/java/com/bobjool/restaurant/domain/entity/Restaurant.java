@@ -3,11 +3,14 @@ package com.bobjool.restaurant.domain.entity;
 import com.bobjool.common.domain.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -31,29 +34,28 @@ public class Restaurant extends BaseEntity {
   @Column(name = "user_id", nullable = false)
   private Long userId;
 
+  @Enumerated(EnumType.STRING)
   @Column(name = "restaurant_category", nullable = false)
   private RestaurantCategory restaurantCategory;
 
-  @Column(name = "restaurant_number", nullable = false)
-  private String restaurantNumber;
+  @Column(name = "restaurant_phone", nullable = false)
+  private String restaurantPhone;
 
   @Column(name = "restaurant_name", nullable = false)
   private String restaurantName;
 
+  @Enumerated(EnumType.STRING)
   @Column(name = "restaurant_region", nullable = false)
   private RestaurantRegion restaurantRegion;
 
   @Column(name = "restaurant_address_detail", nullable = false)
   private String restaurantAddressDetail;
 
-  @Column(name = "restaurant_phone", nullable = false)
-  private String restaurantPhone;
-
   @Column(name = "restaurant_description", nullable = false)
   private String restaurantDescription;
 
   @Column(name = "restaurant_volume", nullable = false)
-  private String restaurantVolume;
+  private int restaurantVolume;
 
   @Column(name = "is_reservation", nullable = false)
   private boolean isReservation;
@@ -62,9 +64,40 @@ public class Restaurant extends BaseEntity {
   private boolean isQueue;
 
   @Column(name = "open_time", nullable = false)
-  private LocalDateTime openTime;
+  private LocalTime openTime;
 
   @Column(name = "close_time", nullable = false)
-  private LocalDateTime closeTime;
+  private LocalTime closeTime;
+
+  public static Restaurant create(
+      Long userId,
+      RestaurantCategory restaurantCategory,
+      String restaurantPhone,
+      String restaurantName,
+      RestaurantRegion restaurantRegion,
+      String restaurantAddressDetail,
+      String restaurantDescription,
+      int restaurantVolume,
+      boolean isReservation,
+      boolean isQueue,
+      LocalTime openTime,
+      LocalTime closeTime
+  ) {
+    return Restaurant.builder()
+        .userId(userId)
+        .restaurantCategory(restaurantCategory)
+        .restaurantPhone(restaurantPhone)
+        .restaurantName(restaurantName)
+        .restaurantRegion(restaurantRegion)
+        .restaurantAddressDetail(restaurantAddressDetail)
+        .restaurantDescription(restaurantDescription)
+        .restaurantVolume(restaurantVolume)
+        .isReservation(isReservation)
+        .isQueue(isQueue)
+        .openTime(openTime)
+        .closeTime(closeTime)
+        .build();
+  }
+
 
 }
