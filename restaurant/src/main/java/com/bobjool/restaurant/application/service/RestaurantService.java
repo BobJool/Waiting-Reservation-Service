@@ -13,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -71,7 +70,7 @@ public class RestaurantService {
     restaurant.deleteBase(restaurant.getUserId());
   }
 
-  public Page<RestaurantResDto> AllRestaurants(String sortBy, int page, int size){
+  public Page<RestaurantResDto> AllRestaurants( int page, int size){
     log.info("pageable");
     Pageable pageable = PageRequest.of(page, size);
     Page<Restaurant> restaurantPage = restaurantRepository.findAllByIsDeletedFalse(pageable);

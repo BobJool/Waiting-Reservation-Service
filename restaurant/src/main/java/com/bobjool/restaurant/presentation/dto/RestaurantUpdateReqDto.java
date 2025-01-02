@@ -1,11 +1,8 @@
 package com.bobjool.restaurant.presentation.dto;
 
-import com.bobjool.restaurant.application.dto.RestaurantCreateDto;
 import com.bobjool.restaurant.application.dto.RestaurantUpdateDto;
 import com.bobjool.restaurant.domain.entity.RestaurantCategory;
 import com.bobjool.restaurant.domain.entity.RestaurantRegion;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import java.time.LocalTime;
 
 public record RestaurantUpdateReqDto(

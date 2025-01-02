@@ -7,7 +7,6 @@ import com.bobjool.restaurant.application.dto.RestaurantResDto;
 import com.bobjool.restaurant.application.service.RestaurantService;
 import com.bobjool.restaurant.presentation.dto.RestaurantCreateReqDto;
 import com.bobjool.restaurant.presentation.dto.RestaurantUpdateReqDto;
-import feign.Response;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +15,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -63,12 +61,11 @@ public class RestaurantController {
 
   @GetMapping
   public ResponseEntity<ApiResponse<PageResponse<RestaurantResDto>>> getAllRestaurants(
-      @RequestParam(defaultValue = "createdAt") String sortBy,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "10") int size) {
     log.info("getAllRestaurants");
 
-    Page<RestaurantResDto> restaurantsInfo = restaurantService.AllRestaurants(sortBy, page, size);
+    Page<RestaurantResDto> restaurantsInfo = restaurantService.AllRestaurants(page, size);
     return ApiResponse.success(SuccessCode.SUCCESS, PageResponse.of(restaurantsInfo));
 
   }
