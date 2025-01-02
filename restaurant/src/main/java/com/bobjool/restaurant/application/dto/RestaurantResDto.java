@@ -20,9 +20,9 @@ public record RestaurantResDto(
     boolean isReservation,
     boolean isQueue,
     LocalTime openTime,
-    LocalTime closeTime,
-    LocalDateTime createdAt,
-    LocalDateTime updatedAt
+    LocalTime closeTime
+//    LocalDateTime createdAt,
+//    LocalDateTime updatedAt
 
 ) {
 
@@ -40,9 +40,9 @@ public record RestaurantResDto(
         restaurant.isReservation(),
         restaurant.isQueue(),
         restaurant.getOpenTime(),
-        restaurant.getCloseTime(),
-        restaurant.getCreatedAt(),
-        restaurant.getUpdatedAt()
+        restaurant.getCloseTime()
+//        restaurant.getCreatedAt(),
+//        restaurant.getUpdatedAt()
     );
   }
 
