@@ -44,6 +44,12 @@ public class RestaurantController {
     return ApiResponse.success(SuccessCode.SUCCESS_UPDATE, response);
   }
 
+  @DeleteMapping("/{restaurantId}")
+  public ResponseEntity<ApiResponse<RestaurantResDto>> updateRestaurant(@Valid @PathVariable("restaurantId") UUID restaurantId) {
 
+    log.info("RestaurantDelete");
+    restaurantService.deleteRestaurant(restaurantId);
+    return ApiResponse.success(SuccessCode.SUCCESS_DELETE);
+  }
 
 }

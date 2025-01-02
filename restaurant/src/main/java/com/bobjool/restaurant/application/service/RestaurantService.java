@@ -50,18 +50,22 @@ public class RestaurantService {
     log.info("updateRestaurant.restaurantUpdateDto = {}", restaurantUpdateDto);
 
     validateDuplicate(restaurantUpdateDto);
-
-
     Restaurant restaurant = restaurantRepository.findById(Id)
         .orElseThrow(() -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND));
 
-
     restaurant.update(restaurantUpdateDto);
-
 
   return RestaurantResDto.from(restaurant);
   }
 
+  public void deleteRestaurant(UUID Id){
+    log.info("DeleteRestaurant");
+
+    Restaurant restaurant = restaurantRepository.findById(Id)
+        .orElseThrow(() -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND));
+
+    restaurant.deleteBase(restaurant.getUserId());
+  }
 
 
     private void validateDuplicate(RestaurantCreateDto restaurantCreateDto) {

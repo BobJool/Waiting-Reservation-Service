@@ -114,5 +114,4 @@ public class Restaurant extends BaseEntity {
     this.closeTime = restaurantUpdateDto.closeTime();
   }
 
-
 }
