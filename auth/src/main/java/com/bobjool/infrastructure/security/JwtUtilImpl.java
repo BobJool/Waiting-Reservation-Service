@@ -1,5 +1,8 @@
 package com.bobjool.infrastructure.security;
 
+import com.bobjool.application.interfaces.JwtUtil;
+import com.bobjool.common.exception.BobJoolException;
+import com.bobjool.common.exception.ErrorCode;
 import com.bobjool.domain.entity.User;
 import com.bobjool.presentation.dto.response.SignInResDto;
 import io.jsonwebtoken.Claims;
@@ -21,7 +24,7 @@ import java.util.*;
 @Slf4j(topic = "JWT 관련 로그")
 @Component
 @RequiredArgsConstructor
-public class JwtUtil {
+public class JwtUtilImpl implements JwtUtil {
     private final RedisTemplate<String, Object> redisTemplate;
     private static final String BEARER_PREFIX = "Bearer ";
     private static final long REFRESH_TOKEN_TIME = 14 * 24 * 60 * 60 * 1000L; // 14 days
@@ -51,7 +54,6 @@ public class JwtUtil {
                 .claim("userId", user.getId())
                 .claim("username", user.getUsername())
                 .claim("role", user.getRole())
-                .claim("userId", user.getId())
                 .setIssuer(issuer)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + accessExpiration))
@@ -88,10 +90,16 @@ public class JwtUtil {
                     .build()
                     .parseClaimsJws(token);
             return true;
+        } catch (io.jsonwebtoken.ExpiredJwtException e) {
+            log.error("만료된 JWT token: {}", e.getMessage());
+            throw new BobJoolException(ErrorCode.EXPIRED_TOKEN);
+        } catch (io.jsonwebtoken.UnsupportedJwtException e) {
+            log.error("지원하지 않는 JWT token: {}", e.getMessage());
+            throw new BobJoolException(ErrorCode.UNSUPPORTED_TOKEN);
         } catch (JwtException e) {
             log.error("유효하지 않은 JWT token: {}", e.getMessage());
+            throw new BobJoolException(ErrorCode.INVALID_TOKEN);
         }
-        return false;
     }
 
     public Claims validateAndGetClaims(String token) {
@@ -101,9 +109,15 @@ public class JwtUtil {
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
+        } catch (io.jsonwebtoken.ExpiredJwtException e) {
+            log.error("만료된 JWT token: {}", e.getMessage());
+            throw new BobJoolException(ErrorCode.EXPIRED_TOKEN);
+        } catch (io.jsonwebtoken.UnsupportedJwtException e) {
+            log.error("지원하지 않는 JWT token: {}", e.getMessage());
+            throw new BobJoolException(ErrorCode.UNSUPPORTED_TOKEN);
         } catch (JwtException e) {
             log.error("유효하지 않은 JWT token: {}", e.getMessage());
-            throw e;
+            throw new BobJoolException(ErrorCode.INVALID_TOKEN);
         }
     }
 
@@ -115,10 +129,15 @@ public class JwtUtil {
 
     public String getTokenFromHeader(String headerName, jakarta.servlet.http.HttpServletRequest request) {
         String header = request.getHeader(headerName);
-        if (StringUtils.hasText(header) && header.startsWith(BEARER_PREFIX)) {
-            return header.substring(BEARER_PREFIX.length());
+
+        if (!StringUtils.hasText(header)) {
+            throw new BobJoolException(ErrorCode.TOKEN_MISSING);
         }
-        return null;
+        if (!header.startsWith(BEARER_PREFIX)) {
+            throw new BobJoolException(ErrorCode.INVALID_TOKEN);
+        }
+
+        return header.substring(BEARER_PREFIX.length());
     }
 
     public String getTokenType(String token) {
@@ -131,7 +150,7 @@ public class JwtUtil {
 
             return claims.get("tokenType", String.class);
         } catch (Exception e) {
-            return null;
+            throw new BobJoolException(ErrorCode.INVALID_TOKEN);
         }
     }
 

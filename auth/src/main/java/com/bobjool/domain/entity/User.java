@@ -32,7 +32,7 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private String email;
 
-    @Column(name = "slack_id", nullable = false)
+    @Column(name = "slack_id")
     private String slackId;
 
     @Column(name = "phone_number", nullable = false)

@@ -8,6 +8,8 @@ public interface UserRepository {
 
     Optional<User> findByUsername(String username);
 
+    Optional<User> findByUsernameAndIsDeletedFalse(String username);
+
     Optional<User> findByNickname(String nickname);
 
     Optional<User> findBySlackId(String slackId);

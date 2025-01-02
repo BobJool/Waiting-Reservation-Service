@@ -2,12 +2,13 @@ package com.bobjool.presentation.controller;
 
 import com.bobjool.application.service.AuthService;
 import com.bobjool.common.presentation.ApiResponse;
+import com.bobjool.common.presentation.SuccessCode;
 import com.bobjool.presentation.dto.request.SignInReqDto;
 import com.bobjool.presentation.dto.request.SignUpReqDto;
 import com.bobjool.presentation.dto.response.SignInResDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,28 +22,26 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/sign-in")
-    public ApiResponse<SignInResDto> signIn(
+    public ResponseEntity<ApiResponse<SignInResDto>> signIn(
             final @RequestBody SignInReqDto request) {
 
-        final SignInResDto response = authService.signIn(request);
+        final SignInResDto response = authService.signIn(request.toServiceDto());
 
-        return new ApiResponse<>(
-                HttpStatus.OK,
-                HttpStatus.OK.getReasonPhrase(),
+        return ApiResponse.success(
+                SuccessCode.SUCCESS,
                 response
         );
     }
 
     @PostMapping("/sign-up")
-    public ApiResponse<String> signUp(
+    public ResponseEntity<ApiResponse<String>> signUp(
             @RequestBody @Valid SignUpReqDto request) {
 
-        authService.signUp(request);
+        authService.signUp(request.toServiceDto());
 
-        return new ApiResponse<>(
-                HttpStatus.CREATED,
-                HttpStatus.CREATED.getReasonPhrase(),
-                "회원가입 완료."
+        return ApiResponse.success(
+                SuccessCode.SUCCESS_INSERT,
+                null
         );
     }
 }

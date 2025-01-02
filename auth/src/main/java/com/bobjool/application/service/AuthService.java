@@ -1,11 +1,11 @@
 package com.bobjool.application.service;
 
+import com.bobjool.application.dto.SignInDto;
+import com.bobjool.application.dto.SignUpDto;
+import com.bobjool.application.interfaces.JwtUtil;
 import com.bobjool.common.exception.*;
 import com.bobjool.domain.entity.User;
 import com.bobjool.domain.repository.UserRepository;
-import com.bobjool.infrastructure.security.JwtUtil;
-import com.bobjool.presentation.dto.request.SignInReqDto;
-import com.bobjool.presentation.dto.request.SignUpReqDto;
 import com.bobjool.presentation.dto.response.SignInResDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +28,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final ValidationService validationService;
 
-    public SignInResDto signIn(SignInReqDto request) {
+    public SignInResDto signIn(SignInDto request) {
 
         String username = request.username();
 
@@ -36,13 +36,9 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(username, request.password())
         );
 
-        User user = userRepository.findByUsername(username)
+        User user = userRepository.findByUsernameAndIsDeletedFalse(username)
                 .filter(userInfo -> passwordEncoder.matches(request.password(), userInfo.getPassword()))
-                .orElseThrow(() -> new IllegalArgumentException("Username을 찾을 수 없습니다."));
-
-        if (user.isDeleted()) {
-            throw new BobJoolException(ErrorCode.USER_DELETED);
-        }
+                .orElseThrow(() -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND));
 
         if (!user.getIsApproved()) {
             throw new BobJoolException(ErrorCode.USER_NOT_APPROVED);
@@ -52,24 +48,24 @@ public class AuthService {
     }
 
     @Transactional
-    public void signUp(final SignUpReqDto request) {
+    public void signUp(final SignUpDto request) {
 
-        validationService.validateDuplicateUsername(request.getUsername());
-        validationService.validateDuplicateSlackId(request.getSlackId());
-        validationService.validateDuplicateNickname(request.getNickname());
-        validationService.validateDuplicateEmail(request.getEmail());
-        validationService.validateDuplicatePhoneNumber(request.getPhoneNumber());
+        validationService.validateDuplicateUsername(request.username());
+        validationService.validateDuplicateSlackId(request.slackId());
+        validationService.validateDuplicateNickname(request.nickname());
+        validationService.validateDuplicateEmail(request.email());
+        validationService.validateDuplicatePhoneNumber(request.phoneNumber());
 
         User user = User.create(
-                request.getUsername(),
-                passwordEncoder.encode(request.getPassword()),
-                request.getName(),
-                request.getNickname(),
-                request.getEmail(),
-                request.getSlackId(),
-                request.getPhoneNumber(),
+                request.username(),
+                passwordEncoder.encode(request.password()),
+                request.name(),
+                request.nickname(),
+                request.email(),
+                request.slackId(),
+                request.phoneNumber(),
                 true,
-                request.getRole()
+                request.role()
         );
 
         userRepository.save(user);

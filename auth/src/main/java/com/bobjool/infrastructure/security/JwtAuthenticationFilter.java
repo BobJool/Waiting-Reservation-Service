@@ -26,7 +26,7 @@ import java.io.IOException;
 @Slf4j(topic = "JWT 인증 필터 관련 로그")
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtUtil jwtUtil;
+    private final JwtUtilImpl jwtUtilImpl;
     private final JwtBlacklistService jwtBlacklistService;
     private final CustomUserDetailsServiceImpl customUserDetailsService;
 
@@ -43,14 +43,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             String token = getTokenFromHeader(request);
 
-            if (token == null || !jwtUtil.validateToken(token)) {
+            if (token == null || !jwtUtilImpl.validateToken(token)) {
                 handleError(response, HttpStatus.UNAUTHORIZED, "유효하지 않거나 누락된 토큰입니다.");
                 return;
             }
 
             if (StringUtils.hasText(token)) {
 
-                String tokenType = jwtUtil.getTokenType(token);
+                String tokenType = jwtUtilImpl.getTokenType(token);
                 if (tokenType == null) {
                     handleError(response, HttpStatus.BAD_REQUEST, "Invalid or missing token type");
                     return;
@@ -62,7 +62,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     return;
                 }
 
-                Claims claims = jwtUtil.validateAndGetClaims(token);
+                Claims claims = jwtUtilImpl.validateAndGetClaims(token);
                 setAuthentication(claims.getSubject());
             }
 
@@ -105,5 +105,4 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private boolean isExcludedUri(String uri) {
         return uri.startsWith("/api/v1/auths/sign-in") || uri.startsWith("/api/v1/auths/sign-up");
     }
-
 }
