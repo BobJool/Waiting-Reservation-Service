@@ -21,3 +21,7 @@ Content-Type: application/json
 POST localhost:19005/api/v1/reservations/cancel/e47cf394-4a51-416c-a2d7-1b45dd17477b
 Content-Type: application/json
 
+### 예약 상세 조회
+GET localhost:19005/api/v1/reservations/e47cf394-4a51-416c-a2d7-1b45dd17477b
+Content-Type: application/json
+

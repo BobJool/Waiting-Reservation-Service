@@ -204,4 +204,40 @@ class ReservationServiceTest {
                 .hasMessage(ErrorCode.CANNOT_CANCEL.getMessage());
     }
 
+    @DisplayName("getReservation - 성공적으로 예약 정보를 반환한다.")
+    @Test
+    void getReservation_whenReservationExists() {
+        // given - 예약이 존재할 때
+        Reservation reservation = Reservation.create(
+                12345L,
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                5
+        );
+        reservationRepository.save(reservation);
+
+        // when - getReservation 호출
+        ReservationResDto response = reservationService.getReservation(reservation.getId());
+
+        // then - 반환된 예약 정보가 올바른지 확인
+        assertThat(response.reservationId()).isEqualTo(reservation.getId());
+        assertThat(response.userId()).isEqualTo(reservation.getUserId());
+        assertThat(response.restaurantId()).isEqualTo(reservation.getRestaurantId());
+        assertThat(response.restaurantScheduleId()).isEqualTo(reservation.getRestaurantScheduleId());
+        assertThat(response.guestCount()).isEqualTo(reservation.getGuestCount());
+        assertThat(response.status()).isEqualTo(reservation.getStatus().name());
+    }
+
+    @DisplayName("getReservation - 예약이 존재하지 않을 경우 BobJoolException 발생")
+    @Test
+    void getReservation_whenReservationNotFound() {
+        // given - 존재하지 않는 예약 ID
+        UUID nonExistentReservationId = UUID.randomUUID();
+
+        // when & then - 예외 발생 확인
+        assertThatThrownBy(() -> reservationService.getReservation(nonExistentReservationId))
+                .isInstanceOf(BobJoolException.class)
+                .hasMessage(ErrorCode.ENTITY_NOT_FOUND.getMessage());
+    }
+
 }

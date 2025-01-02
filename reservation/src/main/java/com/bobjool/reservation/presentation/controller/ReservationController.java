@@ -42,4 +42,11 @@ public class ReservationController {
         ReservationResDto response = reservationService.cancelReservation(reservationId);
         return ApiResponse.success(SuccessCode.SUCCESS, response);
     }
+
+    @GetMapping("/{reservationId}")
+    public ResponseEntity<ApiResponse<ReservationResDto>> getReservation(@PathVariable("reservationId") UUID reservationId) {
+        log.info("getReservation.reservationGetReqDto: {}", reservationId);
+        ReservationResDto response = reservationService.getReservation(reservationId);
+        return ApiResponse.success(SuccessCode.SUCCESS, response);
+    }
 }
