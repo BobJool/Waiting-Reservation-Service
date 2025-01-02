@@ -1,5 +1,7 @@
 package com.bobjool.restaurant.application.service;
 
+import com.bobjool.common.exception.BobJoolException;
+import com.bobjool.common.exception.ErrorCode;
 import com.bobjool.restaurant.application.dto.RestaurantCreateDto;
 import com.bobjool.restaurant.application.dto.RestaurantResDto;
 import com.bobjool.restaurant.domain.entity.Restaurant;
@@ -21,6 +23,8 @@ public class RestaurantService {
   public RestaurantResDto createRestaurant(RestaurantCreateDto restaurantCreateDto) {
     log.info("createRestaurant.restaurantCreateDto = {}", restaurantCreateDto);
 
+    validateDuplicate(restaurantCreateDto);
+
     Restaurant restaurant = Restaurant.create(
         restaurantCreateDto.userId(),
         restaurantCreateDto.restaurantCategory(),
@@ -36,7 +40,19 @@ public class RestaurantService {
         restaurantCreateDto.closeTime()
     );
 
+
     return RestaurantResDto.from(restaurantRepository.save(restaurant));
 
   }
+
+
+  private void validateDuplicate(RestaurantCreateDto restaurantCreateDto) {
+    if(restaurantRepository.findByRestaurantName(restaurantCreateDto.restaurantName()).isPresent())
+      throw new BobJoolException(ErrorCode.DUPLICATED_NAME);
+    if(restaurantRepository.findByRestaurantPhone(restaurantCreateDto.restaurantPhone()).isPresent())
+      throw new BobJoolException(ErrorCode.DUPLICATED_PHONE);
+    if(restaurantRepository.findByRestaurantAddressDetail(restaurantCreateDto.restaurantAddressDetail()).isPresent())
+      throw new BobJoolException(ErrorCode.DUPPLICATED_Address);
+  }
+
 }

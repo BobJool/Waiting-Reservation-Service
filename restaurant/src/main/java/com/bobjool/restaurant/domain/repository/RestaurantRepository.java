@@ -12,6 +12,13 @@ public interface RestaurantRepository {
 
   Optional<Restaurant> findById(UUID id);
 
+  Optional<Restaurant> findByRestaurantName(String restaurantName);
+
+  Optional<Restaurant> findByRestaurantPhone(String restaurantPhone);
+
+  Optional<Restaurant> findByRestaurantAddressDetail(String AddressDetail);
+
+
   Restaurant save(Restaurant restaurant);
 
   // todo JpaRepository 에 있는 시그니쳐와 정확하게 동일해야 합니다.
