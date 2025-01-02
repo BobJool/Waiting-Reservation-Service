@@ -2,10 +2,10 @@ package com.bobjool.reservation.application.service;
 
 import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
-import com.bobjool.reservation.application.dto.PaymentCreateDto;
-import com.bobjool.reservation.application.dto.PaymentResDto;
-import com.bobjool.reservation.application.dto.PaymentSearchDto;
-import com.bobjool.reservation.application.dto.PaymentUpdateDto;
+import com.bobjool.reservation.application.dto.payment.PaymentCreateDto;
+import com.bobjool.reservation.application.dto.payment.PaymentResDto;
+import com.bobjool.reservation.application.dto.payment.PaymentSearchDto;
+import com.bobjool.reservation.application.dto.payment.PaymentUpdateDto;
 import com.bobjool.reservation.application.interfaces.PgClient;
 import com.bobjool.reservation.domain.entity.Payment;
 import com.bobjool.reservation.domain.enums.PaymentMethod;
