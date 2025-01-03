@@ -17,18 +17,18 @@ public record TemplateSelectResDto(
         LocalDateTime updatedAt,
         LocalDateTime deletedAt
 ) {
-    public static TemplateSelectResDto from(TemplateDto createDto) {
+    public static TemplateSelectResDto from(TemplateDto templateDto) {
         return new TemplateSelectResDto(
-                createDto.id(),
-                createDto.type().toString(),
-                createDto.channel().toString(),
-                createDto.type().toString(),
-                createDto.title(),
-                createDto.template(),
-                createDto.variables(),
-                createDto.createdAt(),
-                createDto.updatedAt(),
-                createDto.deletedAt()
+                templateDto.id(),
+                templateDto.serviceType().toString(),
+                templateDto.channel().toString(),
+                templateDto.type().toString(),
+                templateDto.title(),
+                templateDto.template(),
+                templateDto.variables(),
+                templateDto.createdAt(),
+                templateDto.updatedAt(),
+                templateDto.deletedAt()
         );
     }
 }

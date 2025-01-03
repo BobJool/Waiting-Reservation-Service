@@ -9,6 +9,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum NotificationType {
     SUCCESS("성공"),
+    FAIL("실패"),
     CANCEL("취소"),
     RENEW("미루기"),
     RUSH("호출"),
@@ -21,6 +22,7 @@ public enum NotificationType {
     public static NotificationType of(String request) {
         return switch (request.toUpperCase()){
             case "SUCCESS" -> SUCCESS;
+            case "FAIL" -> FAIL;
             case "CANCEL" -> CANCEL;
             case "RENEW" -> RENEW;
             case "RUSH" -> RUSH;
