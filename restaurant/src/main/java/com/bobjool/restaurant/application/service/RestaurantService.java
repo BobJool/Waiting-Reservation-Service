@@ -73,9 +73,9 @@ public class RestaurantService {
   }
 
   @Transactional(readOnly = true)
-  public Page<RestaurantResDto> AllRestaurants( int page, int size){
-    log.info("pageable");
-    Pageable pageable = PageRequest.of(page, size);
+  public Page<RestaurantResDto> AllRestaurants(Pageable pageable){
+    log.info("pageable second All info");
+
     Page<Restaurant> restaurantPage = restaurantRepository.findAllByIsDeletedFalse(pageable);
 
     return restaurantPage.map(RestaurantResDto::from);
