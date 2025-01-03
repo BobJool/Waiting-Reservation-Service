@@ -27,32 +27,6 @@ import java.util.UUID;
 @Service
 public class PaymentService {
     private final PaymentRepository paymentRepository;
-    private final PgClient pgClient;
-
-    // todo 예외 발생 가능한 곳은 테스트 합니다.
-    /**
-     * 1. PaymentMethod.of()
-     * 2. PgName.of()
-     * 3. pgClient.requestPayment()
-     * 4. amount 가 음수 또는 0 일때
-     * */
-    @Transactional
-    public PaymentResDto createPayment(PaymentCreateDto paymentCreateDto) {
-        log.info("createPayment.PaymentCreateDto = {}", paymentCreateDto);
-
-        Payment payment = Payment.create(
-                paymentCreateDto.reservationId(),
-                paymentCreateDto.userId(),
-                paymentCreateDto.amount(),
-                PaymentMethod.of(paymentCreateDto.method()),
-                PgName.of(paymentCreateDto.PgName())
-        );
-        // pg 사의 결제 요청
-        if (!pgClient.requestPayment(payment)) {
-            throw new BobJoolException(ErrorCode.PAYMENT_FAIL);
-        }
-        return PaymentResDto.from(paymentRepository.save(payment));
-    }
 
     public Page<PaymentResDto> search(PaymentSearchDto paymentSearchDto, Pageable pageable) {
         log.info("search.PaymentSearchDto = {}, pageable = {}", paymentSearchDto, pageable);
