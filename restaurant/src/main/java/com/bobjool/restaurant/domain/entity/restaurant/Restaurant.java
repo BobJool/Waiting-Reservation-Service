@@ -1,7 +1,7 @@
-package com.bobjool.restaurant.domain.entity;
+package com.bobjool.restaurant.domain.entity.restaurant;
 
 import com.bobjool.common.domain.entity.BaseEntity;
-import com.bobjool.restaurant.application.dto.RestaurantUpdateDto;
+import com.bobjool.restaurant.application.dto.restaurant.RestaurantUpdateDto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

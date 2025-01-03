@@ -1,12 +1,12 @@
-package com.bobjool.restaurant.presentation.controller;
+package com.bobjool.restaurant.presentation.controller.restaurant;
 
 import com.bobjool.common.presentation.ApiResponse;
 import com.bobjool.common.presentation.PageResponse;
 import com.bobjool.common.presentation.SuccessCode;
-import com.bobjool.restaurant.application.dto.RestaurantResDto;
+import com.bobjool.restaurant.application.dto.restaurant.RestaurantResDto;
 import com.bobjool.restaurant.application.service.RestaurantService;
-import com.bobjool.restaurant.presentation.dto.RestaurantCreateReqDto;
-import com.bobjool.restaurant.presentation.dto.RestaurantUpdateReqDto;
+import com.bobjool.restaurant.presentation.dto.restaurant.RestaurantCreateReqDto;
+import com.bobjool.restaurant.presentation.dto.restaurant.RestaurantUpdateReqDto;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -72,7 +72,7 @@ public class RestaurantController {
     log.info("getAllRestaurants");
 
     Pageable AllRestaurantPageable = PageRequest.of(page, size, pageable.getSort());
-    
+
     Page<RestaurantResDto> resPage
         = restaurantService.AllRestaurants(AllRestaurantPageable);
     return ApiResponse.success(SuccessCode.SUCCESS, PageResponse.of(resPage));

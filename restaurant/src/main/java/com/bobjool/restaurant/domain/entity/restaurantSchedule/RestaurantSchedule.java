@@ -1,4 +1,4 @@
-package com.bobjool.restaurant.domain.entity;
+package com.bobjool.restaurant.domain.entity.restaurantSchedule;
 
 
 import com.bobjool.common.domain.entity.BaseEntity;
@@ -30,6 +30,9 @@ public class RestaurantSchedule extends BaseEntity {
   @Column(name = "id", columnDefinition = "UUID", updatable = false, nullable = false)
   private UUID id;
 
+  @Column(name = "user_id")
+  private Long userId;
+
   @Column(name = "restaurant_id", columnDefinition = "UUID", updatable = false, nullable = false)
   private UUID restaurantId;
 
@@ -50,4 +53,26 @@ public class RestaurantSchedule extends BaseEntity {
 
   @Column(name = "available", nullable = false)
   private boolean available;
+
+  public static RestaurantSchedule create(
+   Long userId,
+   UUID restaurantId,
+   int tableNumber,
+   LocalDate date,
+   LocalTime timeSlot,
+   int maxTableCapacity,
+   int currentCapacity,
+   boolean available
+  ) {
+    return RestaurantSchedule.builder()
+        .userId(userId)
+        .restaurantId(restaurantId)
+        .tableNumber(tableNumber)
+        .date(date)
+        .timeSlot(timeSlot)
+        .maxTableCapacity(maxTableCapacity)
+        .currentCapacity(currentCapacity)
+        .available(available)
+        .build();
+  }
 }

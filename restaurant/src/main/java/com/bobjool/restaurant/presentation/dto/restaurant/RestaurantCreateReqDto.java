@@ -1,16 +1,13 @@
-package com.bobjool.restaurant.presentation.dto;
+package com.bobjool.restaurant.presentation.dto.restaurant;
 
-import com.bobjool.restaurant.application.dto.RestaurantCreateDto;
-import com.bobjool.restaurant.domain.entity.RestaurantCategory;
-import com.bobjool.restaurant.domain.entity.RestaurantRegion;
+import com.bobjool.restaurant.application.dto.restaurant.RestaurantCreateDto;
+import com.bobjool.restaurant.domain.entity.restaurant.RestaurantCategory;
+import com.bobjool.restaurant.domain.entity.restaurant.RestaurantRegion;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.UUID;
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 
