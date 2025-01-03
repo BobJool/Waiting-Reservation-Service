@@ -10,6 +10,7 @@ import com.bobjool.reservation.domain.entity.Reservation;
 import com.bobjool.reservation.domain.enums.PaymentMethod;
 import com.bobjool.reservation.domain.enums.PaymentStatus;
 import com.bobjool.reservation.domain.enums.PgName;
+import com.bobjool.reservation.domain.enums.ReservationStatus;
 import com.bobjool.reservation.domain.repository.PaymentRepository;
 import com.bobjool.reservation.domain.repository.ReservationRepository;
 import com.bobjool.reservation.domain.service.ReservationPaymentDomainService;
@@ -31,6 +32,13 @@ public class ReservationPaymentService {
     @Transactional
     public PaymentResDto createPayment(PaymentCreateDto paymentCreateDto) {
         log.info("createPayment.PaymentCreateDto = {}", paymentCreateDto);
+        Reservation reservation = reservationRepository.findById(paymentCreateDto.reservationId())
+                .orElseThrow(() -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND));
+
+        // PENDING 이 아닌 예약은 예외 발생
+        if(reservation.isNotPending()) {
+            throw new BobJoolException(ErrorCode.PAYMENT_FAIL);
+        }
 
         Payment payment = Payment.create(
                 paymentCreateDto.reservationId(),
@@ -47,8 +55,7 @@ public class ReservationPaymentService {
         payment.updateStatus(status);
 
         // 결제 성공 -> 예약 성공 / 결제 실패 -> 예약 실패
-        Reservation reservation = reservationRepository.findById(payment.getReservationId())
-                .orElseThrow(() -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND));
+
         reservationPaymentDomainService.syncReservationWithPayment(reservation, payment);
 
         return PaymentResDto.from(paymentRepository.save(payment));

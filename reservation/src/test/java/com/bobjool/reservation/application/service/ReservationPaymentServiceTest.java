@@ -227,4 +227,27 @@ class ReservationPaymentServiceTest {
                 .isInstanceOf(BobJoolException.class)
                 .hasMessage(ErrorCode.ENTITY_NOT_FOUND.getMessage());
     }
+
+    @DisplayName("createPayment - Reservation 의 상태가 PENDING 이 아닐 때")
+    @Test
+    void createPayment_whenReservationNotPending() {
+        // given - reservation 의 상태가 PENDIN 이 아닐 때
+        Long userId = 12345L;
+        ReservationStatus completeStatus = ReservationStatus.COMPLETE;
+        Reservation reservation = Reservation.create(userId, UUID.randomUUID(), UUID.randomUUID(), completeStatus, 4);
+        reservationRepository.save(reservation);
+
+        Integer amount = 10_000;
+        String method = "CARD";
+        String pgName = "TOSS";
+        PaymentCreateDto paymentCreateDto = new PaymentCreateDto(reservation.getId(), userId, amount, method, pgName);
+
+        // and - PgClient의 requestPayment 메서드가 true를 반환하도록 설정
+        given(pgClient.requestPayment(any(Payment.class))).willReturn(true);
+
+        // when & then - 예외 발생
+        assertThatThrownBy(() -> reservationPaymentService.createPayment(paymentCreateDto))
+                .isInstanceOf(BobJoolException.class)
+                .hasMessage(ErrorCode.PAYMENT_FAIL.getMessage());
+    }
 }

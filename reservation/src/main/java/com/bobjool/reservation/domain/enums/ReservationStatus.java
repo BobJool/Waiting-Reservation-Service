@@ -44,4 +44,12 @@ public enum ReservationStatus {
     public boolean canNotCancel() {
         return !canCancel();
     }
+
+    public boolean isPending() {
+        return this == PENDING;
+    }
+
+    public boolean isNotPending() {
+        return !isPending();
+    }
 }
