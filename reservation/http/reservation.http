@@ -2,12 +2,13 @@
 POST localhost:19005/api/v1/reservations
 Content-Type: application/json
 
-### 날짜, 시간 -> LocalDate, LocalTime
 {
   "user_id": 12345,
   "restaurant_id": "550e8400-e29b-41d4-a716-446655440001",
   "restaurant_schedule_id": "660e8400-e29b-41d4-a716-446655440002",
-  "guest_count": 4
+  "guest_count": 4,
+  "reservation_date": "2025-01-27",
+  "reservation_time": "14:00"
 }
 
 ### 예약 상태 변경

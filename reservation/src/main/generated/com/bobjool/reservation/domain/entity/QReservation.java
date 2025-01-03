@@ -40,6 +40,10 @@ public class QReservation extends EntityPathBase<Reservation> {
     //inherited
     public final BooleanPath isDeleted = _super.isDeleted;
 
+    public final DatePath<java.time.LocalDate> reservationDate = createDate("reservationDate", java.time.LocalDate.class);
+
+    public final TimePath<java.time.LocalTime> reservationTime = createTime("reservationTime", java.time.LocalTime.class);
+
     public final ComparablePath<java.util.UUID> restaurantId = createComparable("restaurantId", java.util.UUID.class);
 
     public final ComparablePath<java.util.UUID> restaurantScheduleId = createComparable("restaurantScheduleId", java.util.UUID.class);

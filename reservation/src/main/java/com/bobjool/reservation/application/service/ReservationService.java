@@ -34,7 +34,9 @@ public class ReservationService {
                 reservationCreateDto.userId(),
                 reservationCreateDto.restaurantId(),
                 reservationCreateDto.restaurantScheduleId(),
-                reservationCreateDto.guestCount());
+                reservationCreateDto.guestCount(),
+                reservationCreateDto.reservationDate(),
+                reservationCreateDto.reservationTime());
         return ReservationResDto.from(reservationRepository.save(reservation));
     }
 
