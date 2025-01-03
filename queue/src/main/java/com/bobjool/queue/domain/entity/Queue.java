@@ -7,9 +7,19 @@ import com.bobjool.queue.domain.enums.DiningOption;
 import com.bobjool.queue.domain.enums.QueueStatus;
 import com.bobjool.queue.domain.enums.QueueType;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -49,5 +59,20 @@ public class Queue extends BaseEntity {
 	@Enumerated(EnumType.STRING)
 	@Column(name = "dining_option", nullable = false)
 	private DiningOption diningOption;
+
+	public static Queue create(UUID restaurantId, Long userId, Integer member, QueueType type,
+		DiningOption diningOption, Integer position) {
+		return Queue.builder()
+			.id(UUID.randomUUID())
+			.restaurantId(restaurantId)
+			.userId(userId)
+			.member(member)
+			.type(type)
+			.diningOption(diningOption)
+			.status(QueueStatus.WAITING)
+			.position(position)
+			.delayCount(0)
+			.build();
+	}
 
 }
