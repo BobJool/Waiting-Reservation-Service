@@ -4,12 +4,15 @@ import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
 import com.bobjool.reservation.application.dto.reservation.ReservationCreateDto;
 import com.bobjool.reservation.application.dto.reservation.ReservationResDto;
+import com.bobjool.reservation.application.dto.reservation.ReservationSearchDto;
 import com.bobjool.reservation.application.dto.reservation.ReservationUpdateDto;
 import com.bobjool.reservation.domain.entity.Reservation;
 import com.bobjool.reservation.domain.enums.ReservationStatus;
 import com.bobjool.reservation.domain.repository.ReservationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -71,5 +74,22 @@ public class ReservationService {
                 .orElseThrow(() -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND));
 
         return ReservationResDto.from(reservation);
+    }
+
+    public Page<ReservationResDto> search(ReservationSearchDto searchDto, Pageable pageable) {
+        log.info("searchReservation.searchDto = {}, pageable = {}", searchDto, pageable);
+
+        ReservationStatus status = null;
+        if (searchDto.status() != null) {
+            status = ReservationStatus.of(searchDto.status());
+        }
+
+        Page<Reservation> reservationPage = reservationRepository.search(
+                searchDto.userId(),
+                searchDto.restaurantId(),
+                searchDto.restaurantScheduleId(),
+                status,
+                pageable);
+        return reservationPage.map(ReservationResDto::from);
     }
 }
