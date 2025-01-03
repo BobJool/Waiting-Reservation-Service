@@ -4,26 +4,36 @@ server:
 spring:
   application:
     name: auth-service
-#  datasource:
-#    driver-class-name: org.postgresql.Driver
-#    url: jdbc:postgresql://localhost:5432/notification_db
-#    username: postgres
-#    password: password
-#  jpa:
-#    hibernate:
-#      ddl-auto: update
-#    show-sql: true
-#    properties:
-#      format-sql: true
-#      use_sql_comments: true
-#      hibernate:
-#        dialect: org.hibernate.dialect.PostgreSQLDialect
+  config:
+    import: classpath:application-key.yml
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/user_db
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      format-sql: true
+      use_sql_comments: true
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  data:
+    redis:
+      host: localhost
+      port: 6379
 
 eureka:
   client:
     serviceUrl:
       defaultZone: http://localhost:19000/eureka/
 
+service:
+  jwt:
+    access-expiration: 360000
+    secret-key: ${SECURITY_JWT_KEY}
 
 #management:
 #  zipkin:

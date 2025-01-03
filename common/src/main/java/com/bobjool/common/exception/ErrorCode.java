@@ -17,6 +17,17 @@ public enum ErrorCode {
     FORBIDDEN_ACCESS(HttpStatus.FORBIDDEN, "접근 권한이 존재하지 않습니다."),
     MISSING_ROLE(HttpStatus.BAD_REQUEST, "권한 정보가 없습니다."),
     INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, "유저 ID 또는 비밀번호 정보가 일치하지 않습니다."),
+    USER_DELETED(HttpStatus.BAD_REQUEST, "삭제된 사용자입니다."),
+    USER_NOT_APPROVED(HttpStatus.UNAUTHORIZED, "승인되지 않은 사용자입니다."),
+    DUPLICATE_USERNAME(HttpStatus.BAD_REQUEST, "이미 존재하는 유저 ID 입니다."),
+    DUPLICATE_NICKNAME(HttpStatus.BAD_REQUEST, "이미 존재하는 닉네임입니다."),
+    DUPLICATE_EMAIL(HttpStatus.BAD_REQUEST, "이미 존재하는 이메일입니다."),
+    DUPLICATE_PHONE_NUMBER(HttpStatus.BAD_REQUEST, "이미 존재하는 전화번호입니다."),
+    DUPLICATE_SLACK_ID(HttpStatus.BAD_REQUEST, "이미 존재하는 Slack ID입니다."),
+    TOKEN_MISSING(HttpStatus.UNAUTHORIZED, "토큰이 누락되었습니다."),
+    INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
+    EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "만료된 JWT 토큰입니다."),
+    UNSUPPORTED_TOKEN(HttpStatus.UNAUTHORIZED, "지원하지 않는 JWT 토큰 형식입니다."),
 
     // 레스토랑
     DUPLICATED_NAME(HttpStatus.BAD_REQUEST,"식당 이름이 이미 존재합니다."),
