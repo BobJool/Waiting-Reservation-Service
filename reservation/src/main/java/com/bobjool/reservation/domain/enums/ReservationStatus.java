@@ -13,6 +13,7 @@ public enum ReservationStatus {
     CHECK_IN("체크인"),
     CANCEL("예약 취소"),
     NO_SHOW("노쇼"), // "예약 부도" 라는 말이 있던데, 너무 생소해서 그냥 "노쇼"로 하겠습니다.
+    FAIL("예약 실패"),
     ;
 
     private final String description;
@@ -24,6 +25,7 @@ public enum ReservationStatus {
             case "CHECK_IN" -> CHECK_IN;
             case "CANCEL" -> CANCEL;
             case "NO_SHOW" -> NO_SHOW;
+            case "FAIL" -> FAIL;
             default -> throw new BobJoolException(ErrorCode.UNSUPPORTED_RESERVATION_STATUS);
         };
     }
@@ -33,7 +35,7 @@ public enum ReservationStatus {
      * CHECK_IN, NO_SHOW 상태에서는 취소 불가
      */
     public boolean canCancel() {
-        return this != CHECK_IN && this != NO_SHOW;
+        return this != CHECK_IN && this != NO_SHOW && this != FAIL;
     }
 
     /**
