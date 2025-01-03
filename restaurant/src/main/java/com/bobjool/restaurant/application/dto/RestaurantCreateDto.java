@@ -2,10 +2,13 @@ package com.bobjool.restaurant.application.dto;
 
 import com.bobjool.restaurant.domain.entity.RestaurantCategory;
 import com.bobjool.restaurant.domain.entity.RestaurantRegion;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.UUID;
 
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record RestaurantCreateDto(
     Long userId,
     RestaurantCategory restaurantCategory,

@@ -3,12 +3,16 @@ package com.bobjool.restaurant.presentation.dto;
 import com.bobjool.restaurant.application.dto.RestaurantCreateDto;
 import com.bobjool.restaurant.domain.entity.RestaurantCategory;
 import com.bobjool.restaurant.domain.entity.RestaurantRegion;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.UUID;
+
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 
 public record RestaurantCreateReqDto (
 //      @NotNull(message = "레스토랑 ID 는 필수 입력값입니다.")
