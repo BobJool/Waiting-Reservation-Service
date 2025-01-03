@@ -52,8 +52,8 @@ public class TemplateService {
     }
 
     @Transactional
-    public TemplateDto updateTemplate(UUID templatesId, TemplateCreateDto createDto) {
-        Template template = getTemplateById(templatesId);
+    public TemplateDto updateTemplate(UUID templateId, TemplateCreateDto createDto) {
+        Template template = getTemplateById(templateId);
         String variables = templateConvertService.getVariablesToJson(
                 createDto.template()
         );
@@ -71,8 +71,6 @@ public class TemplateService {
         return TemplateDto.from(template);
     }
 
-    private Template getTemplateById(UUID templatesId) {
-        return templateRepository.findByIdAndDeletedAtIsNull(templatesId)
     @Transactional
     public TemplateDto deleteTemplate(UUID templateId) {
         Template template = getTemplateById(templateId);
@@ -83,6 +81,8 @@ public class TemplateService {
         return TemplateDto.from(template);
     }
 
+    private Template getTemplateById(UUID templateId) {
+        return templateRepository.findByIdAndDeletedAtIsNull(templateId)
                 .orElseThrow(
                         () -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND)
                 );
