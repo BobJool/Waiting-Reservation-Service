@@ -24,3 +24,6 @@ Content-Type: application/json
   "title": "제목",
   "template" : "안녕하세요. ${username}님! ${restaurant} 웨이팅 정보를 알려드립니다."
 }
+
+### 템플릿 삭제
+DELETE localhost:19050/api/v1/notifications/templates/1471d39e-472d-4261-9a6f-dfb4b290fb75

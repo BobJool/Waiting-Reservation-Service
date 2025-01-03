@@ -73,6 +73,16 @@ public class TemplateService {
 
     private Template getTemplateById(UUID templatesId) {
         return templateRepository.findByIdAndDeletedAtIsNull(templatesId)
+    @Transactional
+    public TemplateDto deleteTemplate(UUID templateId) {
+        Template template = getTemplateById(templateId);
+
+        template.deleteTemplate();
+        log.info("deleted template: {}", template);
+
+        return TemplateDto.from(template);
+    }
+
                 .orElseThrow(
                         () -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND)
                 );

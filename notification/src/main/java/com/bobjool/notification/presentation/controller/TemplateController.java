@@ -5,6 +5,7 @@ import com.bobjool.common.presentation.SuccessCode;
 import com.bobjool.notification.application.service.TemplateService;
 import com.bobjool.notification.presentation.request.TemplateReqDto;
 import com.bobjool.notification.presentation.response.TemplateCreateResDto;
+import com.bobjool.notification.presentation.response.TemplateDeleteResDto;
 import com.bobjool.notification.presentation.response.TemplateSelectResDto;
 import com.bobjool.notification.presentation.response.TemplateUpdateResDto;
 import jakarta.validation.Valid;
@@ -49,6 +50,14 @@ public class TemplateController {
         );
 
         return ApiResponse.success(SuccessCode.SUCCESS_UPDATE, response);
+    }
+
+    @DeleteMapping("/{templateId}")
+    public ResponseEntity<ApiResponse<TemplateDeleteResDto>> deleteTemplate(@PathVariable UUID templateId) {
+        TemplateDeleteResDto response = TemplateDeleteResDto.from(
+                templateService.deleteTemplate(templateId)
+        );
+        return ApiResponse.success(SuccessCode.SUCCESS_DELETE, response);
     }
 
 }
