@@ -2,7 +2,7 @@ package com.bobjool.notification.application.service;
 
 import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
-import com.bobjool.notification.infrastructure.client.SlackClient;
+import com.bobjool.notification.application.client.SlackClient;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import lombok.RequiredArgsConstructor;
