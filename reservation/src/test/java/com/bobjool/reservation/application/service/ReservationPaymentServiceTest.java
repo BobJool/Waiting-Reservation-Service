@@ -178,7 +178,7 @@ class ReservationPaymentServiceTest {
         // when - paymentService.createPayment() 를 호출하면!
         PaymentResDto response = reservationPaymentService.createPayment(paymentCreateDto);
 
-        // then - 적절한 응답
+        // then - 결제 실패 응답
         assertThat(response.PaymentId()).isNotNull();
         assertThat(response.reservationId()).isEqualTo(reservation.getId());
         assertThat(response.userId()).isEqualTo(userId);
@@ -203,7 +203,7 @@ class ReservationPaymentServiceTest {
         assertThat(payment.getUpdatedAt()).isNotNull();
         assertThat(payment.getIsDeleted()).isFalse();
 
-        // and - Reservation 의 status 도 COMPLETE
+        // and - Reservation 의 status 도 FAIL
         Reservation updatedReservation = reservationRepository.findById(response.reservationId()).orElse(null);
         assertThat(updatedReservation.getStatus()).isEqualTo(ReservationStatus.FAIL);
     }
@@ -231,7 +231,7 @@ class ReservationPaymentServiceTest {
     @DisplayName("createPayment - Reservation 의 상태가 PENDING 이 아닐 때")
     @Test
     void createPayment_whenReservationNotPending() {
-        // given - reservation 의 상태가 PENDIN 이 아닐 때
+        // given - reservation 의 상태가 PENDING 이 아닐 때
         Long userId = 12345L;
         ReservationStatus completeStatus = ReservationStatus.COMPLETE;
         Reservation reservation = Reservation.create(userId, UUID.randomUUID(), UUID.randomUUID(), completeStatus, 4);
@@ -245,9 +245,36 @@ class ReservationPaymentServiceTest {
         // and - PgClient의 requestPayment 메서드가 true를 반환하도록 설정
         given(pgClient.requestPayment(any(Payment.class))).willReturn(true);
 
-        // when & then - 예외 발생
-        assertThatThrownBy(() -> reservationPaymentService.createPayment(paymentCreateDto))
-                .isInstanceOf(BobJoolException.class)
-                .hasMessage(ErrorCode.PAYMENT_FAIL.getMessage());
+        // when
+        PaymentResDto response = reservationPaymentService.createPayment(paymentCreateDto);
+
+        // then - 결제 실패 응답
+        assertThat(response.PaymentId()).isNotNull();
+        assertThat(response.reservationId()).isEqualTo(reservation.getId());
+        assertThat(response.userId()).isEqualTo(userId);
+        assertThat(response.amount()).isEqualTo(amount);
+        assertThat(response.method()).isEqualTo(PaymentMethod.CARD.name());
+        assertThat(response.pgName()).isEqualTo(PgName.TOSS.name());
+        assertThat(response.status()).isEqualTo(PaymentStatus.FAIL.name());
+        assertThat(response.createdAt()).isNotNull();
+        assertThat(response.updatedAt()).isNotNull();
+
+        // and - Payment 가 저장되었다.
+        Payment payment = paymentRepository.findById(response.PaymentId()).orElse(null);
+        assertThat(payment).isNotNull();
+        assertThat(payment.getId()).isEqualTo(response.PaymentId());
+        assertThat(payment.getReservationId()).isEqualTo(reservation.getId());
+        assertThat(payment.getUserId()).isEqualTo(userId);
+        assertThat(payment.getAmount()).isEqualTo(amount);
+        assertThat(payment.getMethod()).isEqualTo(PaymentMethod.CARD);
+        assertThat(payment.getPgName()).isEqualTo(PgName.TOSS);
+        assertThat(payment.getStatus()).isEqualTo(PaymentStatus.FAIL);
+        assertThat(payment.getCreatedAt()).isNotNull();
+        assertThat(payment.getUpdatedAt()).isNotNull();
+        assertThat(payment.getIsDeleted()).isFalse();
+
+        // and - Reservation 의 status 는 기존대로 COMPLETE
+        Reservation updatedReservation = reservationRepository.findById(response.reservationId()).orElse(null);
+        assertThat(updatedReservation.getStatus()).isEqualTo(ReservationStatus.COMPLETE);
     }
 }

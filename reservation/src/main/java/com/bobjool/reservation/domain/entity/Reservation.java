@@ -84,6 +84,10 @@ public class Reservation extends BaseEntity {
         updateStatus(ReservationStatus.CANCEL);
     }
 
+    public boolean isPending() {
+        return this.getStatus().isPending();
+    }
+
     public boolean isNotPending() {
         return this.getStatus().isNotPending();
     }

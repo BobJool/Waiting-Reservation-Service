@@ -10,7 +10,6 @@ import com.bobjool.reservation.domain.entity.Reservation;
 import com.bobjool.reservation.domain.enums.PaymentMethod;
 import com.bobjool.reservation.domain.enums.PaymentStatus;
 import com.bobjool.reservation.domain.enums.PgName;
-import com.bobjool.reservation.domain.enums.ReservationStatus;
 import com.bobjool.reservation.domain.repository.PaymentRepository;
 import com.bobjool.reservation.domain.repository.ReservationRepository;
 import com.bobjool.reservation.domain.service.ReservationPaymentDomainService;
@@ -36,8 +35,9 @@ public class ReservationPaymentService {
                 .orElseThrow(() -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND));
 
         // PENDING 이 아닌 예약은 예외 발생
+        PaymentStatus status = PaymentStatus.COMPLETE;
         if(reservation.isNotPending()) {
-            throw new BobJoolException(ErrorCode.PAYMENT_FAIL);
+            status = PaymentStatus.FAIL;
         }
 
         Payment payment = Payment.create(
@@ -48,15 +48,15 @@ public class ReservationPaymentService {
                 PgName.of(paymentCreateDto.PgName())
         );
         // pg 사의 결제 요청
-        PaymentStatus status = PaymentStatus.COMPLETE;
         if (!pgClient.requestPayment(payment)) {
             status = PaymentStatus.FAIL;
         }
         payment.updateStatus(status);
 
         // 결제 성공 -> 예약 성공 / 결제 실패 -> 예약 실패
-
-        reservationPaymentDomainService.syncReservationWithPayment(reservation, payment);
+        if (reservation.isPending()) {
+            reservationPaymentDomainService.syncReservationWithPayment(reservation, payment);
+        }
 
         return PaymentResDto.from(paymentRepository.save(payment));
     }
