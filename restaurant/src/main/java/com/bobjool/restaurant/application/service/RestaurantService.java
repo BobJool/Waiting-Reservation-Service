@@ -49,6 +49,7 @@ public class RestaurantService {
 
   }
 
+  @Transactional
   public RestaurantResDto updateRestaurant(UUID Id, RestaurantUpdateDto restaurantUpdateDto) {
     log.info("updateRestaurant.restaurantUpdateDto = {}", restaurantUpdateDto);
 
@@ -61,6 +62,7 @@ public class RestaurantService {
   return RestaurantResDto.from(restaurant);
   }
 
+  @Transactional
   public void deleteRestaurant(UUID Id){
     log.info("DeleteRestaurant");
 
@@ -70,6 +72,7 @@ public class RestaurantService {
     restaurant.deleteBase(restaurant.getUserId());
   }
 
+  @Transactional(readOnly = true)
   public Page<RestaurantResDto> AllRestaurants( int page, int size){
     log.info("pageable");
     Pageable pageable = PageRequest.of(page, size);
