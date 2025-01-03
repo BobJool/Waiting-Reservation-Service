@@ -1,16 +1,15 @@
-package com.bobjool.restaurant.presentation.dto;
+package com.bobjool.restaurant.presentation.dto.restaurantSchedule;
 
-import com.bobjool.restaurant.application.dto.restaurant.RestaurantCreateDto;
 import com.bobjool.restaurant.application.dto.restaurantSchedule.RestaurantScheduleCreateDto;
-import com.bobjool.restaurant.domain.entity.restaurant.RestaurantCategory;
-import com.bobjool.restaurant.domain.entity.restaurant.RestaurantRegion;
-import com.bobjool.restaurant.domain.entity.restaurantSchedule.RestaurantSchedule;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.UUID;
 
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record RestaurantScheduleCreateReqDto(
     @NotNull(message = "레스트랑 ID는 필수값 입니다.")
     UUID restaurantId,
@@ -29,7 +28,7 @@ public record RestaurantScheduleCreateReqDto(
     LocalTime timeSlot,
 
     @NotNull(message = "테이블 최대 인원수는 필수값 입니다.")
-    int maxTableCapacity
+    int maxCapacity
 ) {
 
   public RestaurantScheduleCreateDto toServiceDto() {
@@ -39,7 +38,7 @@ public record RestaurantScheduleCreateReqDto(
         tableNumber,
         date,
         timeSlot,
-        maxTableCapacity
+        maxCapacity
     );
   }
 }

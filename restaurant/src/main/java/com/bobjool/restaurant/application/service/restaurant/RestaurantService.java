@@ -1,4 +1,4 @@
-package com.bobjool.restaurant.application.service;
+package com.bobjool.restaurant.application.service.restaurant;
 
 import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;

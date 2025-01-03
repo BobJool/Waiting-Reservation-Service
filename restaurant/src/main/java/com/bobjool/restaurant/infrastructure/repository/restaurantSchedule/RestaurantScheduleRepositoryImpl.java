@@ -1,4 +1,4 @@
-package com.bobjool.restaurant.infrastructure.repository;
+package com.bobjool.restaurant.infrastructure.repository.restaurantSchedule;
 
 import com.bobjool.restaurant.domain.entity.restaurantSchedule.RestaurantSchedule;
 import com.bobjool.restaurant.domain.repository.RestaurantScheduleRepository;

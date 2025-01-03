@@ -16,7 +16,7 @@ public record RestaurantScheduleCreateDto(
     int tableNumber,
     LocalDate date,
     LocalTime timeSlot,
-    int maxTableCapacity
+    int maxCapacity
 ){
 
 }

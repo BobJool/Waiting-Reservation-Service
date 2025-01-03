@@ -1,19 +1,17 @@
 package com.bobjool.restaurant.application.service.restaurantSchedule;
 
-import com.bobjool.restaurant.application.dto.restaurant.RestaurantCreateDto;
-import com.bobjool.restaurant.application.dto.restaurant.RestaurantResDto;
+import com.bobjool.common.exception.BobJoolException;
+import com.bobjool.common.exception.ErrorCode;
 import com.bobjool.restaurant.application.dto.restaurant.RestaurantUpdateDto;
 import com.bobjool.restaurant.application.dto.restaurantSchedule.RestaurantScheduleCreateDto;
 import com.bobjool.restaurant.application.dto.restaurantSchedule.RestaurantScheduleResDto;
+import com.bobjool.restaurant.application.dto.restaurantSchedule.RestaurantScheduleReserveDto;
+import com.bobjool.restaurant.application.dto.restaurantSchedule.RestaurantScheduleUpdateDto;
 import com.bobjool.restaurant.domain.entity.restaurantSchedule.RestaurantSchedule;
-import com.bobjool.restaurant.domain.repository.RestaurantRepository;
 import com.bobjool.restaurant.domain.repository.RestaurantScheduleRepository;
-import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,7 +31,7 @@ public class RestaurantScheduleService {
         createDto.tableNumber(),
         createDto.date(),
         createDto.timeSlot(),
-        createDto.maxTableCapacity(),
+        createDto.maxCapacity(),
         0,
         true
     );
@@ -41,12 +39,42 @@ public class RestaurantScheduleService {
     return RestaurantScheduleResDto.from(scheduleRepository.save(schedule));
   }
 
-//  public RestaurantResDto updateSchedule(UUID restaurantId, RestaurantUpdateDto serviceDto) {
-//  }
+  //for customer
+  public RestaurantScheduleResDto reserveSchedule(UUID scheduleId, RestaurantScheduleReserveDto scheduleReserveDto) {
+    log.info("updateSchedule.ScheduleReserveDto = {}", scheduleReserveDto);
+
+    RestaurantSchedule restaurantSchedule = scheduleRepository.findById(scheduleId)
+        .orElseThrow(() -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND));
+
+    if(restaurantSchedule.getMaxCapacity() < scheduleReserveDto.currentCapacity()){
+      log.info("restaurantSchedule.getMaxCapacity = {}", restaurantSchedule.getMaxCapacity());
+      log.info("scheduleUpdateDto.currentCapacity = {}", scheduleReserveDto.currentCapacity());
+      throw new BobJoolException(ErrorCode.CAPACITY_OVERFLOW);
+    }
+    if(!restaurantSchedule.isAvailable()){
+      throw new BobJoolException(ErrorCode.ALREADEY_RESERVED);
+    }
+    restaurantSchedule.reserve(scheduleReserveDto);
+    return RestaurantScheduleResDto.from(restaurantSchedule);
+  }
+
+  //for owner
+  public RestaurantScheduleResDto updateSchedule(UUID scheduleId, RestaurantScheduleUpdateDto scheduleUpdateDto) {
+    log.info("updateSchedule.ScheduleUpdateDto = {}", scheduleUpdateDto);
+
+    RestaurantSchedule restaurantSchedule = scheduleRepository.findById(scheduleId)
+        .orElseThrow(() -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND));
+
+    restaurantSchedule.update(scheduleUpdateDto);
+
+    return RestaurantScheduleResDto.from(restaurantSchedule);
+  }
 
 //  public void deleteSchedule(@Valid UUID restaurantId) {
 //  }
 
 //  public Page<RestaurantResDto> AllSchedules(Pageable allRestaurantPageable) {
 //  }
+
+
 }

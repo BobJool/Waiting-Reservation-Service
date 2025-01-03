@@ -1,10 +1,10 @@
-package com.bobjool.restaurant.infrastructure.repository;
+package com.bobjool.restaurant.infrastructure.repository.restaurantSchedule;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class RestaurantRepositoryCustomImpl implements RestaurantRepositoryCustom {
+public class RestaurantScheduleRepositoryCustomImpl implements RestaurantScheduleRepositoryCustom {
 
   /**
    * QueryDSL 구현체

@@ -16,7 +16,7 @@ public record RestaurantScheduleResDto(
     int tableNumber,
     LocalDate date,
     LocalTime timeSlot,
-    int maxTableCapacity,
+    int maxCapacity,
     int currentCapacity,
     boolean available
 
@@ -30,7 +30,7 @@ public record RestaurantScheduleResDto(
         restaurantSchedule.getTableNumber(),
         restaurantSchedule.getDate(),
         restaurantSchedule.getTimeSlot(),
-        restaurantSchedule.getMaxTableCapacity(),
+        restaurantSchedule.getMaxCapacity(),
         restaurantSchedule.getCurrentCapacity(),
         restaurantSchedule.isAvailable()
     );

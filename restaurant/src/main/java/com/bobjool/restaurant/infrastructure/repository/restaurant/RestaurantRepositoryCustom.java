@@ -1,4 +1,4 @@
-package com.bobjool.restaurant.infrastructure.repository;
+package com.bobjool.restaurant.infrastructure.repository.restaurant;
 
 public interface RestaurantRepositoryCustom {
 

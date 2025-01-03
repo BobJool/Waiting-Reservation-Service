@@ -4,7 +4,7 @@ import com.bobjool.common.presentation.ApiResponse;
 import com.bobjool.common.presentation.PageResponse;
 import com.bobjool.common.presentation.SuccessCode;
 import com.bobjool.restaurant.application.dto.restaurant.RestaurantResDto;
-import com.bobjool.restaurant.application.service.RestaurantService;
+import com.bobjool.restaurant.application.service.restaurant.RestaurantService;
 import com.bobjool.restaurant.presentation.dto.restaurant.RestaurantCreateReqDto;
 import com.bobjool.restaurant.presentation.dto.restaurant.RestaurantUpdateReqDto;
 import jakarta.validation.Valid;

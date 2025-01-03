@@ -2,6 +2,8 @@ package com.bobjool.restaurant.domain.entity.restaurantSchedule;
 
 
 import com.bobjool.common.domain.entity.BaseEntity;
+import com.bobjool.restaurant.application.dto.restaurantSchedule.RestaurantScheduleReserveDto;
+import com.bobjool.restaurant.application.dto.restaurantSchedule.RestaurantScheduleUpdateDto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -45,8 +47,8 @@ public class RestaurantSchedule extends BaseEntity {
   @Column(name = "time_slot", nullable = false)
   private LocalTime timeSlot;
 
-  @Column(name = "max_table_capacity", nullable = false)
-  private int maxTableCapacity;
+  @Column(name = "max_capacity", nullable = false)
+  private int maxCapacity;
 
   @Column(name = "current_capacity")
   private int currentCapacity;
@@ -60,7 +62,7 @@ public class RestaurantSchedule extends BaseEntity {
    int tableNumber,
    LocalDate date,
    LocalTime timeSlot,
-   int maxTableCapacity,
+   int maxCapacity,
    int currentCapacity,
    boolean available
   ) {
@@ -70,9 +72,29 @@ public class RestaurantSchedule extends BaseEntity {
         .tableNumber(tableNumber)
         .date(date)
         .timeSlot(timeSlot)
-        .maxTableCapacity(maxTableCapacity)
+        .maxCapacity(maxCapacity)
         .currentCapacity(currentCapacity)
         .available(available)
         .build();
   }
+
+  //Customer가 좌석 예약
+  public void reserve(RestaurantScheduleReserveDto scheduleReserveDto){
+    this.userId = scheduleReserveDto.userId();
+    this.date = scheduleReserveDto.date(); // 있는지 조회만
+    this.timeSlot = scheduleReserveDto.timeSlot(); // 있는지 조회만
+    this.currentCapacity = scheduleReserveDto.currentCapacity();
+    this.available = false;
+  }
+
+  //Owner가 스케쥴에 대한 정보를 수정
+  public void update(RestaurantScheduleUpdateDto scheduleUpdateDto){
+    this.userId = scheduleUpdateDto.userId();
+    this.date = scheduleUpdateDto.date(); // 있는지 조회만
+    this.timeSlot = scheduleUpdateDto.timeSlot(); // 있는지 조회만
+    this.maxCapacity = scheduleUpdateDto.maxCapacity();
+    this.currentCapacity = scheduleUpdateDto.currentCapacity();
+    this.available = scheduleUpdateDto.available();
+  }
+
 }
