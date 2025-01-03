@@ -15,4 +15,5 @@ public interface RestaurantScheduleRepository {
 
   Page<RestaurantSchedule> findAllByIsDeletedFalse(Pageable pageable);
 
+  Page<RestaurantSchedule> findAllByRestaurantId(UUID restaurantId, Pageable pageable);
 }

@@ -97,5 +97,13 @@ public class RestaurantScheduleService {
     return SchedulePage.map(RestaurantScheduleResDto::from);
   }
 
+  @Transactional(readOnly = true)
+  public Page<RestaurantScheduleResDto> readForOneRestaurant(UUID id, Pageable pageable) {
+    log.info("All RestaurantSchedule info");
+
+    Page<RestaurantSchedule> SchedulePage = scheduleRepository.findAllByRestaurantId(id, pageable);
+
+    return SchedulePage.map(RestaurantScheduleResDto::from);
+  }
 
 }

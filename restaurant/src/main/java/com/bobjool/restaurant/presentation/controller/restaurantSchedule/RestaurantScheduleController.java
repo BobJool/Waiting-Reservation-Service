@@ -93,4 +93,22 @@ public class RestaurantScheduleController {
         = scheduleService.AllSchedules(AllRestaurantPageable);
     return ApiResponse.success(SuccessCode.SUCCESS, PageResponse.of(resPage));
   }
+
+
+  //특정 음식점 스케쥴 전체 조회
+  @GetMapping("/{restaurantId}")
+  public ResponseEntity<ApiResponse<PageResponse<RestaurantScheduleResDto>>> readForOneRestaurantSchedule(
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size,
+      @SortDefault(sort = "createdAt", direction = Direction.DESC)
+      Pageable pageable,
+      @PathVariable("restaurantId") UUID restaurantId) {
+    log.info("getAllRestaurants");
+
+    Pageable AllRestaurantPageable = PageRequest.of(page, size, pageable.getSort());
+
+    Page<RestaurantScheduleResDto> resPage
+        = scheduleService.readForOneRestaurant(restaurantId, AllRestaurantPageable);
+    return ApiResponse.success(SuccessCode.SUCCESS, PageResponse.of(resPage));
+  }
 }
