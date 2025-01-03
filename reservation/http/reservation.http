@@ -25,3 +25,6 @@ Content-Type: application/json
 GET localhost:19005/api/v1/reservations/e47cf394-4a51-416c-a2d7-1b45dd17477b
 Content-Type: application/json
 
+### 예약 목록 검색
+GET localhost:19005/api/v1/reservations?page=0&size=5&sort=createdAt,DESC&status=PENDING
+Content-Type: application/json
