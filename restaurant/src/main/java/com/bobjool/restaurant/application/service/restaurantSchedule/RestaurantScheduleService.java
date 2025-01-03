@@ -2,6 +2,7 @@ package com.bobjool.restaurant.application.service.restaurantSchedule;
 
 import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
+import com.bobjool.restaurant.application.dto.restaurant.RestaurantResDto;
 import com.bobjool.restaurant.application.dto.restaurant.RestaurantUpdateDto;
 import com.bobjool.restaurant.application.dto.restaurantSchedule.RestaurantScheduleCreateDto;
 import com.bobjool.restaurant.application.dto.restaurantSchedule.RestaurantScheduleResDto;
@@ -14,6 +15,8 @@ import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -85,8 +88,14 @@ public class RestaurantScheduleService {
     schedule.deleteBase(schedule.getUserId());
   }
 
-//  public Page<RestaurantResDto> AllSchedules(Pageable allRestaurantPageable) {
-//  }
+  @Transactional(readOnly = true)
+  public Page<RestaurantScheduleResDto> AllSchedules(Pageable pageable) {
+    log.info("All RestaurantSchedule info");
+
+    Page<RestaurantSchedule> SchedulePage = scheduleRepository.findAllByIsDeletedFalse(pageable);
+
+    return SchedulePage.map(RestaurantScheduleResDto::from);
+  }
 
 
 }

@@ -73,7 +73,7 @@ public class RestaurantService {
 
   @Transactional(readOnly = true)
   public Page<RestaurantResDto> AllRestaurants(Pageable pageable){
-    log.info("pageable second All info");
+    log.info("All Restaurant info");
 
     Page<Restaurant> restaurantPage = restaurantRepository.findAllByIsDeletedFalse(pageable);
 
