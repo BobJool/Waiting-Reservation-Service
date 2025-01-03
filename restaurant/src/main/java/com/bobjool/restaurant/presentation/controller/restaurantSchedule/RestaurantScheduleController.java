@@ -12,6 +12,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -48,7 +49,7 @@ public class RestaurantScheduleController {
     return ApiResponse.success(SuccessCode.SUCCESS_UPDATE, response);
   }
 
-  //생성된 음식점 스케쥴 Owner가 수정
+  //음식점 스케쥴 Owner가 수정
   @PatchMapping("/owner/{ScheduleId}")
   public ResponseEntity<ApiResponse<RestaurantScheduleResDto>> updateSchedule(
       @Valid @RequestBody RestaurantScheduleUpdateReqDto scheduleUpdateReqDto,
@@ -59,15 +60,15 @@ public class RestaurantScheduleController {
     return ApiResponse.success(SuccessCode.SUCCESS_UPDATE, response);
   }
 
-//  //음식점 스케쥴 삭제
-//  @DeleteMapping("/{restaurantId}")
-//  public ResponseEntity<ApiResponse<RestaurantResDto>> deleteSchedule(
-//      @Valid @PathVariable("restaurantId") UUID restaurantId) {
-//
-//    log.info("RestaurantDelete");
-//    scheduleService.deleteSchedule(restaurantId);
-//    return ApiResponse.success(SuccessCode.SUCCESS_DELETE);
-//  }
+  //음식점 스케쥴 삭제
+  @DeleteMapping("/owner/{ScheduleId}")
+  public ResponseEntity<ApiResponse<RestaurantScheduleResDto>> deleteSchedule(
+      @Valid @PathVariable("ScheduleId") UUID ScheduleId) {
+
+    log.info("RestaurantDelete");
+    scheduleService.deleteSchedule(ScheduleId);
+    return ApiResponse.success(SuccessCode.SUCCESS_DELETE);
+  }
 //
 //  //모든 생성된 음식점 스케쥴 전체 조회
 //  @GetMapping

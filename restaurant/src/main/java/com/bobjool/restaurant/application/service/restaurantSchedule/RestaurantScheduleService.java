@@ -7,8 +7,10 @@ import com.bobjool.restaurant.application.dto.restaurantSchedule.RestaurantSched
 import com.bobjool.restaurant.application.dto.restaurantSchedule.RestaurantScheduleResDto;
 import com.bobjool.restaurant.application.dto.restaurantSchedule.RestaurantScheduleReserveDto;
 import com.bobjool.restaurant.application.dto.restaurantSchedule.RestaurantScheduleUpdateDto;
+import com.bobjool.restaurant.domain.entity.restaurant.Restaurant;
 import com.bobjool.restaurant.domain.entity.restaurantSchedule.RestaurantSchedule;
 import com.bobjool.restaurant.domain.repository.RestaurantScheduleRepository;
+import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +25,7 @@ public class RestaurantScheduleService {
 
   private final RestaurantScheduleRepository scheduleRepository;
 
+  @Transactional
   public RestaurantScheduleResDto createSchedule(RestaurantScheduleCreateDto createDto) {
 
     RestaurantSchedule schedule = RestaurantSchedule.create(
@@ -40,6 +43,7 @@ public class RestaurantScheduleService {
   }
 
   //for customer
+  @Transactional
   public RestaurantScheduleResDto reserveSchedule(UUID scheduleId, RestaurantScheduleReserveDto scheduleReserveDto) {
     log.info("updateSchedule.ScheduleReserveDto = {}", scheduleReserveDto);
 
@@ -59,6 +63,7 @@ public class RestaurantScheduleService {
   }
 
   //for owner
+  @Transactional
   public RestaurantScheduleResDto updateSchedule(UUID scheduleId, RestaurantScheduleUpdateDto scheduleUpdateDto) {
     log.info("updateSchedule.ScheduleUpdateDto = {}", scheduleUpdateDto);
 
@@ -70,8 +75,15 @@ public class RestaurantScheduleService {
     return RestaurantScheduleResDto.from(restaurantSchedule);
   }
 
-//  public void deleteSchedule(@Valid UUID restaurantId) {
-//  }
+  @Transactional
+  public void deleteSchedule(UUID Id) {
+    log.info("DeleteSchedule");
+
+    RestaurantSchedule schedule = scheduleRepository.findById(Id)
+        .orElseThrow(() -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND));
+
+    schedule.deleteBase(schedule.getUserId());
+  }
 
 //  public Page<RestaurantResDto> AllSchedules(Pageable allRestaurantPageable) {
 //  }
