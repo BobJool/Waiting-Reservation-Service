@@ -3,19 +3,18 @@ package com.bobjool.application.interfaces;
 import com.bobjool.domain.entity.User;
 import com.bobjool.presentation.dto.response.SignInResDto;
 import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
 
 public interface JwtUtil {
-    public SignInResDto createAccessToken(final User user);
-    public String createRefreshToken(String username);
-    public boolean validateToken(String token);
-    public Claims validateAndGetClaims(String token);
-    public long getRemainingExpiration(String token);
-    public String getTokenFromHeader(String headerName, jakarta.servlet.http.HttpServletRequest request);
-    public String getTokenType(String token);
-    public List<String> getAllActiveTokens(String username);
-
-
-
+    String createAccessToken(User user);
+    String createRefreshToken(String username);
+    boolean validateToken(String token);
+    Claims validateAndGetClaims(String token);
+    String getTokenFromHeader(String headerName, HttpServletRequest request);
+    String getTokenType(String token);
+    long getRemainingExpiration(String token);
+    List<String> getAllActiveTokens(String username);
 }
+

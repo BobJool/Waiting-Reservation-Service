@@ -28,6 +28,7 @@ public enum ErrorCode {
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
     EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "만료된 JWT 토큰입니다."),
     UNSUPPORTED_TOKEN(HttpStatus.UNAUTHORIZED, "지원하지 않는 JWT 토큰 형식입니다."),
+    UNKNOWN_TOKEN_TYPE(HttpStatus.BAD_REQUEST, "토큰 타입이 확인되지 않았습니다."),
 
     // 레스토랑
 

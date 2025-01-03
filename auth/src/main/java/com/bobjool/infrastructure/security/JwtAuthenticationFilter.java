@@ -1,9 +1,9 @@
 package com.bobjool.infrastructure.security;
 
+import com.bobjool.application.interfaces.JwtUtil;
 import com.bobjool.application.service.JwtBlacklistService;
+import com.bobjool.common.exception.BobJoolException;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,7 +16,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -26,63 +25,46 @@ import java.io.IOException;
 @Slf4j(topic = "JWT 인증 필터 관련 로그")
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtUtilImpl jwtUtilImpl;
+    private final JwtUtil jwtUtil;
     private final JwtBlacklistService jwtBlacklistService;
     private final CustomUserDetailsServiceImpl customUserDetailsService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+
         try {
             String requestUri = request.getRequestURI();
             log.info("requestUri: {}", requestUri);
+
             if (isExcludedUri(requestUri)) {
                 filterChain.doFilter(request, response);
                 return;
             }
 
-            String token = getTokenFromHeader(request);
+            String token = jwtUtil.getTokenFromHeader("Authorization", request);
 
-            if (token == null || !jwtUtilImpl.validateToken(token)) {
+            if (!jwtUtil.validateToken(token)) {
                 handleError(response, HttpStatus.UNAUTHORIZED, "유효하지 않거나 누락된 토큰입니다.");
                 return;
             }
 
-            if (StringUtils.hasText(token)) {
-
-                String tokenType = jwtUtilImpl.getTokenType(token);
-                if (tokenType == null) {
-                    handleError(response, HttpStatus.BAD_REQUEST, "Invalid or missing token type");
-                    return;
-                }
-
-                boolean isAccessToken = "access".equals(tokenType);
-                if (jwtBlacklistService.isBlacklisted(token, isAccessToken)) {
-                    handleError(response, HttpStatus.UNAUTHORIZED, "Token is blacklisted");
-                    return;
-                }
-
-                Claims claims = jwtUtilImpl.validateAndGetClaims(token);
-                setAuthentication(claims.getSubject());
+            if (jwtBlacklistService.isBlacklisted(token, "access".equals(jwtUtil.getTokenType(token)))) {
+                handleError(response, HttpStatus.UNAUTHORIZED, "Token is blacklisted");
+                return;
             }
 
+            Claims claims = jwtUtil.validateAndGetClaims(token);
+            setAuthentication(claims.getSubject());
             filterChain.doFilter(request, response);
 
-        } catch (ExpiredJwtException e) {
-            log.error("만료된 JWT token", e);
-            handleError(response, HttpStatus.UNAUTHORIZED, "만료된 Token");
-        } catch (JwtException e) {
-            log.error("유효하지 않은 JWT token: {}", e.getMessage());
-            handleError(response, HttpStatus.UNAUTHORIZED, "유효하지 않은 token");
+        } catch (BobJoolException e) {
+            log.error("JWT Exception: {}", e.getMessage());
+            handleError(response, HttpStatus.UNAUTHORIZED, e.getMessage());
         } catch (Exception e) {
-            log.error("예기치 않은 오류가 발생했습니다.", e);
+            log.error("Unexpected error occurred.", e);
             handleError(response, HttpStatus.INTERNAL_SERVER_ERROR, "예기치 않은 오류가 발생했습니다.");
         }
-    }
-
-    private String getTokenFromHeader(HttpServletRequest request) {
-        String header = request.getHeader("Authorization");
-        return (StringUtils.hasText(header) && header.startsWith("Bearer ")) ? header.substring(7) : null;
     }
 
     private void setAuthentication(String username) {
