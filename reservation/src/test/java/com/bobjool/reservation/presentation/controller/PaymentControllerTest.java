@@ -1,6 +1,7 @@
 package com.bobjool.reservation.presentation.controller;
 
 import com.bobjool.reservation.application.service.PaymentService;
+import com.bobjool.reservation.application.service.ReservationPaymentService;
 import com.bobjool.reservation.presentation.dto.payment.PaymentCreateReqDto;
 import com.bobjool.reservation.presentation.dto.payment.PaymentUpdateReqDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,6 +40,9 @@ class PaymentControllerTest {
     // 가짜 객체
     @MockBean
     private PaymentService paymentService;
+
+    @MockBean
+    ReservationPaymentService reservationPaymentService;
 
     @DisplayName("createPayment - 성공")
     @Test

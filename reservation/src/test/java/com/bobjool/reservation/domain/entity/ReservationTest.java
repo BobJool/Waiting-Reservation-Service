@@ -173,4 +173,43 @@ class ReservationTest {
         assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.CANCEL);
     }
 
+    @DisplayName("isNotPending - 상태가 PENDING 이 아니면 true 를 반환한다")
+    @ParameterizedTest
+    @ValueSource(strings = {"COMPLETE", "CHECK_IN", "CANCEL", "NO_SHOW", "FAIL"})
+    void isNotPending_returnsTrueWhenStatusIsNotPending(String statusString) {
+        // given
+        Reservation reservation = Reservation.create(
+                12345L,
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                ReservationStatus.of(statusString),
+                3
+        );
+
+        // when
+        boolean result = reservation.isNotPending();
+
+        // then
+        assertThat(result).isTrue();
+    }
+
+    @DisplayName("isNotPending - 상태가 PENDING 이면 false 를 반환한다")
+    @Test
+    void isNotPending_returnsFalseWhenStatusIsPending() {
+        // given
+        Reservation reservation = Reservation.create(
+                12345L,
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                ReservationStatus.PENDING,
+                3
+        );
+
+        // when
+        boolean result = reservation.isNotPending();
+
+        // then
+        assertThat(result).isFalse();
+    }
+
 }

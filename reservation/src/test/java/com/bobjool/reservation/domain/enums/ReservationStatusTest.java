@@ -89,4 +89,58 @@ class ReservationStatusTest {
         // then
         assertThat(result).isTrue();
     }
+
+    @DisplayName("isPending - 상태가 PENDING 이면 true 를 반환한다")
+    @Test
+    void isPending_returnsTrueWhenStatusIsPending() {
+        // given
+        ReservationStatus status = ReservationStatus.PENDING;
+
+        // when
+        boolean result = status.isPending();
+
+        // then
+        assertThat(result).isTrue();
+    }
+
+    @DisplayName("isPending - 상태가 PENDING 이 아니면 false 를 반환한다")
+    @ParameterizedTest
+    @ValueSource(strings = {"COMPLETE", "CHECK_IN", "CANCEL", "NO_SHOW", "FAIL"})
+    void isPending_returnsFalseWhenStatusIsNotPending(String statusString) {
+        // given
+        ReservationStatus status = ReservationStatus.of(statusString);
+
+        // when
+        boolean result = status.isPending();
+
+        // then
+        assertThat(result).isFalse();
+    }
+
+    @DisplayName("isNotPending - 상태가 PENDING 이 아니면 true 를 반환한다")
+    @ParameterizedTest
+    @ValueSource(strings = {"COMPLETE", "CHECK_IN", "CANCEL", "NO_SHOW", "FAIL"})
+    void isNotPending_returnsTrueWhenStatusIsNotPending(String statusString) {
+        // given
+        ReservationStatus status = ReservationStatus.of(statusString);
+
+        // when
+        boolean result = status.isNotPending();
+
+        // then
+        assertThat(result).isTrue();
+    }
+
+    @DisplayName("isNotPending - 상태가 PENDING 이면 false 를 반환한다")
+    @Test
+    void isNotPending_returnsFalseWhenStatusIsPending() {
+        // given
+        ReservationStatus status = ReservationStatus.PENDING;
+
+        // when
+        boolean result = status.isNotPending();
+
+        // then
+        assertThat(result).isFalse();
+    }
 }

@@ -45,7 +45,7 @@ public enum ErrorCode {
     UNSUPPORTED_PAYMENT_STATUS(HttpStatus.BAD_REQUEST, "지원하지 않는 결제 상태입니다."),
     UNSUPPORTED_PG_NAME(HttpStatus.BAD_REQUEST, "지원하지 않는 PG사 이름입니다."),
     INVALID_PAYMENT_AMOUNT(HttpStatus.BAD_REQUEST, "결제 금액은 양수여야 합니다."),
-    PAYMENT_FAIL(HttpStatus.SERVICE_UNAVAILABLE, "알 수 없는 이유로 결제에 실패했습니다."),
+    PAYMENT_FAIL(HttpStatus.BAD_REQUEST, "대기 상태의 예약만 결제 가능합니다."),
     CANNOT_REFUND(HttpStatus.CONFLICT, "환불할 수 없는 상태입니다."),
 
     // 알림
