@@ -7,18 +7,18 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum NotificationChannel {
-    SLACK("슬랙"),
-    EMAIL("이메일")
+public enum BobjoolServiceType {
+    QUEUE("웨이팅"),
+    RESERVATION("예약")
     ;
 
     private final String description;
 
-    public static NotificationChannel of(String request) {
+    public static BobjoolServiceType of(String request) {
         return switch (request.toUpperCase()){
-            case "SLACK" -> SLACK;
-            case "EMAIL" -> EMAIL;
-            default -> throw new BobJoolException(ErrorCode.UNSUPPORTED_CHANNEL_TYPE);
+            case "QUEUE" -> QUEUE;
+            case "RESERVATION" -> RESERVATION;
+            default -> throw new BobJoolException(ErrorCode.UNSUPPORTED_SERVICE_TYPE);
         };
     }
 }

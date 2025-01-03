@@ -49,9 +49,13 @@ public enum ErrorCode {
     CANNOT_REFUND(HttpStatus.CONFLICT, "환불할 수 없는 상태입니다."),
 
     // 알림
-
+    INVALID_SLACK_EMAIL(HttpStatus.BAD_REQUEST, "Slack 이메일이 존재하지 않습니다."),
+    SLACK_MESSAGE_FAIL(HttpStatus.SERVICE_UNAVAILABLE, "Slack 알림 메시지 전송에 실패했습니다."),
+    UNSUPPORTED_SERVICE_TYPE(HttpStatus.BAD_REQUEST, "지원하지 않는 서비스 입니다."),
+    UNSUPPORTED_CHANNEL_TYPE(HttpStatus.BAD_REQUEST, "지원하지 않는 채널 입니다."),
+    UNSUPPORTED_NOTIFICATION_TYPE(HttpStatus.BAD_REQUEST, "지원하지 않는 알림 종류 입니다."),
+    INVALID_NOTIFICATION_STATUS(HttpStatus.BAD_REQUEST, "유효하지 않은 알림 상태 입니다.")
     // AI
-
 
     ;
 

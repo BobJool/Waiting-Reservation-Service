@@ -18,26 +18,21 @@ public class Notification extends BaseEntity {
     @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
-    @Column(name = "message", nullable = false)
-    private String message;
-
-    @Column(name = "category", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private NotificationCategory category;
-
-    @Column(name = "type", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private NotificationType type;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "template_id", nullable = false)
+    private Template templateId;
 
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @Column(name = "status")
+    @Column(name = "json_data")
+    private String jsonData;
+
+    @Column(name = "message", nullable = false)
+    private String message;
+
+    @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
     private NotificationStatus status;
-
-    @Column(name = "channel", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private NotificationChannel channel;
 
 }

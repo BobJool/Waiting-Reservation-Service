@@ -4,11 +4,13 @@ server:
 spring:
   application:
     name: notification-service
+  config:
+    import: classpath:application-key.yml
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/notification_db
-    username: postgres
-    password: password
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update
@@ -24,6 +26,9 @@ eureka:
     serviceUrl:
       defaultZone: http://localhost:19000/eureka/
 
+token:
+  slack:
+    oauth: ${SLACK_OAUTH_TOKEN}
 
 #management:
 #  zipkin:
