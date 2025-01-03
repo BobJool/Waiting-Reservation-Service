@@ -12,11 +12,7 @@ import java.util.UUID;
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record RestaurantScheduleReserveReqDto(
 
-    @NotNull(message = "레스트랑 ID는 필수값 입니다.")
-    UUID restaurantScheduleId,
-
     @NotNull(message = "유저 ID 는 필수 입력값입니다.")
-    @Positive(message = "유저 ID 는 양수여야 합니다.")
     Long userId,
 
     @NotNull(message = "테이블 번호를 입력하여야 합니다.")
@@ -35,7 +31,6 @@ public record RestaurantScheduleReserveReqDto(
 
   public RestaurantScheduleReserveDto toServiceDto() {
     return new RestaurantScheduleReserveDto(
-        restaurantScheduleId,
         userId,
         tableNumber,
         date,

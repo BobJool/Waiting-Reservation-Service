@@ -2,16 +2,12 @@ package com.bobjool.restaurant.application.service.restaurantSchedule;
 
 import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
-import com.bobjool.restaurant.application.dto.restaurant.RestaurantResDto;
-import com.bobjool.restaurant.application.dto.restaurant.RestaurantUpdateDto;
 import com.bobjool.restaurant.application.dto.restaurantSchedule.RestaurantScheduleCreateDto;
 import com.bobjool.restaurant.application.dto.restaurantSchedule.RestaurantScheduleResDto;
 import com.bobjool.restaurant.application.dto.restaurantSchedule.RestaurantScheduleReserveDto;
 import com.bobjool.restaurant.application.dto.restaurantSchedule.RestaurantScheduleUpdateDto;
-import com.bobjool.restaurant.domain.entity.restaurant.Restaurant;
 import com.bobjool.restaurant.domain.entity.restaurantSchedule.RestaurantSchedule;
 import com.bobjool.restaurant.domain.repository.RestaurantScheduleRepository;
-import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

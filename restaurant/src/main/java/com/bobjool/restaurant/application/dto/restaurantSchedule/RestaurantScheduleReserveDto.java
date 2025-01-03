@@ -5,7 +5,6 @@ import java.time.LocalTime;
 import java.util.UUID;
 
 public record RestaurantScheduleReserveDto(
-    UUID RestaurantScheduleId,
     Long userId,
     int tableNumber,
     LocalDate date,

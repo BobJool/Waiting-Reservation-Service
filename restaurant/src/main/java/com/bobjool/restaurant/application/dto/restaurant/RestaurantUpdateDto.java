@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.time.LocalTime;
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-
 public record RestaurantUpdateDto(
     RestaurantCategory restaurantCategory,
     String restaurantPhone,
