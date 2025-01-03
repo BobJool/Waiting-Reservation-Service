@@ -1,17 +1,16 @@
-package com.bobjool.restaurant.application.service;
+package com.bobjool.restaurant.application.service.restaurant;
 
 import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
-import com.bobjool.restaurant.application.dto.RestaurantCreateDto;
-import com.bobjool.restaurant.application.dto.RestaurantResDto;
-import com.bobjool.restaurant.application.dto.RestaurantUpdateDto;
-import com.bobjool.restaurant.domain.entity.Restaurant;
+import com.bobjool.restaurant.application.dto.restaurant.RestaurantCreateDto;
+import com.bobjool.restaurant.application.dto.restaurant.RestaurantResDto;
+import com.bobjool.restaurant.application.dto.restaurant.RestaurantUpdateDto;
+import com.bobjool.restaurant.domain.entity.restaurant.Restaurant;
 import com.bobjool.restaurant.domain.repository.RestaurantRepository;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,6 +48,7 @@ public class RestaurantService {
 
   }
 
+  @Transactional
   public RestaurantResDto updateRestaurant(UUID Id, RestaurantUpdateDto restaurantUpdateDto) {
     log.info("updateRestaurant.restaurantUpdateDto = {}", restaurantUpdateDto);
 
@@ -61,6 +61,7 @@ public class RestaurantService {
   return RestaurantResDto.from(restaurant);
   }
 
+  @Transactional
   public void deleteRestaurant(UUID Id){
     log.info("DeleteRestaurant");
 
@@ -70,9 +71,10 @@ public class RestaurantService {
     restaurant.deleteBase(restaurant.getUserId());
   }
 
-  public Page<RestaurantResDto> AllRestaurants( int page, int size){
-    log.info("pageable");
-    Pageable pageable = PageRequest.of(page, size);
+  @Transactional(readOnly = true)
+  public Page<RestaurantResDto> AllRestaurants(Pageable pageable){
+    log.info("All Restaurant info");
+
     Page<Restaurant> restaurantPage = restaurantRepository.findAllByIsDeletedFalse(pageable);
 
     return restaurantPage.map(RestaurantResDto::from);
