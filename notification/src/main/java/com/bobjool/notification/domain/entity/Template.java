@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.util.UUID;
 
+@ToString
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -56,4 +57,21 @@ public class Template extends BaseEntity {
                 .variables(variables)
                 .build();
     }
+
+    public void updateTemplate(
+            BobjoolServiceType serviceType,
+            NotificationChannel channel,
+            NotificationType type,
+            String title,
+            String template,
+            String variables
+    ) {
+        this.serviceType = serviceType;
+        this.channel = channel;
+        this.type = type;
+        this.title = title;
+        this.template = template;
+        this.variables = variables;
+    }
+
 }
