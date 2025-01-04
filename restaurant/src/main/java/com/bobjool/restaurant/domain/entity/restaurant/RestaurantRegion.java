@@ -1,4 +1,4 @@
-package com.bobjool.restaurant.domain.entity;
+package com.bobjool.restaurant.domain.entity.restaurant;
 
 public enum RestaurantRegion {
 

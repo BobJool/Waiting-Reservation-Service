@@ -1,17 +1,21 @@
-package com.bobjool.restaurant.presentation.controller;
+package com.bobjool.restaurant.presentation.controller.restaurant;
 
 import com.bobjool.common.presentation.ApiResponse;
 import com.bobjool.common.presentation.PageResponse;
 import com.bobjool.common.presentation.SuccessCode;
-import com.bobjool.restaurant.application.dto.RestaurantResDto;
-import com.bobjool.restaurant.application.service.RestaurantService;
-import com.bobjool.restaurant.presentation.dto.RestaurantCreateReqDto;
-import com.bobjool.restaurant.presentation.dto.RestaurantUpdateReqDto;
+import com.bobjool.restaurant.application.dto.restaurant.RestaurantResDto;
+import com.bobjool.restaurant.application.service.restaurant.RestaurantService;
+import com.bobjool.restaurant.presentation.dto.restaurant.RestaurantCreateReqDto;
+import com.bobjool.restaurant.presentation.dto.restaurant.RestaurantUpdateReqDto;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.SortDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -62,11 +66,16 @@ public class RestaurantController {
   @GetMapping
   public ResponseEntity<ApiResponse<PageResponse<RestaurantResDto>>> getAllRestaurants(
       @RequestParam(defaultValue = "0") int page,
-      @RequestParam(defaultValue = "10") int size) {
+      @RequestParam(defaultValue = "10") int size,
+      @SortDefault(sort = "createdAt", direction = Direction.DESC)
+      Pageable pageable) {
     log.info("getAllRestaurants");
 
-    Page<RestaurantResDto> restaurantsInfo = restaurantService.AllRestaurants(page, size);
-    return ApiResponse.success(SuccessCode.SUCCESS, PageResponse.of(restaurantsInfo));
+    Pageable AllRestaurantPageable = PageRequest.of(page, size, pageable.getSort());
+
+    Page<RestaurantResDto> resPage
+        = restaurantService.AllRestaurants(AllRestaurantPageable);
+    return ApiResponse.success(SuccessCode.SUCCESS, PageResponse.of(resPage));
 
   }
 
