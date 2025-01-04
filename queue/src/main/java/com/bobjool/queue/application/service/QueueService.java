@@ -10,8 +10,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
+import com.bobjool.queue.application.dto.QueueDelayDto;
 import com.bobjool.queue.application.dto.QueueRegisterDto;
 import com.bobjool.queue.application.dto.QueueStatusResDto;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,18 +23,18 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class QueueService {
 
-	private final ChannelTopic topic;
 	private final RedisQueueService redisQueueService;
+	private final ChannelTopic registerTopic;
+	private final ChannelTopic delayTopic;
 
-	public String publishToQueue(QueueRegisterDto dto) {
+	public String publishRegisterQueue(QueueRegisterDto dto) {
 		try {
-			redisQueueService.publishMessage(topic.getTopic(), dto.toString());
+			redisQueueService.publishMessage(registerTopic.getTopic(), dto.toString());
 			return "대기열 요청 성공";
 		} catch (Exception e) {
 			throw new BobJoolException(ErrorCode.QUEUE_PUBLISHING_FAILED);
 		}
 	}
-
 	@Transactional
 	public void registerQueue(QueueRegisterDto request) {
 		Long userId = request.userId();
@@ -53,4 +55,6 @@ public class QueueService {
 		List<String> nextUsers = redisQueueService.getNextTenUsersWithOrder(restaurantId, userId);
 		return new QueueStatusResDto(rank, nextUsers);
 	}
+
+
 }

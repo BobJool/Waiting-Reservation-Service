@@ -17,16 +17,26 @@ public class QueueMessageSubscriber implements MessageListener {
 
 	@Override
 	public void onMessage(Message message, byte[] pattern) {
+		String topic = new String(pattern);
 		String messageBody = new String(message.getBody());
-		QueueRegisterDto dto = parseMessage(messageBody);
-		queueService.registerQueue(dto);
+
+		switch (topic) {
+			case "queue.register":
+				QueueRegisterDto registerDto = parseMessage(messageBody, QueueRegisterDto.class);
+				queueService.registerQueue(registerDto);
+				break;
+
+			default:
+				throw new IllegalArgumentException("Unknown topic: " + topic);
+		}
 	}
 
-	private QueueRegisterDto parseMessage(String messageBody) {
+	private <T> T parseMessage(String messageBody, Class<T> valueType) {
 		try {
-			return objectMapper.readValue(messageBody, QueueRegisterDto.class);
+			return objectMapper.readValue(messageBody, valueType);
 		} catch (Exception e) {
 			throw new RuntimeException("Failed to parse message body: " + messageBody, e);
 		}
 	}
+
 }
