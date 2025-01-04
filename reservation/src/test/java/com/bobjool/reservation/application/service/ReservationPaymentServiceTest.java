@@ -23,6 +23,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -44,7 +46,8 @@ class ReservationPaymentServiceTest {
     void createPayment_whenValidInput() {
         // given - PENDING 상태의 reservation 이 저장되어 있고
         Long userId = 12345L;
-        Reservation reservation = Reservation.create(userId, UUID.randomUUID(), UUID.randomUUID(), ReservationStatus.PENDING, 4);
+        Reservation reservation = Reservation.create(userId, UUID.randomUUID(), UUID.randomUUID(), ReservationStatus.PENDING, 4,
+                LocalDate.now(), LocalTime.now());
         reservationRepository.save(reservation);
 
         // and - 적절한 요청이 들어왔을 때
@@ -94,7 +97,8 @@ class ReservationPaymentServiceTest {
     void createPayment_whenInvalidMethod() {
         // given - PENDING 상태의 reservation 이 저장되어 있고
         Long userId = 12345L;
-        Reservation reservation = Reservation.create(userId, UUID.randomUUID(), UUID.randomUUID(), ReservationStatus.PENDING, 4);
+        Reservation reservation = Reservation.create(userId, UUID.randomUUID(), UUID.randomUUID(), ReservationStatus.PENDING, 4,
+                LocalDate.now(), LocalTime.now());
         reservationRepository.save(reservation);
 
         // and - 결제 방식이 유효하지 않은 값일 때
@@ -117,7 +121,8 @@ class ReservationPaymentServiceTest {
     void createPayment_whenInvalidPgName() {
         // given - PENDING 상태의 reservation 이 저장되어 있고
         Long userId = 12345L;
-        Reservation reservation = Reservation.create(userId, UUID.randomUUID(), UUID.randomUUID(), ReservationStatus.PENDING, 4);
+        Reservation reservation = Reservation.create(userId, UUID.randomUUID(), UUID.randomUUID(), ReservationStatus.PENDING, 4,
+                LocalDate.now(), LocalTime.now());
         reservationRepository.save(reservation);
 
         // and - PgName이 유효하지 않은 값일 때
@@ -141,7 +146,8 @@ class ReservationPaymentServiceTest {
     void createPayment_whenNegativeAmount(Integer amount) {
         // given - PENDING 상태의 reservation 이 저장되어 있고
         Long userId = 12345L;
-        Reservation reservation = Reservation.create(userId, UUID.randomUUID(), UUID.randomUUID(), ReservationStatus.PENDING, 4);
+        Reservation reservation = Reservation.create(userId, UUID.randomUUID(), UUID.randomUUID(), ReservationStatus.PENDING, 4,
+                LocalDate.now(), LocalTime.now());
         reservationRepository.save(reservation);
 
         // and - PgName이 유효하지 않은 값일 때
@@ -163,7 +169,8 @@ class ReservationPaymentServiceTest {
     void createPayment_whenPGServerError() {
         // given - PENDING 상태의 reservation 이 저장되어 있고
         Long userId = 12345L;
-        Reservation reservation = Reservation.create(userId, UUID.randomUUID(), UUID.randomUUID(), ReservationStatus.PENDING, 4);
+        Reservation reservation = Reservation.create(userId, UUID.randomUUID(), UUID.randomUUID(), ReservationStatus.PENDING, 4,
+                LocalDate.now(), LocalTime.now());
         reservationRepository.save(reservation);
 
         // and - 적절한 요청이 들어왔을 때
@@ -234,7 +241,8 @@ class ReservationPaymentServiceTest {
         // given - reservation 의 상태가 PENDING 이 아닐 때
         Long userId = 12345L;
         ReservationStatus completeStatus = ReservationStatus.COMPLETE;
-        Reservation reservation = Reservation.create(userId, UUID.randomUUID(), UUID.randomUUID(), completeStatus, 4);
+        Reservation reservation = Reservation.create(userId, UUID.randomUUID(), UUID.randomUUID(), completeStatus, 4,
+                LocalDate.now(), LocalTime.now());
         reservationRepository.save(reservation);
 
         Integer amount = 10_000;

@@ -8,6 +8,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.UUID;
 
 import static com.bobjool.reservation.domain.enums.PaymentMethod.CARD;
@@ -35,7 +37,9 @@ class ReservationPaymentDomainServiceTest {
                 UUID.randomUUID(),
                 UUID.randomUUID(),
                 ReservationStatus.PENDING,
-                4
+                4,
+                LocalDate.now(),
+                LocalTime.now()
         );
 
         // and - COMPLETE 상태의 Payment가 주어졌을 때
@@ -57,7 +61,9 @@ class ReservationPaymentDomainServiceTest {
                 UUID.randomUUID(),
                 UUID.randomUUID(),
                 ReservationStatus.PENDING,
-                4
+                4,
+                LocalDate.now(),
+                LocalTime.now()
         );
         // and - FAIL 상태의 Payment가 주어졌을 때
         Payment payment = Payment.create(UUID.randomUUID(), 1L, 10_000, PaymentStatus.FAIL, CARD, TOSS);
@@ -78,7 +84,9 @@ class ReservationPaymentDomainServiceTest {
                 UUID.randomUUID(),
                 UUID.randomUUID(),
                 ReservationStatus.PENDING,
-                4
+                4,
+                LocalDate.now(),
+                LocalTime.now()
         );
         // and - PENDING 상태의 Payment 가  주어졌을 때
         Payment payment = Payment.create(UUID.randomUUID(), 1L, 10_000, PaymentStatus.PENDING, CARD, TOSS);

@@ -15,7 +15,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -43,8 +45,10 @@ class ReservationControllerTest {
         UUID restaurantScheduleId = UUID.randomUUID();
         Long userId = 12345L;
         Integer guestCount = 4;
-
-        ReservationCreateReqDto requestDto = new ReservationCreateReqDto(userId, restaurantId, restaurantScheduleId, guestCount);
+        LocalDate reservationDate = LocalDate.of(2025, 11, 3);
+        LocalTime reservationTime = LocalTime.of(14, 00, 00);
+        ReservationCreateReqDto requestDto = new ReservationCreateReqDto(userId, restaurantId, restaurantScheduleId, guestCount,
+                reservationDate, reservationTime);
 
         // when & then
         mockMvc.perform(post("/api/v1/reservations")
@@ -62,8 +66,11 @@ class ReservationControllerTest {
         UUID restaurantScheduleId = UUID.randomUUID();
         Long userId = null; // userId가 null
         Integer guestCount = 4;
+        LocalDate reservationDate = LocalDate.of(2025, 11, 3);
+        LocalTime reservationTime = LocalTime.of(14, 00, 00);
 
-        ReservationCreateReqDto requestDto = new ReservationCreateReqDto(userId, restaurantId, restaurantScheduleId, guestCount);
+        ReservationCreateReqDto requestDto = new ReservationCreateReqDto(userId, restaurantId, restaurantScheduleId, guestCount,
+                reservationDate, reservationTime);
 
         // when & then
         mockMvc.perform(post("/api/v1/reservations")
@@ -83,8 +90,11 @@ class ReservationControllerTest {
         UUID restaurantScheduleId = UUID.randomUUID();
         Long userId = 12345L;
         Integer guestCount = 4;
+        LocalDate reservationDate = LocalDate.of(2025, 11, 3);
+        LocalTime reservationTime = LocalTime.of(14, 00, 00);
 
-        ReservationCreateReqDto requestDto = new ReservationCreateReqDto(userId, restaurantId, restaurantScheduleId, guestCount);
+        ReservationCreateReqDto requestDto = new ReservationCreateReqDto(userId, restaurantId, restaurantScheduleId, guestCount,
+                reservationDate, reservationTime);
 
         // when & then
         mockMvc.perform(post("/api/v1/reservations")
@@ -104,8 +114,11 @@ class ReservationControllerTest {
         UUID restaurantScheduleId = null; // restaurantId가 null
         Long userId = 12345L;
         Integer guestCount = 4;
+        LocalDate reservationDate = LocalDate.of(2025, 11, 3);
+        LocalTime reservationTime = LocalTime.of(14, 00, 00);
 
-        ReservationCreateReqDto requestDto = new ReservationCreateReqDto(userId, restaurantId, restaurantScheduleId, guestCount);
+        ReservationCreateReqDto requestDto = new ReservationCreateReqDto(userId, restaurantId, restaurantScheduleId, guestCount,
+                reservationDate, reservationTime);
 
         // when & then
         mockMvc.perform(post("/api/v1/reservations")
@@ -125,8 +138,11 @@ class ReservationControllerTest {
         UUID restaurantId = UUID.randomUUID();
         UUID restaurantScheduleId = UUID.randomUUID();
         Long userId = 12345L;
+        LocalDate reservationDate = LocalDate.of(2025, 11, 3);
+        LocalTime reservationTime = LocalTime.of(14, 00, 00);
 
-        ReservationCreateReqDto requestDto = new ReservationCreateReqDto(userId, restaurantId, restaurantScheduleId, guestCount);
+        ReservationCreateReqDto requestDto = new ReservationCreateReqDto(userId, restaurantId, restaurantScheduleId, guestCount,
+                reservationDate, reservationTime);
 
         // when & then
         mockMvc.perform(post("/api/v1/reservations")
