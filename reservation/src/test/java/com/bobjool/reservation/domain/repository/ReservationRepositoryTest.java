@@ -14,6 +14,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -174,7 +176,8 @@ class ReservationRepositoryTest {
             int guestCount = guestCounts[i % guestCounts.length];
 
             // Reservation 객체 생성 및 리스트에 추가
-            Reservation reservation = Reservation.create(userId, restaurantId, restaurantScheduleId, status, guestCount);
+            Reservation reservation = Reservation.create(userId, restaurantId, restaurantScheduleId, status, guestCount,
+                    LocalDate.now(), LocalTime.now());
             reservations.add(reservation);
         }
 

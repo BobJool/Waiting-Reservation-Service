@@ -2,7 +2,9 @@ package com.bobjool.reservation.application.dto.reservation;
 
 import com.bobjool.reservation.domain.entity.Reservation;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.UUID;
 
 public record ReservationResDto(
@@ -12,6 +14,8 @@ public record ReservationResDto(
         UUID restaurantScheduleId,
         String status,
         Integer guestCount,
+        LocalDate reservationDate,
+        LocalTime reservationTime,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {
@@ -23,6 +27,8 @@ public record ReservationResDto(
                 reservation.getRestaurantScheduleId(),
                 reservation.getStatus().name(),
                 reservation.getGuestCount(),
+                reservation.getReservationDate(),
+                reservation.getReservationTime(),
                 reservation.getCreatedAt(),
                 reservation.getUpdatedAt()
         );

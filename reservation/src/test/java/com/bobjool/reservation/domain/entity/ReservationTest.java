@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -23,9 +25,12 @@ class ReservationTest {
         UUID scheduleId = UUID.randomUUID();
         Integer guestCount = 5;
         ReservationStatus status = ReservationStatus.PENDING;
+        LocalDate reservationDate = LocalDate.of(2025, 11, 3);
+        LocalTime reservationTime = LocalTime.of(14, 00, 00);
 
         // when
-        Reservation reservation = Reservation.create(userId, restaurantId, scheduleId, status, guestCount);
+        Reservation reservation = Reservation.create(userId, restaurantId, scheduleId, status, guestCount,
+                reservationDate, reservationTime);
 
         // then
         assertThat(reservation.getUserId()).isEqualTo(userId);
@@ -47,7 +52,7 @@ class ReservationTest {
         Integer guestCount = 5;
 
         // when & then
-        Reservation.create(12345L, UUID.randomUUID(), UUID.randomUUID(), guestCount);
+        Reservation.create(12345L, UUID.randomUUID(), UUID.randomUUID(), guestCount, LocalDate.now(), LocalTime.now());
 
         // 예외가 발생하지 않으면 테스트 통과
     }
@@ -60,7 +65,7 @@ class ReservationTest {
 
         // when & then
         assertThatThrownBy(() ->
-                Reservation.create(12345L, UUID.randomUUID(), UUID.randomUUID(), guestCount)
+                Reservation.create(12345L, UUID.randomUUID(), UUID.randomUUID(), guestCount, LocalDate.now(), LocalTime.now())
         ).isInstanceOf(BobJoolException.class)
                 .hasMessage("예약 인원수는 양수여야 합니다.");
     }
@@ -73,9 +78,12 @@ class ReservationTest {
         UUID restaurantId = UUID.randomUUID();
         UUID scheduleId = UUID.randomUUID();
         Integer guestCount = 3;
+        LocalDate reservationDate = LocalDate.of(2025, 11, 3);
+        LocalTime reservationTime = LocalTime.of(14, 00, 00);
 
         // when
-        Reservation reservation = Reservation.create(userId, restaurantId, scheduleId, guestCount);
+        Reservation reservation = Reservation.create(userId, restaurantId, scheduleId, guestCount,
+                reservationDate, reservationTime);
 
         // then
         assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.PENDING);
@@ -90,8 +98,11 @@ class ReservationTest {
         UUID scheduleId = UUID.randomUUID();
         ReservationStatus completeStatus = ReservationStatus.COMPLETE;
         Integer guestCount = 3;
+        LocalDate reservationDate = LocalDate.of(2025, 11, 3);
+        LocalTime reservationTime = LocalTime.of(14, 00, 00);
 
-        Reservation reservation = Reservation.create(userId, restaurantId, scheduleId, completeStatus ,guestCount);
+        Reservation reservation = Reservation.create(userId, restaurantId, scheduleId, completeStatus ,guestCount,
+                reservationDate, reservationTime);
 
         // when - updateStatus 호출
         reservation.updateStatus(ReservationStatus.CHECK_IN);
@@ -108,8 +119,11 @@ class ReservationTest {
         UUID scheduleId = UUID.randomUUID();
         ReservationStatus pendingStatus = ReservationStatus.PENDING;
         Integer guestCount = 3;
+        LocalDate reservationDate = LocalDate.of(2025, 11, 3);
+        LocalTime reservationTime = LocalTime.of(14, 00, 00);
 
-        Reservation reservation = Reservation.create(userId, restaurantId, scheduleId, pendingStatus, guestCount);
+        Reservation reservation = Reservation.create(userId, restaurantId, scheduleId, pendingStatus, guestCount,
+                reservationDate, reservationTime);
 
         // when - cancel 호출
         reservation.cancel();
@@ -127,8 +141,11 @@ class ReservationTest {
         UUID scheduleId = UUID.randomUUID();
         ReservationStatus checkInStatus = ReservationStatus.CHECK_IN;
         Integer guestCount = 3;
+        LocalDate reservationDate = LocalDate.of(2025, 11, 3);
+        LocalTime reservationTime = LocalTime.of(14, 00, 00);
 
-        Reservation reservation = Reservation.create(userId, restaurantId, scheduleId, checkInStatus, guestCount);
+        Reservation reservation = Reservation.create(userId, restaurantId, scheduleId, checkInStatus, guestCount,
+                reservationDate, reservationTime);
 
         // when & then - 예외 발생 확인
         assertThatThrownBy(reservation::cancel)
@@ -145,8 +162,11 @@ class ReservationTest {
         UUID scheduleId = UUID.randomUUID();
         ReservationStatus noShowStatus = ReservationStatus.NO_SHOW;
         Integer guestCount = 3;
+        LocalDate reservationDate = LocalDate.of(2025, 11, 3);
+        LocalTime reservationTime = LocalTime.of(14, 00, 00);
 
-        Reservation reservation = Reservation.create(userId, restaurantId, scheduleId, noShowStatus, guestCount);
+        Reservation reservation = Reservation.create(userId, restaurantId, scheduleId, noShowStatus, guestCount,
+                reservationDate, reservationTime);
 
         // when & then - 예외 발생 확인
         assertThatThrownBy(reservation::cancel)
@@ -163,8 +183,11 @@ class ReservationTest {
         UUID scheduleId = UUID.randomUUID();
         ReservationStatus noShowStatus = ReservationStatus.NO_SHOW;
         Integer guestCount = 3;
+        LocalDate reservationDate = LocalDate.of(2025, 11, 3);
+        LocalTime reservationTime = LocalTime.of(14, 00, 00);
 
-        Reservation reservation = Reservation.create(userId, restaurantId, scheduleId, noShowStatus, guestCount);
+        Reservation reservation = Reservation.create(userId, restaurantId, scheduleId, noShowStatus, guestCount,
+                reservationDate, reservationTime);
 
         // when - cancel 호출
         reservation.cancelForOwner();
@@ -183,7 +206,9 @@ class ReservationTest {
                 UUID.randomUUID(),
                 UUID.randomUUID(),
                 ReservationStatus.of(statusString),
-                3
+                3,
+                LocalDate.now(),
+                LocalTime.now()
         );
 
         // when
@@ -202,7 +227,9 @@ class ReservationTest {
                 UUID.randomUUID(),
                 UUID.randomUUID(),
                 ReservationStatus.PENDING,
-                3
+                3,
+                LocalDate.now(),
+                LocalTime.now()
         );
 
         // when
