@@ -65,16 +65,12 @@ public class RestaurantController {
 
   @GetMapping
   public ResponseEntity<ApiResponse<PageResponse<RestaurantResDto>>> getAllRestaurants(
-      @RequestParam(defaultValue = "0") int page,
-      @RequestParam(defaultValue = "10") int size,
       @SortDefault(sort = "createdAt", direction = Direction.DESC)
       Pageable pageable) {
     log.info("getAllRestaurants");
 
-    Pageable AllRestaurantPageable = PageRequest.of(page, size, pageable.getSort());
-
     Page<RestaurantResDto> resPage
-        = restaurantService.AllRestaurants(AllRestaurantPageable);
+        = restaurantService.AllRestaurants(pageable);
     return ApiResponse.success(SuccessCode.SUCCESS, PageResponse.of(resPage));
 
   }

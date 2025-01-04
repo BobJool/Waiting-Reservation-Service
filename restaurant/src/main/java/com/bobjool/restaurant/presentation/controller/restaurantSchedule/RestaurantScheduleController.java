@@ -81,16 +81,12 @@ public class RestaurantScheduleController {
   //모든 생성된 음식점 스케쥴 전체 조회
   @GetMapping
   public ResponseEntity<ApiResponse<PageResponse<RestaurantScheduleResDto>>> getAllSchedule(
-      @RequestParam(defaultValue = "0") int page,
-      @RequestParam(defaultValue = "10") int size,
       @SortDefault(sort = "createdAt", direction = Direction.DESC)
       Pageable pageable) {
-    log.info("getAllRestaurants");
-
-    Pageable AllRestaurantPageable = PageRequest.of(page, size, pageable.getSort());
+    log.info("getAllRestaurantsSchedule");
 
     Page<RestaurantScheduleResDto> resPage
-        = scheduleService.AllSchedules(AllRestaurantPageable);
+        = scheduleService.AllSchedules(pageable);
     return ApiResponse.success(SuccessCode.SUCCESS, PageResponse.of(resPage));
   }
 
@@ -98,17 +94,13 @@ public class RestaurantScheduleController {
   //특정 음식점 스케쥴 전체 조회
   @GetMapping("/{restaurantId}")
   public ResponseEntity<ApiResponse<PageResponse<RestaurantScheduleResDto>>> readForOneRestaurantSchedule(
-      @RequestParam(defaultValue = "0") int page,
-      @RequestParam(defaultValue = "10") int size,
       @SortDefault(sort = "createdAt", direction = Direction.DESC)
       Pageable pageable,
       @PathVariable("restaurantId") UUID restaurantId) {
     log.info("getAllRestaurants");
 
-    Pageable AllRestaurantPageable = PageRequest.of(page, size, pageable.getSort());
-
     Page<RestaurantScheduleResDto> resPage
-        = scheduleService.readForOneRestaurant(restaurantId, AllRestaurantPageable);
+        = scheduleService.readForOneRestaurant(restaurantId, pageable);
     return ApiResponse.success(SuccessCode.SUCCESS, PageResponse.of(resPage));
   }
 }
