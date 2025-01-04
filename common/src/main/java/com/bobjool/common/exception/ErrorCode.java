@@ -22,6 +22,10 @@ public enum ErrorCode {
 
     // 대기열
     USER_ALREADY_IN_QUEUE(HttpStatus.CONFLICT, "사용자가 이미 다른 대기열에 등록되어 있습니다."),
+    QUEUE_PUBLISHING_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "대기열 등록 발행에 실패했습니다."),
+    UNSUPPORTED_DINING_OPTION(HttpStatus.BAD_REQUEST, "지원하지 않는 식당 이용 방식입니다."),
+    UNSUPPORTED_QUEUE_STATUS(HttpStatus.BAD_REQUEST, "지원하지 않는 줄서기 상태입니다."),
+    UNSUPPORTED_QUEUE_TYPE(HttpStatus.BAD_REQUEST, "지원하지 않는 줄서기 방식입니다."),
     // 예약
 
     // 결제
