@@ -62,7 +62,7 @@ public class RestaurantScheduleController {
   public ResponseEntity<ApiResponse<RestaurantScheduleResDto>> updateSchedule(
       @Valid @RequestBody RestaurantScheduleUpdateReqDto scheduleUpdateReqDto,
       @PathVariable("ScheduleId") UUID ScheduleId) {
-    log.info("update.RestaurantUpdateReqDto={}", scheduleUpdateReqDto);
+    log.info("update.RestaurantScheduleUpdateReqDto={}", scheduleUpdateReqDto);
     RestaurantScheduleResDto response = scheduleService.updateSchedule(ScheduleId,
         scheduleUpdateReqDto.toServiceDto());
     return ApiResponse.success(SuccessCode.SUCCESS_UPDATE, response);

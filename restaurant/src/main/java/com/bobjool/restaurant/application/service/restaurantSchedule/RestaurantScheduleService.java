@@ -8,6 +8,8 @@ import com.bobjool.restaurant.application.dto.restaurantSchedule.RestaurantSched
 import com.bobjool.restaurant.application.dto.restaurantSchedule.RestaurantScheduleUpdateDto;
 import com.bobjool.restaurant.domain.entity.restaurantSchedule.RestaurantSchedule;
 import com.bobjool.restaurant.domain.repository.RestaurantScheduleRepository;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -60,7 +62,12 @@ public class RestaurantScheduleService {
     if(!restaurantSchedule.isAvailable()){
       throw new BobJoolException(ErrorCode.ALREADEY_RESERVED);
     }
-    restaurantSchedule.reserve(scheduleReserveDto);
+    restaurantSchedule.reserve(
+        scheduleReserveDto.userId(),
+        scheduleReserveDto.date(),
+        scheduleReserveDto.timeSlot(),
+        scheduleReserveDto.currentCapacity()
+    );
     return RestaurantScheduleResDto.from(restaurantSchedule);
   }
 
@@ -72,7 +79,16 @@ public class RestaurantScheduleService {
     RestaurantSchedule restaurantSchedule = scheduleRepository.findById(scheduleId)
         .orElseThrow(() -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND));
 
-    restaurantSchedule.update(scheduleUpdateDto);
+    restaurantSchedule.update(
+        scheduleUpdateDto.userId(),
+        scheduleUpdateDto.date(),
+        scheduleUpdateDto.timeSlot(),
+        scheduleUpdateDto.maxCapacity(),
+        scheduleUpdateDto.currentCapacity(),
+        scheduleUpdateDto.available()
+    );
+
+
 
     return RestaurantScheduleResDto.from(restaurantSchedule);
   }
