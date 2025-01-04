@@ -97,4 +97,13 @@ public class RestaurantSchedule extends BaseEntity {
     this.available = scheduleUpdateDto.available();
   }
 
+  /**
+   * 예약 가능 여부를 확인하는 메서드
+   * @param requestedCapacity 요청된 추가 예약 인원
+   * @return true: 수용 가능, false: 초과
+   */
+  public boolean isCapacityExceeded(int requestedCapacity) {
+    return this.maxCapacity > requestedCapacity;
+  }
+
 }

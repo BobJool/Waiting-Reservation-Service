@@ -49,11 +49,14 @@ public class RestaurantScheduleService {
     RestaurantSchedule restaurantSchedule = scheduleRepository.findById(scheduleId)
         .orElseThrow(() -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND));
 
-    if(restaurantSchedule.getMaxCapacity() < scheduleReserveDto.currentCapacity()){
+    if(!restaurantSchedule.isCapacityExceeded(
+        scheduleReserveDto.currentCapacity())){
       log.info("restaurantSchedule.getMaxCapacity = {}", restaurantSchedule.getMaxCapacity());
       log.info("scheduleUpdateDto.currentCapacity = {}", scheduleReserveDto.currentCapacity());
       throw new BobJoolException(ErrorCode.CAPACITY_OVERFLOW);
     }
+
+
     if(!restaurantSchedule.isAvailable()){
       throw new BobJoolException(ErrorCode.ALREADEY_RESERVED);
     }
