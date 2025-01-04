@@ -8,7 +8,7 @@ import com.bobjool.queue.domain.enums.QueueType;
 public record QueueRegisterDto(
 	UUID restaurantId,
 	Long userId,
-	int member,
+	Integer member,
 	QueueType type,
 	DiningOption diningOption
 ) {

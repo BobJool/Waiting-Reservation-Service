@@ -10,10 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
-import com.bobjool.queue.application.dto.QueueDelayDto;
+import com.bobjool.queue.application.dto.QueueDelayResDto;
 import com.bobjool.queue.application.dto.QueueRegisterDto;
 import com.bobjool.queue.application.dto.QueueStatusResDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +24,6 @@ public class QueueService {
 
 	private final RedisQueueService redisQueueService;
 	private final ChannelTopic registerTopic;
-	private final ChannelTopic delayTopic;
 
 	public String publishRegisterQueue(QueueRegisterDto dto) {
 		try {
@@ -48,6 +46,7 @@ public class QueueService {
 		redisQueueService.markUserAsWaiting(userId, restaurantId);
 		long rank = redisQueueService.getUserPositionInQueue(restaurantId, userId);
 
+		//TODO: 카프카 메세지 발행 > queue.registered
 	}
 
 	public QueueStatusResDto getNextTenUsersWithOrder(UUID restaurantId, Long userId) {
@@ -56,5 +55,10 @@ public class QueueService {
 		return new QueueStatusResDto(rank, nextUsers);
 	}
 
-
+	public QueueDelayResDto delayUserRank(UUID restaurantId, Long userId, Long targetUserId) {
+		String userHashKey = "queue:restaurant:" + restaurantId + ":user:" + userId;
+		redisQueueService.validateAndUpdateDelayCount(userHashKey);
+		//TODO: 카프카 메세지 발행 > queue.delayed
+		return redisQueueService.delayUserRank(restaurantId, userId, targetUserId);
+	}
 }
