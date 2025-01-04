@@ -13,4 +13,13 @@ public record QueueRegisterDto(
 	DiningOption diningOption
 ) {
 
+	@Override
+	public String toString() {
+		return "{" +
+			"\"restaurantId\":\"" + restaurantId + "\"," +
+			"\"userId\":\"" + userId + "\"," +
+			"\"member\":\"" + member + "\"," +
+			"\"type\":\"" + type + "\"," +
+			"\"diningOption\":\"" + diningOption + "\"}";
+	}
 }

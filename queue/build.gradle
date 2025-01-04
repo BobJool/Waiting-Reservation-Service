@@ -12,6 +12,7 @@ dependencies {
     api 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
     api 'org.springframework.cloud:spring-cloud-starter-openfeign'
     api 'org.springframework.boot:spring-boot-starter-data-redis'
+    api 'org.redisson:redisson-spring-boot-starter:3.18.0'
 
     runtimeOnly 'org.postgresql:postgresql'
 

@@ -1,12 +1,14 @@
 package com.bobjool.queue.application.service;
 
-import java.util.Set;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
 
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
+import com.bobjool.queue.application.dto.QueueRegisterDto;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,22 +17,41 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 public class RedisQueueService {
-	private final RedisTemplate<String, String> redisTemplate;
+	private final RedisTemplate<String, Object> redisTemplate;
+	private final StringRedisTemplate stringRedisTemplate;
+
+	// 메시지 발행
+	public void publishMessage(String topic, String message) {
+		stringRedisTemplate.convertAndSend(topic, message);
+	}
+
+	// 대기 큐에 사용자 추가
+	public Map<String, Object> addUserToQueue(QueueRegisterDto dto) {
+		String redisKey = "queue:restaurant:" + dto.restaurantId() + ":usersList";
+		String userHashKey = "queue:restaurant:" + dto.restaurantId() + ":user:" + dto.userId();
+
+		long position = Optional.ofNullable(redisTemplate.opsForZSet().size(redisKey)).orElse(0L) + 1;
+		double uniqueScore = (double) position;
+		redisTemplate.opsForZSet().add(redisKey, String.valueOf(dto.userId()), uniqueScore);
+
+		Map<String, Object> userInfo = Map.of(
+			"restaurant_id", dto.restaurantId(),
+			"user_id", dto.userId(),
+			"member", dto.member(),
+			"type", dto.type(),
+			"diningOption", dto.diningOption(),
+			"position", position,
+			"delay_count", 0
+		);
+		redisTemplate.opsForHash().putAll(userHashKey, userInfo);
+
+		log.info("Added user {} to queue {} with position {}", dto.userId(), redisKey, position);
+		return userInfo;
+	}
 
 	public boolean isUserAlreadyWaiting(Long userId) {
 		String userWaitingKey = "queue:user:" + userId + ":waiting";
 		return Boolean.TRUE.equals(redisTemplate.hasKey(userWaitingKey));
-	}
-
-	@Transactional
-	public long addUserToQueue(UUID restaurantId, String userId) {
-		String redisKey = "queue:" + restaurantId + ":usersList";
-		long now = System.currentTimeMillis();
-		double uniqueScore = now + ThreadLocalRandom.current().nextDouble();
-		redisTemplate.opsForZSet().add(redisKey, userId, uniqueScore);
-		long rank = getUserPositionInQueue(restaurantId, userId);
-		log.info("Added user {} to queue {} with rank {}", userId, redisKey, rank);
-		return rank;
 	}
 
 	public void markUserAsWaiting(Long userId, UUID restaurantId) {
@@ -39,15 +60,10 @@ public class RedisQueueService {
 		log.info("Marked user {} as waiting for restaurant {}", userId, restaurantId);
 	}
 
-	public Set<String> getAllUsersInQueue(UUID restaurantId) {
-		String redisKey = "queue:" + restaurantId + ":usersList";
-		return redisTemplate.opsForZSet().range(redisKey, 0, -1);
-	}
+	public long getUserPositionInQueue(UUID restaurantId, Long userId) {
+		String redisKey = "queue:restaurant:" + restaurantId + ":usersList";
 
-	public long getUserPositionInQueue(UUID restaurantId, String userId) {
-		String redisKey = "queue:" + restaurantId + ":usersList";
-
-		Long rank = redisTemplate.opsForZSet().rank(redisKey, userId);
+		Long rank = redisTemplate.opsForZSet().rank(redisKey, String.valueOf(userId));
 		if (rank == null) {
 			throw new IllegalStateException("User not found in queue.");
 		}
