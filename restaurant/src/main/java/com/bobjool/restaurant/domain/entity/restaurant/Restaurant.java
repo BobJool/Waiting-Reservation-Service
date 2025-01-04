@@ -113,4 +113,12 @@ public class Restaurant extends BaseEntity {
     this.closeTime = restaurantUpdateDto.closeTime();
   }
 
+  public void isReservation(boolean isReservation){
+    this.isReservation = isReservation;
+  }
+
+  public void isQueue(boolean isQueue){
+    this.isQueue = isQueue;
+  }
+
 }

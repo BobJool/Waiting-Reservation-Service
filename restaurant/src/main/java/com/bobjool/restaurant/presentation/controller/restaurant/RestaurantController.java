@@ -21,6 +21,7 @@ import org.springframework.data.web.SortDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -53,6 +54,24 @@ public class RestaurantController {
     log.info("update.RestaurantUpdateReqDto={}", restaurantUpdateReqDto);
     RestaurantResDto response = restaurantService.updateRestaurant(restaurantId,
         restaurantUpdateReqDto.toServiceDto());
+    return ApiResponse.success(SuccessCode.SUCCESS_UPDATE, response);
+  }
+
+  @PutMapping("/is-reservation/{restaurantId}")
+  public ResponseEntity<ApiResponse<RestaurantResDto>> restaurantReservationChange(
+      @Valid @RequestParam boolean isReservation,
+      @PathVariable("restaurantId") UUID restaurantId) {
+    log.info("isReservation={}", isReservation);
+    RestaurantResDto response = restaurantService.isReservation(restaurantId, isReservation);
+    return ApiResponse.success(SuccessCode.SUCCESS_UPDATE, response);
+  }
+
+  @PutMapping("/is-queue/{restaurantId}")
+  public ResponseEntity<ApiResponse<RestaurantResDto>> restaurantQueueChange(
+      @Valid @RequestParam boolean isQueue,
+      @PathVariable("restaurantId") UUID restaurantId) {
+    log.info("isQueue={}", isQueue);
+    RestaurantResDto response = restaurantService.isQueue(restaurantId, isQueue);
     return ApiResponse.success(SuccessCode.SUCCESS_UPDATE, response);
   }
 
@@ -119,6 +138,8 @@ public class RestaurantController {
     RestaurantForMasterResDto response = restaurantService.getRestaurantsForMaster(restaurantId);
     return ApiResponse.success(SuccessCode.SUCCESS_UPDATE, response);
   }
+
+
 
 
 }

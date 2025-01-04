@@ -9,6 +9,7 @@ import com.bobjool.restaurant.application.dto.restaurant.RestaurantResDto;
 import com.bobjool.restaurant.application.dto.restaurant.RestaurantUpdateDto;
 import com.bobjool.restaurant.domain.entity.restaurant.Restaurant;
 import com.bobjool.restaurant.domain.repository.RestaurantRepository;
+import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -125,6 +126,28 @@ public class RestaurantService {
     return RestaurantForMasterResDto.from(restaurant);
   }
 
+  public RestaurantResDto isReservation(UUID restaurantId, boolean isReservation) {
+    log.info("isReservation={}", isReservation);
+
+    Restaurant restaurant = restaurantRepository.findById(restaurantId)
+        .orElseThrow(() -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND));
+
+    restaurant.isReservation(isReservation);
+
+    return RestaurantResDto.from(restaurant);
+  }
+
+  public RestaurantResDto isQueue(UUID restaurantId, boolean isQueue) {
+    log.info("isQueue={}", isQueue);
+
+    Restaurant restaurant = restaurantRepository.findById(restaurantId)
+        .orElseThrow(() -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND));
+
+    restaurant.isQueue(isQueue);
+
+    return RestaurantResDto.from(restaurant);
+  }
+
   private void validateDuplicate(RestaurantCreateDto restaurantCreateDto) {
     if (restaurantRepository.findByRestaurantName(restaurantCreateDto.restaurantName())
         .isPresent()) {
@@ -155,5 +178,6 @@ public class RestaurantService {
       throw new BobJoolException(ErrorCode.DUPPLICATED_Address);
     }
   }
+
 
 }
