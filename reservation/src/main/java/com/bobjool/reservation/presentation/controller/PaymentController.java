@@ -3,11 +3,12 @@ package com.bobjool.reservation.presentation.controller;
 import com.bobjool.common.presentation.ApiResponse;
 import com.bobjool.common.presentation.PageResponse;
 import com.bobjool.common.presentation.SuccessCode;
-import com.bobjool.reservation.application.dto.PaymentResDto;
-import com.bobjool.reservation.application.dto.PaymentSearchDto;
+import com.bobjool.reservation.application.dto.payment.PaymentResDto;
+import com.bobjool.reservation.application.dto.payment.PaymentSearchDto;
 import com.bobjool.reservation.application.service.PaymentService;
-import com.bobjool.reservation.presentation.dto.PaymentCreateReqDto;
-import com.bobjool.reservation.presentation.dto.PaymentUpdateReqDto;
+import com.bobjool.reservation.application.service.ReservationPaymentService;
+import com.bobjool.reservation.presentation.dto.payment.PaymentCreateReqDto;
+import com.bobjool.reservation.presentation.dto.payment.PaymentUpdateReqDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,11 +28,12 @@ import java.util.UUID;
 @RestController
 public class PaymentController {
     private final PaymentService paymentService;
+    private final ReservationPaymentService reservationPaymentService;
 
     @PostMapping
     public ResponseEntity<ApiResponse<PaymentResDto>> createPayment(@Valid @RequestBody PaymentCreateReqDto paymentCreateReqDto) {
         log.info("createProduct.paymentCreateReqDto={}", paymentCreateReqDto);
-        PaymentResDto response = paymentService.createPayment(paymentCreateReqDto.toServiceDto());
+        PaymentResDto response = reservationPaymentService.createPayment(paymentCreateReqDto.toServiceDto());
         return ApiResponse.success(SuccessCode.SUCCESS_INSERT, response);
     }
 

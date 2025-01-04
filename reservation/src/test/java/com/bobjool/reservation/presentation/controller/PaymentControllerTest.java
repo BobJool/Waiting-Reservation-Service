@@ -1,11 +1,14 @@
 package com.bobjool.reservation.presentation.controller;
 
 import com.bobjool.reservation.application.service.PaymentService;
-import com.bobjool.reservation.presentation.dto.PaymentCreateReqDto;
-import com.bobjool.reservation.presentation.dto.PaymentUpdateReqDto;
+import com.bobjool.reservation.application.service.ReservationPaymentService;
+import com.bobjool.reservation.presentation.dto.payment.PaymentCreateReqDto;
+import com.bobjool.reservation.presentation.dto.payment.PaymentUpdateReqDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -37,6 +40,9 @@ class PaymentControllerTest {
     // 가짜 객체
     @MockBean
     private PaymentService paymentService;
+
+    @MockBean
+    ReservationPaymentService reservationPaymentService;
 
     @DisplayName("createPayment - 성공")
     @Test
@@ -146,13 +152,13 @@ class PaymentControllerTest {
                 .andExpect(jsonPath("$.data").isEmpty());
     }
 
-    @DisplayName("createPayment - amount가 음수일 때")
-    @Test
-    void createPayment_whenNegativeAmount() throws Exception {
+    @DisplayName("createPayment - amount가 0 또는 음수일 때")
+    @ParameterizedTest
+    @ValueSource(ints = {0, -1})
+    void createPayment_whenNegativeAmount(Integer amount) throws Exception {
         // given - amount가 음수인 요청 생성
         UUID reservationId = UUID.randomUUID();
         Long userId = 12345L;
-        Integer amount = -1000;
         String method = "CARD";
         String pgName = "TOSS";
         PaymentCreateReqDto paymentCreateReqDto = new PaymentCreateReqDto(reservationId, userId, amount, method, pgName);

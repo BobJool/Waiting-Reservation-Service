@@ -1,4 +1,4 @@
-package com.bobjool.reservation.application.dto;
+package com.bobjool.reservation.application.dto.payment;
 
 import com.bobjool.reservation.domain.entity.Payment;
 
