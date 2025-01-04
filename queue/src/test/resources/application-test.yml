@@ -1,0 +1,57 @@
+spring:
+  config:
+    activate:
+      on-profile: test
+  application:
+    name: queue-service
+
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:test
+    username: sa
+    password:
+#  datasource:
+#    url: jdbc:postgresql://localhost:5432/queue_db
+#    username: postgres
+#    password: password
+#    driver-class-name: org.postgresql.Driver
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      username: default
+      password: systempass
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+#        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        default_batch_fetch_size: 100
+        use_sql_comments: true
+    show-sql: true
+    defer-datasource-initialization: true
+
+sql:
+  init:
+    mode: never
+
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: debug
+        orm:
+          jdbc:
+            bind: trace
+
+eureka:
+  client:
+    enabled: false
+  instance:
+    enabled: false
+
