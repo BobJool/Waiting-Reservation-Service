@@ -40,6 +40,7 @@ public enum ErrorCode {
     UNSUPPORTED_DINING_OPTION(HttpStatus.BAD_REQUEST, "지원하지 않는 식당 이용 방식입니다."),
     UNSUPPORTED_QUEUE_STATUS(HttpStatus.BAD_REQUEST, "지원하지 않는 줄서기 상태입니다."),
     UNSUPPORTED_QUEUE_TYPE(HttpStatus.BAD_REQUEST, "지원하지 않는 줄서기 방식입니다."),
+    USER_NOT_FOUND_IN_QUEUE(HttpStatus.BAD_REQUEST, "해당 대기열에 사용자가 존재하지 않습니다."),
 
     // 예약
     INVALID_GUEST_COUNT(HttpStatus.BAD_REQUEST, "예약 인원수는 양수여야 합니다."),

@@ -1,5 +1,6 @@
 package com.bobjool.queue.application.service;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -10,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
 import com.bobjool.queue.application.dto.QueueRegisterDto;
+import com.bobjool.queue.application.dto.QueueStatusResDto;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,5 +46,11 @@ public class QueueService {
 		redisQueueService.markUserAsWaiting(userId, restaurantId);
 		long rank = redisQueueService.getUserPositionInQueue(restaurantId, userId);
 
+	}
+
+	public QueueStatusResDto getNextTenUsersWithOrder(UUID restaurantId, Long userId) {
+		long rank = redisQueueService.getUserPositionInQueue(restaurantId, userId);
+		List<String> nextUsers = redisQueueService.getNextTenUsersWithOrder(restaurantId, userId);
+		return new QueueStatusResDto(rank, nextUsers);
 	}
 }

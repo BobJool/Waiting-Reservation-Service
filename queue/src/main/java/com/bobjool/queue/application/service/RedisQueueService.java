@@ -1,13 +1,19 @@
 package com.bobjool.queue.application.service;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import com.bobjool.common.exception.BobJoolException;
+import com.bobjool.common.exception.ErrorCode;
 import com.bobjool.queue.application.dto.QueueRegisterDto;
 
 import lombok.RequiredArgsConstructor;
@@ -66,9 +72,27 @@ public class RedisQueueService {
 
 		Long rank = redisTemplate.opsForZSet().rank(redisKey, String.valueOf(userId));
 		if (rank == null) {
-			throw new IllegalStateException("User not found in queue.");
+			throw new BobJoolException(ErrorCode.USER_NOT_FOUND_IN_QUEUE);
 		}
 		return rank + 1;
 	}
 
+	public List<String> getNextTenUsersWithOrder(UUID restaurantId, Long userId) {
+		String redisKey = "queue:restaurant:" + restaurantId + ":usersList";
+		long userRank = getUserPositionInQueue(restaurantId, userId);
+
+		Set<Object> nextUsers = redisTemplate.opsForZSet().range(redisKey, userRank, userRank + 9);
+		if (nextUsers == null) {
+			return Collections.emptyList();
+		}
+
+		List<String> result = new ArrayList<>();
+		int order = (int) (userRank + 1);
+		for (Object userIdObj : nextUsers) {
+			long nextUserId = Long.parseLong(userIdObj.toString());
+			result.add(order + "번째: " + nextUserId);
+			order++;
+		}
+		return result;
+	}
 }
