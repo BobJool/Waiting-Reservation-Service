@@ -23,6 +23,8 @@ public interface RestaurantRepository {
 
   Page<Restaurant> findAllByIsDeletedFalse(Pageable pageable);
 
+  Page<Restaurant> findAllByIsDeletedTrue(Pageable pageable);
+
   // todo 직접 만든 메서드는 테스트 해봐야 합니다.
 
 }

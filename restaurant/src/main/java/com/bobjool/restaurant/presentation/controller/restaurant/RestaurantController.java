@@ -3,6 +3,8 @@ package com.bobjool.restaurant.presentation.controller.restaurant;
 import com.bobjool.common.presentation.ApiResponse;
 import com.bobjool.common.presentation.PageResponse;
 import com.bobjool.common.presentation.SuccessCode;
+import com.bobjool.restaurant.application.dto.restaurant.RestaurantForCustomerResDto;
+import com.bobjool.restaurant.application.dto.restaurant.RestaurantForMasterResDto;
 import com.bobjool.restaurant.application.dto.restaurant.RestaurantResDto;
 import com.bobjool.restaurant.application.service.restaurant.RestaurantService;
 import com.bobjool.restaurant.presentation.dto.restaurant.RestaurantCreateReqDto;
@@ -63,6 +65,7 @@ public class RestaurantController {
     return ApiResponse.success(SuccessCode.SUCCESS_DELETE);
   }
 
+  //모든 음식점 정보 전체 조회
   @GetMapping
   public ResponseEntity<ApiResponse<PageResponse<RestaurantResDto>>> getAllRestaurants(
       @SortDefault(sort = "createdAt", direction = Direction.DESC)
@@ -72,7 +75,50 @@ public class RestaurantController {
     Page<RestaurantResDto> resPage
         = restaurantService.AllRestaurants(pageable);
     return ApiResponse.success(SuccessCode.SUCCESS, PageResponse.of(resPage));
-
   }
+
+  //삭제된 음식점 정보 전체 조회
+  @GetMapping("/deleted")
+  public ResponseEntity<ApiResponse<PageResponse<RestaurantResDto>>> getDeletedRestaurants(
+      @SortDefault(sort = "createdAt", direction = Direction.DESC)
+      Pageable pageable) {
+    log.info("getDeletedRestaurants");
+
+    Page<RestaurantResDto> resPage
+        = restaurantService.DeletedRestaurants(pageable);
+    return ApiResponse.success(SuccessCode.SUCCESS, PageResponse.of(resPage));
+  }
+
+  //음식점 정보 검색
+
+  //단일 음식점 정보 조회(for Owner)
+  @GetMapping("/{restaurantId}")
+  public ResponseEntity<ApiResponse<RestaurantResDto>> getRestaurantsForOwner(
+      @Valid @PathVariable("restaurantId") UUID restaurantId) {
+    log.info("getAllRestaurants");
+
+    RestaurantResDto response = restaurantService.getRestaurantsForOwner(restaurantId);
+    return ApiResponse.success(SuccessCode.SUCCESS_UPDATE, response);
+  }
+
+  //단일 음식점 정보 조회(for Owner)
+  @GetMapping("/customer/{restaurantId}")
+  public ResponseEntity<ApiResponse<RestaurantForCustomerResDto>> getRestaurantsForCustomer(
+      @Valid @PathVariable("restaurantId") UUID restaurantId) {
+    log.info("getAllRestaurants");
+
+    RestaurantForCustomerResDto response = restaurantService.getRestaurantsForCustomer(restaurantId);
+    return ApiResponse.success(SuccessCode.SUCCESS_UPDATE, response);
+  }
+  //단일 음식점 정보 조회(for Master)
+  @GetMapping("/master/{restaurantId}")
+  public ResponseEntity<ApiResponse<RestaurantForMasterResDto>> getRestaurantsForMaster(
+      @Valid @PathVariable("restaurantId") UUID restaurantId) {
+    log.info("getAllRestaurants");
+
+    RestaurantForMasterResDto response = restaurantService.getRestaurantsForMaster(restaurantId);
+    return ApiResponse.success(SuccessCode.SUCCESS_UPDATE, response);
+  }
+
 
 }
