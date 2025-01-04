@@ -1,6 +1,6 @@
 package com.bobjool.restaurant.domain.repository;
 
-import com.bobjool.restaurant.domain.entity.Restaurant;
+import com.bobjool.restaurant.domain.entity.restaurant.Restaurant;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.domain.Page;

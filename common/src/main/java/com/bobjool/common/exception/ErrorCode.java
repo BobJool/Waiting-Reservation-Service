@@ -34,6 +34,10 @@ public enum ErrorCode {
     DUPLICATED_PHONE(HttpStatus.BAD_REQUEST, "식당 연락처가 이미 존재합니다."),
     DUPPLICATED_Address(HttpStatus.BAD_REQUEST,"식당 주소가 이미 존재합니다."),
 
+    // 레스토랑 스케쥴
+    CAPACITY_OVERFLOW(HttpStatus.BAD_REQUEST,"요청한 인원수가 테이블 최대 인원수를 초과합니다."),
+    ALREADEY_RESERVED(HttpStatus.CONFLICT,"해당 예약이 만료되어 예약이 불가능 합니다."),
+
     // 대기열
     USER_ALREADY_IN_QUEUE(HttpStatus.CONFLICT, "사용자가 이미 다른 대기열에 등록되어 있습니다."),
     QUEUE_PUBLISHING_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "대기열 등록 발행에 실패했습니다."),
