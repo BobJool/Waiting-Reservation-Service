@@ -57,8 +57,10 @@ public class QueueService {
 
 	public QueueDelayResDto delayUserRank(UUID restaurantId, Long userId, Long targetUserId) {
 		String userHashKey = "queue:restaurant:" + restaurantId + ":user:" + userId;
-		redisQueueService.validateAndUpdateDelayCount(userHashKey);
+		redisQueueService.validateNotLastInQueue(restaurantId,userId);
+		redisQueueService.validateDelayCount(userHashKey);
+		QueueDelayResDto response = redisQueueService.delayUserRank(restaurantId, userId, targetUserId);
 		//TODO: 카프카 메세지 발행 > queue.delayed
-		return redisQueueService.delayUserRank(restaurantId, userId, targetUserId);
+		return response;
 	}
 }
