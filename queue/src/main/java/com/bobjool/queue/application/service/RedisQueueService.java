@@ -41,7 +41,8 @@ public class RedisQueueService {
 			"type", dto.type(),
 			"diningOption", dto.diningOption(),
 			"position", position,
-			"delay_count", 0
+			"delay_count", 0,
+			"created_at", System.currentTimeMillis()
 		);
 		redisTemplate.opsForHash().putAll(userHashKey, userInfo);
 
