@@ -6,6 +6,7 @@ import com.bobjool.common.presentation.SuccessCode;
 import com.bobjool.reservation.application.dto.payment.PaymentResDto;
 import com.bobjool.reservation.application.dto.payment.PaymentSearchDto;
 import com.bobjool.reservation.application.service.PaymentService;
+import com.bobjool.reservation.application.service.ReservationPaymentService;
 import com.bobjool.reservation.presentation.dto.payment.PaymentCreateReqDto;
 import com.bobjool.reservation.presentation.dto.payment.PaymentUpdateReqDto;
 import jakarta.validation.Valid;
@@ -27,11 +28,12 @@ import java.util.UUID;
 @RestController
 public class PaymentController {
     private final PaymentService paymentService;
+    private final ReservationPaymentService reservationPaymentService;
 
     @PostMapping
     public ResponseEntity<ApiResponse<PaymentResDto>> createPayment(@Valid @RequestBody PaymentCreateReqDto paymentCreateReqDto) {
         log.info("createProduct.paymentCreateReqDto={}", paymentCreateReqDto);
-        PaymentResDto response = paymentService.createPayment(paymentCreateReqDto.toServiceDto());
+        PaymentResDto response = reservationPaymentService.createPayment(paymentCreateReqDto.toServiceDto());
         return ApiResponse.success(SuccessCode.SUCCESS_INSERT, response);
     }
 
