@@ -41,8 +41,7 @@ public class AuthController {
         authService.signUp(request.toServiceDto());
 
         return ApiResponse.success(
-                SuccessCode.SUCCESS_INSERT,
-                null
+                SuccessCode.SUCCESS_INSERT
         );
     }
 
@@ -53,8 +52,7 @@ public class AuthController {
         authService.signOut(request);
 
         return ApiResponse.success(
-                SuccessCode.SUCCESS,
-                null
+                SuccessCode.SUCCESS
         );
     }
 }

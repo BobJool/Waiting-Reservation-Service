@@ -4,6 +4,8 @@ import com.bobjool.reservation.application.dto.reservation.ReservationCreateDto;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.UUID;
 
 public record ReservationCreateReqDto(
@@ -16,14 +18,20 @@ public record ReservationCreateReqDto(
         UUID restaurantScheduleId,
         @NotNull(message = "예약 인원수는 필수 입력값입니다.")
         @Positive(message = "예약 인원수는 양수여야 합니다.")
-        Integer guestCount
+        Integer guestCount,
+        @NotNull(message = "예약 날짜는 필수 입력값입니다.")
+        LocalDate reservationDate,
+        @NotNull(message = "예약 시간은 필수 입력값입니다.")
+        LocalTime reservationTime
 ) {
     public ReservationCreateDto toServiceDto() {
         return new ReservationCreateDto(
                 userId,
                 restaurantId,
                 restaurantScheduleId,
-                guestCount
+                guestCount,
+                reservationDate,
+                reservationTime
         );
     }
 }

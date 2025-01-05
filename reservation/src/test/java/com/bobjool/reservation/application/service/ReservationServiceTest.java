@@ -21,6 +21,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -50,8 +52,11 @@ class ReservationServiceTest {
         UUID restaurantId = UUID.randomUUID();
         UUID scheduleId = UUID.randomUUID();
         Integer guestCount = 5;
+        LocalDate reservationDate = LocalDate.of(2025, 11, 3);
+        LocalTime reservationTime = LocalTime.of(14, 00, 00);
 
-        ReservationCreateDto reservationCreateDto = new ReservationCreateDto(userId, restaurantId, scheduleId, guestCount);
+        ReservationCreateDto reservationCreateDto = new ReservationCreateDto(userId, restaurantId, scheduleId, guestCount,
+                reservationDate, reservationTime);
 
         // when - reservationService.createReservation() 호출
         ReservationResDto response = reservationService.createReservation(reservationCreateDto);
@@ -82,8 +87,11 @@ class ReservationServiceTest {
         Long userId = 12345L;
         UUID restaurantId = UUID.randomUUID();
         UUID scheduleId = UUID.randomUUID();
+        LocalDate reservationDate = LocalDate.of(2025, 11, 3);
+        LocalTime reservationTime = LocalTime.of(14, 00, 00);
 
-        ReservationCreateDto reservationCreateDto = new ReservationCreateDto(userId, restaurantId, scheduleId, guestCount);
+        ReservationCreateDto reservationCreateDto = new ReservationCreateDto(userId, restaurantId, scheduleId, guestCount,
+                reservationDate, reservationTime);
 
             // when & then - 예외 발생 검증
         assertThatThrownBy(() -> reservationService.createReservation(reservationCreateDto))
@@ -103,7 +111,9 @@ class ReservationServiceTest {
                 12345L,
                 UUID.randomUUID(),
                 UUID.randomUUID(),
-                5
+                5,
+                LocalDate.now(),
+                LocalTime.now()
         );
         reservationRepository.save(reservation);
 
@@ -142,7 +152,9 @@ class ReservationServiceTest {
                 12345L,
                 UUID.randomUUID(),
                 UUID.randomUUID(),
-                5
+                5,
+                LocalDate.now(),
+                LocalTime.now()
         );
         reservationRepository.save(reservation);
 
@@ -162,7 +174,9 @@ class ReservationServiceTest {
                 12345L,
                 UUID.randomUUID(),
                 UUID.randomUUID(),
-                5
+                5,
+                LocalDate.now(),
+                LocalTime.now()
         );
         reservationRepository.save(reservation);
 
@@ -200,7 +214,9 @@ class ReservationServiceTest {
                 UUID.randomUUID(),
                 UUID.randomUUID(),
                 reservationStatus,
-                5
+                5,
+                LocalDate.now(),
+                LocalTime.now()
         );
         reservationRepository.save(reservation);
 
@@ -218,7 +234,9 @@ class ReservationServiceTest {
                 12345L,
                 UUID.randomUUID(),
                 UUID.randomUUID(),
-                5
+                5,
+                LocalDate.now(),
+                LocalTime.now()
         );
         reservationRepository.save(reservation);
 
@@ -253,9 +271,9 @@ class ReservationServiceTest {
         Long userId = 12345L;
         UUID restaurantId = UUID.randomUUID();
         UUID scheduleId = UUID.randomUUID();
-        Reservation reservation1 = Reservation.create(userId, restaurantId, scheduleId, 2);
-        Reservation reservation2 = Reservation.create(userId, restaurantId, UUID.randomUUID(), 4);
-        Reservation reservation3 = Reservation.create(67890L, restaurantId, scheduleId, 3); // 다른 userId
+        Reservation reservation1 = Reservation.create(userId, restaurantId, scheduleId, 2, LocalDate.now(), LocalTime.now());
+        Reservation reservation2 = Reservation.create(userId, restaurantId, UUID.randomUUID(), 4, LocalDate.now(), LocalTime.now());
+        Reservation reservation3 = Reservation.create(67890L, restaurantId, scheduleId, 3, LocalDate.now(), LocalTime.now()); // 다른 userId
         reservationRepository.saveAll(List.of(reservation1, reservation2, reservation3));
 
         Pageable pageable = PageRequest.of(0, 10);
