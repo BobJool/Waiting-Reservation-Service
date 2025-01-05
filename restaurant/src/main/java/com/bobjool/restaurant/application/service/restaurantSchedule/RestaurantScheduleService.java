@@ -3,6 +3,7 @@ package com.bobjool.restaurant.application.service.restaurantSchedule;
 import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
 import com.bobjool.restaurant.application.dto.restaurantSchedule.RestaurantScheduleCreateDto;
+import com.bobjool.restaurant.application.dto.restaurantSchedule.RestaurantScheduleForCustomerResDto;
 import com.bobjool.restaurant.application.dto.restaurantSchedule.RestaurantScheduleResDto;
 import com.bobjool.restaurant.application.dto.restaurantSchedule.RestaurantScheduleReserveDto;
 import com.bobjool.restaurant.application.dto.restaurantSchedule.RestaurantScheduleUpdateDto;
@@ -114,14 +115,14 @@ public class RestaurantScheduleService {
 
   @Transactional(readOnly = true)
   public Page<RestaurantScheduleResDto> readForOneRestaurant(UUID id, Pageable pageable) {
-    log.info("All RestaurantSchedule info");
+    log.info("RestaurantSchedule info");
 
     Page<RestaurantSchedule> SchedulePage = scheduleRepository.findAllByRestaurantId(id, pageable);
 
     return SchedulePage.map(RestaurantScheduleResDto::from);
   }
 
-
+  @Transactional(readOnly = true)
   public Page<RestaurantScheduleResDto> findAllByRestaurantIdAndDate(UUID restaurantId,
       LocalDate date, Pageable pageable) {
     log.info("All RestaurantSchedule info");
@@ -166,5 +167,14 @@ public class RestaurantScheduleService {
         restaurant.getId(), date, pageable);
 
     return SchedulePage.map(RestaurantScheduleResDto::from);
+  }
+
+  @Transactional(readOnly = true)
+  public Page<RestaurantScheduleForCustomerResDto> readForUserReserve(Long userId, Pageable pageable) {
+    log.info("RestaurantSchedule info");
+
+    Page<RestaurantSchedule> SchedulePage = scheduleRepository.findAllByUserId(userId, pageable);
+
+    return SchedulePage.map(RestaurantScheduleForCustomerResDto::from);
   }
 }

@@ -14,7 +14,6 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.SortDefault;
@@ -92,7 +91,7 @@ public class RestaurantController {
     log.info("getAllRestaurants");
 
     Page<RestaurantResDto> resPage
-        = restaurantService.AllRestaurants(pageable);
+        = restaurantService.readRestaurants(pageable);
     return ApiResponse.success(SuccessCode.SUCCESS, PageResponse.of(resPage));
   }
 
@@ -104,7 +103,7 @@ public class RestaurantController {
     log.info("getDeletedRestaurants");
 
     Page<RestaurantResDto> resPage
-        = restaurantService.DeletedRestaurants(pageable);
+        = restaurantService.deletedRestaurants(pageable);
     return ApiResponse.success(SuccessCode.SUCCESS, PageResponse.of(resPage));
   }
 
@@ -116,7 +115,7 @@ public class RestaurantController {
       @Valid @PathVariable("restaurantId") UUID restaurantId) {
     log.info("getAllRestaurants");
 
-    RestaurantResDto response = restaurantService.getRestaurantsForOwner(restaurantId);
+    RestaurantResDto response = restaurantService.readRestaurantsForOwner(restaurantId);
     return ApiResponse.success(SuccessCode.SUCCESS_UPDATE, response);
   }
 
@@ -126,7 +125,7 @@ public class RestaurantController {
       @Valid @PathVariable("restaurantId") UUID restaurantId) {
     log.info("getAllRestaurants");
 
-    RestaurantForCustomerResDto response = restaurantService.getRestaurantsForCustomer(restaurantId);
+    RestaurantForCustomerResDto response = restaurantService.readRestaurantsForCustomer(restaurantId);
     return ApiResponse.success(SuccessCode.SUCCESS_UPDATE, response);
   }
   //단일 음식점 정보 조회(for Master)
@@ -135,7 +134,7 @@ public class RestaurantController {
       @Valid @PathVariable("restaurantId") UUID restaurantId) {
     log.info("getAllRestaurants");
 
-    RestaurantForMasterResDto response = restaurantService.getRestaurantsForMaster(restaurantId);
+    RestaurantForMasterResDto response = restaurantService.readRestaurantsForMaster(restaurantId);
     return ApiResponse.success(SuccessCode.SUCCESS_UPDATE, response);
   }
 

@@ -18,4 +18,8 @@ public interface RestaurantScheduleRepository {
   Page<RestaurantSchedule> findAllByRestaurantId(UUID restaurantId, Pageable pageable);
 
   Page<RestaurantSchedule> findAllByRestaurantIdAndDate(UUID restaurantId, LocalDate date, Pageable pageable);
+
+  Page<RestaurantSchedule> findAllByUserId(Long userId, Pageable pageable);
+
+
 }

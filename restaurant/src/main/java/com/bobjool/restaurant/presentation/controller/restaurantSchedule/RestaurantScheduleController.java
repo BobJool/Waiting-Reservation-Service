@@ -3,6 +3,7 @@ package com.bobjool.restaurant.presentation.controller.restaurantSchedule;
 import com.bobjool.common.presentation.ApiResponse;
 import com.bobjool.common.presentation.PageResponse;
 import com.bobjool.common.presentation.SuccessCode;
+import com.bobjool.restaurant.application.dto.restaurantSchedule.RestaurantScheduleForCustomerResDto;
 import com.bobjool.restaurant.application.dto.restaurantSchedule.RestaurantScheduleResDto;
 import com.bobjool.restaurant.application.service.restaurantSchedule.RestaurantScheduleService;
 import com.bobjool.restaurant.presentation.dto.restaurantSchedule.RestaurantScheduleCreateReqDto;
@@ -129,6 +130,18 @@ public class RestaurantScheduleController {
     Page<RestaurantScheduleResDto> response = scheduleService.createDailySchedule(2, scheduleCreateReqDto.date(),
         scheduleCreateReqDto.toServiceDto());
     return ApiResponse.success(SuccessCode.SUCCESS_INSERT, PageResponse.of(response));
+  }
+
+  @GetMapping("/user/{userId}")
+  public ResponseEntity<ApiResponse<PageResponse<RestaurantScheduleForCustomerResDto>>> readUserReserve(
+      @SortDefault(sort = "createdAt", direction = Direction.DESC)
+      Pageable pageable,
+      @PathVariable("userId") Long userId) {
+    log.info("getUserReserve");
+
+    Page<RestaurantScheduleForCustomerResDto> resPage
+        = scheduleService.readForUserReserve(userId, pageable);
+    return ApiResponse.success(SuccessCode.SUCCESS, PageResponse.of(resPage));
   }
 
 }

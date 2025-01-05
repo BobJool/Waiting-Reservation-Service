@@ -9,7 +9,6 @@ import com.bobjool.restaurant.application.dto.restaurant.RestaurantResDto;
 import com.bobjool.restaurant.application.dto.restaurant.RestaurantUpdateDto;
 import com.bobjool.restaurant.domain.entity.restaurant.Restaurant;
 import com.bobjool.restaurant.domain.repository.RestaurantRepository;
-import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -76,7 +75,7 @@ public class RestaurantService {
 
   //음식점 모든 정보 전체 조회
   @Transactional(readOnly = true)
-  public Page<RestaurantResDto> AllRestaurants(Pageable pageable) {
+  public Page<RestaurantResDto> readRestaurants(Pageable pageable) {
     log.info("All Restaurant info");
 
     Page<Restaurant> restaurantPage = restaurantRepository.findAllByIsDeletedFalse(pageable);
@@ -86,7 +85,7 @@ public class RestaurantService {
 
   //삭제된 음식점 정보 전체 조회
   @Transactional(readOnly = true)
-  public Page<RestaurantResDto> DeletedRestaurants(Pageable pageable) {
+  public Page<RestaurantResDto> deletedRestaurants(Pageable pageable) {
     log.info("Deleted Restaurant info");
 
     Page<Restaurant> restaurantPage = restaurantRepository.findAllByIsDeletedTrue(pageable);
@@ -97,7 +96,7 @@ public class RestaurantService {
 
   //단일 음식점 정보 조회 For Owner
   @Transactional(readOnly = true)
-  public RestaurantForCustomerResDto getRestaurantsForCustomer(UUID id) {
+  public RestaurantForCustomerResDto readRestaurantsForCustomer(UUID id) {
     log.info("All Restaurant info");
 
     Restaurant restaurant = restaurantRepository.findById(id)
@@ -107,7 +106,7 @@ public class RestaurantService {
   }
 
   @Transactional(readOnly = true)
-  public RestaurantResDto getRestaurantsForOwner(UUID id) {
+  public RestaurantResDto readRestaurantsForOwner(UUID id) {
     log.info("All Restaurant info");
 
     Restaurant restaurant = restaurantRepository.findById(id)
@@ -117,7 +116,7 @@ public class RestaurantService {
   }
 
   @Transactional(readOnly = true)
-  public RestaurantForMasterResDto getRestaurantsForMaster(UUID id) {
+  public RestaurantForMasterResDto readRestaurantsForMaster(UUID id) {
     log.info("All Restaurant info");
 
     Restaurant restaurant = restaurantRepository.findById(id)
@@ -126,6 +125,7 @@ public class RestaurantService {
     return RestaurantForMasterResDto.from(restaurant);
   }
 
+  @Transactional
   public RestaurantResDto isReservation(UUID restaurantId, boolean isReservation) {
     log.info("isReservation={}", isReservation);
 
@@ -136,7 +136,7 @@ public class RestaurantService {
 
     return RestaurantResDto.from(restaurant);
   }
-
+  @Transactional
   public RestaurantResDto isQueue(UUID restaurantId, boolean isQueue) {
     log.info("isQueue={}", isQueue);
 
