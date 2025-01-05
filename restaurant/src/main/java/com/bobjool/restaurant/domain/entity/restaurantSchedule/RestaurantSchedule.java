@@ -2,7 +2,6 @@ package com.bobjool.restaurant.domain.entity.restaurantSchedule;
 
 
 import com.bobjool.common.domain.entity.BaseEntity;
-import com.bobjool.restaurant.application.dto.restaurantSchedule.RestaurantScheduleUpdateDto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -80,14 +79,11 @@ public class RestaurantSchedule extends BaseEntity {
   //Customer가 좌석 예약
   public void reserve(
       Long userId,
-      LocalDate date,
-      LocalTime timeSlot,
       int currentCapacity
   ){
       this.userId = userId;
-      this.date = date;
-      this.timeSlot = timeSlot;
       this.currentCapacity = currentCapacity;
+      this.available = false;
   }
 
   //Owner가 스케쥴에 대한 정보를 수정

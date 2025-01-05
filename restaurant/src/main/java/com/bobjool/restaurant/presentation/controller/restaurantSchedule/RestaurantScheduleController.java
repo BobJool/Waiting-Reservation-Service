@@ -14,7 +14,6 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.SortDefault;
@@ -26,7 +25,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
@@ -48,34 +46,34 @@ public class RestaurantScheduleController {
   }
 
   //생성된 음식점 스케쥴을 Customer가 예약
-  @PatchMapping("/{ScheduleId}")
+  @PatchMapping("/{scheduleId}")
   public ResponseEntity<ApiResponse<RestaurantScheduleResDto>> reserveSchedule(
       @Valid @RequestBody RestaurantScheduleReserveReqDto scheduleReserveReqDto,
-      @PathVariable("ScheduleId") UUID ScheduleId) {
+      @PathVariable("scheduleId") UUID scheduleId) {
     log.info("update.RestaurantUpdateReqDto={}", scheduleReserveReqDto);
-    RestaurantScheduleResDto response = scheduleService.reserveSchedule(ScheduleId,
+    RestaurantScheduleResDto response = scheduleService.reserveSchedule(scheduleId,
         scheduleReserveReqDto.toServiceDto());
     return ApiResponse.success(SuccessCode.SUCCESS_UPDATE, response);
   }
 
   //음식점 스케쥴 Owner가 수정
-  @PatchMapping("/owner/{ScheduleId}")
+  @PatchMapping("/owner/{scheduleId}")
   public ResponseEntity<ApiResponse<RestaurantScheduleResDto>> updateSchedule(
       @Valid @RequestBody RestaurantScheduleUpdateReqDto scheduleUpdateReqDto,
-      @PathVariable("ScheduleId") UUID ScheduleId) {
+      @PathVariable("scheduleId") UUID scheduleId) {
     log.info("update.RestaurantScheduleUpdateReqDto={}", scheduleUpdateReqDto);
-    RestaurantScheduleResDto response = scheduleService.updateSchedule(ScheduleId,
+    RestaurantScheduleResDto response = scheduleService.updateSchedule(scheduleId,
         scheduleUpdateReqDto.toServiceDto());
     return ApiResponse.success(SuccessCode.SUCCESS_UPDATE, response);
   }
 
   //음식점 스케쥴 삭제
-  @DeleteMapping("/owner/{ScheduleId}")
+  @DeleteMapping("/owner/{scheduleId}")
   public ResponseEntity<ApiResponse<RestaurantScheduleResDto>> deleteSchedule(
-      @Valid @PathVariable("ScheduleId") UUID ScheduleId) {
+      @Valid @PathVariable("scheduleId") UUID scheduleId) {
 
     log.info("RestaurantDelete");
-    scheduleService.deleteSchedule(ScheduleId);
+    scheduleService.deleteSchedule(scheduleId);
     return ApiResponse.success(SuccessCode.SUCCESS_DELETE);
   }
 

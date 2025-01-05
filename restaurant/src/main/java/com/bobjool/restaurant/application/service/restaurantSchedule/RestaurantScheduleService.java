@@ -12,15 +12,11 @@ import com.bobjool.restaurant.domain.repository.RestaurantRepository;
 import com.bobjool.restaurant.domain.repository.RestaurantScheduleRepository;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.web.SortDefault;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -71,8 +67,6 @@ public class RestaurantScheduleService {
     }
     restaurantSchedule.reserve(
         scheduleReserveDto.userId(),
-        scheduleReserveDto.date(),
-        scheduleReserveDto.timeSlot(),
         scheduleReserveDto.currentCapacity()
     );
     return RestaurantScheduleResDto.from(restaurantSchedule);
