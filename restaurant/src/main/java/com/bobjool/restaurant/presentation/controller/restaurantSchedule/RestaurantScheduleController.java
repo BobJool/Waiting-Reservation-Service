@@ -120,4 +120,17 @@ public class RestaurantScheduleController {
     return ApiResponse.success(SuccessCode.SUCCESS, PageResponse.of(resPage));
   }
 
+  //음식점 다음주 스케쥴 슬롯 생성
+  //음식점 스케쥴 생성 예정
+  @PostMapping("/DailySchedule")
+  public ResponseEntity<ApiResponse<PageResponse<RestaurantScheduleResDto>>> createDailySchedule(
+      @Valid @RequestBody RestaurantScheduleCreateReqDto scheduleCreateReqDto
+      ) {
+    log.info("DailySchedule.RestaurantScheduleCreateReqDto={}", scheduleCreateReqDto);
+    log.info("DailySchedule.date={}", scheduleCreateReqDto.timeSlot());
+    Page<RestaurantScheduleResDto> response = scheduleService.createDailySchedule(2, scheduleCreateReqDto.date(),
+        scheduleCreateReqDto.toServiceDto());
+    return ApiResponse.success(SuccessCode.SUCCESS_INSERT, PageResponse.of(response));
+  }
+
 }
