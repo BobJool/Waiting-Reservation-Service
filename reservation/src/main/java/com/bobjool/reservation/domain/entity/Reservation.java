@@ -6,7 +6,10 @@ import com.bobjool.common.exception.ErrorCode;
 import com.bobjool.reservation.domain.enums.ReservationStatus;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.cglib.core.Local;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.UUID;
 
 @Getter
@@ -38,22 +41,34 @@ public class Reservation extends BaseEntity {
     @Column(name = "guest_count", nullable = false)
     private Integer guestCount;
 
+    @Column(name = "reservation_date", nullable = false)
+    private LocalDate reservationDate;  // 예약 날짜
+
+    @Column(name = "reservation_time", nullable = false)
+    private LocalTime reservationTime;  // 예약 시간
+
     public static Reservation create(Long userId, UUID restaurantId, UUID restaurantScheduleId,
-                                     ReservationStatus status, Integer guestCount) {
+                                     ReservationStatus status, Integer guestCount,
+                                     LocalDate reservationDate, LocalTime reservationTime) {
         Reservation reservation = Reservation.builder()
                 .userId(userId)
                 .restaurantId(restaurantId)
                 .restaurantScheduleId(restaurantScheduleId)
                 .status(status)
                 .guestCount(guestCount)
+                .reservationDate(reservationDate)
+                .reservationTime(reservationTime)
                 .build();
         reservation.validateGuestCount();
         return reservation;
 
     }
 
-    public static Reservation create(Long userId, UUID restaurantId, UUID restaurantScheduleId, Integer guestCount) {
-        return create(userId, restaurantId, restaurantScheduleId, ReservationStatus.PENDING, guestCount);
+    public static Reservation create(Long userId, UUID restaurantId, UUID restaurantScheduleId,
+                                     Integer guestCount,
+                                     LocalDate reservationDate, LocalTime reservationTime) {
+        return create(userId, restaurantId, restaurantScheduleId, ReservationStatus.PENDING, guestCount,
+                reservationDate, reservationTime);
     }
 
     private void validateGuestCount() {
