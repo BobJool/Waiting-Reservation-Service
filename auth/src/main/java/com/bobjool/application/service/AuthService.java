@@ -7,6 +7,7 @@ import com.bobjool.common.exception.*;
 import com.bobjool.domain.entity.User;
 import com.bobjool.domain.repository.UserRepository;
 import com.bobjool.presentation.dto.response.SignInResDto;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,7 +25,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
-//    private final JwtBlacklistService jwtBlacklistService;
+    private final JwtBlacklistService jwtBlacklistService;
     private final PasswordEncoder passwordEncoder;
     private final ValidationService validationService;
 
@@ -44,7 +45,9 @@ public class AuthService {
             throw new BobJoolException(ErrorCode.USER_NOT_APPROVED);
         }
 
-        return jwtUtil.createAccessToken(user);
+        String token = jwtUtil.createAccessToken(user);
+
+        return SignInResDto.of(token);
     }
 
     @Transactional
@@ -69,5 +72,25 @@ public class AuthService {
         );
 
         userRepository.save(user);
+    }
+
+    public void signOut(HttpServletRequest request) {
+
+        String token = jwtUtil.getTokenFromHeader("Authorization", request);
+
+        if (token == null || !jwtUtil.validateToken(token)) {
+            throw new BobJoolException(ErrorCode.INVALID_TOKEN);
+        }
+
+        String tokenType = jwtUtil.getTokenType(token);
+        if (tokenType == null) {
+            throw new BobJoolException(ErrorCode.UNKNOWN_TOKEN_TYPE);
+        }
+
+        long expiration = jwtUtil.getRemainingExpiration(token);
+
+        boolean isAccessToken = "access".equals(tokenType);
+
+        jwtBlacklistService.addToBlacklist(token, expiration, isAccessToken);
     }
 }

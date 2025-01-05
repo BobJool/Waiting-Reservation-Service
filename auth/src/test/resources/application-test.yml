@@ -1,0 +1,19 @@
+spring:
+  config:
+    activate:
+      on-profile: test
+  application:
+    name: auth-service
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: debug
+        orm:
+          jdbc:
+            bind: trace

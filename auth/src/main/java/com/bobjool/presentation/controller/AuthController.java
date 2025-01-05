@@ -6,6 +6,7 @@ import com.bobjool.common.presentation.SuccessCode;
 import com.bobjool.presentation.dto.request.SignInReqDto;
 import com.bobjool.presentation.dto.request.SignUpReqDto;
 import com.bobjool.presentation.dto.response.SignInResDto;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -40,8 +41,18 @@ public class AuthController {
         authService.signUp(request.toServiceDto());
 
         return ApiResponse.success(
-                SuccessCode.SUCCESS_INSERT,
-                null
+                SuccessCode.SUCCESS_INSERT
+        );
+    }
+
+    @PostMapping("/sign-out")
+    public ResponseEntity<ApiResponse<String>> signOut(
+            HttpServletRequest request) {
+
+        authService.signOut(request);
+
+        return ApiResponse.success(
+                SuccessCode.SUCCESS
         );
     }
 }
