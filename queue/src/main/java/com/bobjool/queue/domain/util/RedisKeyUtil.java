@@ -13,7 +13,7 @@ public class RedisKeyUtil {
 	}
 
 	public static String getUserQueueDataKey(UUID restaurantId, Long userId) {
-		return String.format("queue:restaurant:%s:%d", restaurantId, userId);
+		return String.format("queue:restaurant:%s:user:%d", restaurantId, userId);
 	}
 
 	public static String getFailuresKey(UUID restaurantId) {

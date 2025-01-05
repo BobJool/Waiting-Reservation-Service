@@ -47,13 +47,12 @@ public class RedisQueueService {
 			"user_id", dto.userId(),
 			"member", dto.member(),
 			"type", dto.type(),
-			"diningOption", dto.diningOption(),
+			"dining_option", dto.diningOption(),
 			"position", position,
 			"delay_count", 0,
 			"created_at", System.currentTimeMillis()
 		);
 		redisTemplate.opsForHash().putAll(userQueueDataKey, userInfo);
-
 		log.info("Added user {} to queue {} with position {}", dto.userId(), waitingListKey, position);
 		return userInfo;
 	}
@@ -151,6 +150,7 @@ public class RedisQueueService {
 
 	private void updateDelayCount(String userHashKey) {
 		Integer delayCount = (Integer) redisTemplate.opsForHash().get(userHashKey, "delay_count");
+		if (delayCount == null) {  delayCount = 0; }
 		redisTemplate.opsForHash().put(userHashKey, "delay_count", delayCount + 1);
 	}
 
