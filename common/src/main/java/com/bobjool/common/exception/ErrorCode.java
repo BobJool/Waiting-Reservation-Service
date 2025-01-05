@@ -16,6 +16,7 @@ public enum ErrorCode {
     // 인증
     FORBIDDEN_ACCESS(HttpStatus.FORBIDDEN, "접근 권한이 존재하지 않습니다."),
     MISSING_ROLE(HttpStatus.BAD_REQUEST, "권한 정보가 없습니다."),
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
     INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, "유저 ID 또는 비밀번호 정보가 일치하지 않습니다."),
     USER_DELETED(HttpStatus.BAD_REQUEST, "삭제된 사용자입니다."),
     USER_NOT_APPROVED(HttpStatus.UNAUTHORIZED, "승인되지 않은 사용자입니다."),
