@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
+import com.bobjool.queue.application.dto.QueueDelayDto;
 import com.bobjool.queue.application.dto.QueueDelayResDto;
 import com.bobjool.queue.application.dto.QueueRegisterDto;
 import com.bobjool.queue.application.dto.QueueStatusResDto;
@@ -25,6 +26,7 @@ public class QueueService {
 
 	private final RedisQueueService redisQueueService;
 	private final ChannelTopic registerTopic;
+	private final ChannelTopic delayTopic;
 
 	public String publishRegisterQueue(QueueRegisterDto dto) {
 		try {
@@ -34,6 +36,16 @@ public class QueueService {
 			throw new BobJoolException(ErrorCode.QUEUE_PUBLISHING_FAILED);
 		}
 	}
+
+	public String publishDelayQueue(QueueDelayDto dto) {
+		try {
+			redisQueueService.publishMessage(delayTopic.getTopic(), dto.toString());
+			return "대기열 내 순서 미루기 요청 성공";
+		} catch (Exception e) {
+			throw new BobJoolException(ErrorCode.QUEUE_PUBLISHING_FAILED);
+		}
+	}
+
 	@Transactional
 	public void registerQueue(QueueRegisterDto request) {
 		Long userId = request.userId();
@@ -56,12 +68,11 @@ public class QueueService {
 		return new QueueStatusResDto(rank, nextUsers);
 	}
 
-	public QueueDelayResDto delayUserRank(UUID restaurantId, Long userId, Long targetUserId) {
-		String userHashKey = RedisKeyUtil.getUserQueueDataKey(restaurantId, userId);
-		redisQueueService.validateNotLastInQueue(restaurantId,userId);
+	public void delayUserRank(QueueDelayDto dto) {
+		String userHashKey = RedisKeyUtil.getUserQueueDataKey(dto.restaurantId(), dto.userId());
+		redisQueueService.validateNotLastInQueue(dto.restaurantId(), dto.userId());
 		redisQueueService.validateDelayCount(userHashKey);
-		QueueDelayResDto response = redisQueueService.delayUserRank(restaurantId, userId, targetUserId);
+		QueueDelayResDto response = redisQueueService.delayUserRank(dto.restaurantId(), dto.userId(), dto.targetUserId());
 		//TODO: 카프카 메세지 발행 > queue.delayed
-		return response;
 	}
 }

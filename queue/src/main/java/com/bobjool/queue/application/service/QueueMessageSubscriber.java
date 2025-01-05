@@ -4,6 +4,7 @@ import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.stereotype.Service;
 
+import com.bobjool.queue.application.dto.QueueDelayDto;
 import com.bobjool.queue.application.dto.QueueRegisterDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -24,6 +25,11 @@ public class QueueMessageSubscriber implements MessageListener {
 			case "queue.register":
 				QueueRegisterDto registerDto = parseMessage(messageBody, QueueRegisterDto.class);
 				queueService.registerQueue(registerDto);
+				break;
+
+			case "queue.delay":
+				QueueDelayDto delayDto = parseMessage(messageBody, QueueDelayDto.class);
+				queueService.delayUserRank(delayDto);
 				break;
 
 			default:

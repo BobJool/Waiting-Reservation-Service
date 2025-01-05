@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bobjool.common.presentation.ApiResponse;
 import com.bobjool.common.presentation.SuccessCode;
+import com.bobjool.queue.application.dto.QueueDelayDto;
 import com.bobjool.queue.application.dto.QueueDelayResDto;
 import com.bobjool.queue.application.dto.QueueStatusResDto;
 import com.bobjool.queue.application.service.QueueService;
@@ -44,12 +45,13 @@ public class QueueController {
 	}
 
 	@PostMapping("/queues/{restaurantId}/{userId}")
-	public ResponseEntity<ApiResponse<QueueDelayResDto>> delayUserRank(
+	public ResponseEntity<ApiResponse<String>> delayUserRank(
 		@PathVariable UUID restaurantId,
 		@PathVariable Long userId,
 		@RequestParam Long targetUserId) {
 		// TODO : 롤검증 /오너라면 자신식당의 웨이팅정보변경인지 검증/ 손님이라면 내 줄서기 정보인지 확인
-		return ApiResponse.success(SuccessCode.SUCCESS, queueService.delayUserRank(restaurantId,userId,targetUserId));
+		return ApiResponse.success(SuccessCode.SUCCESS_ACCEPTED,
+			queueService.publishDelayQueue(new QueueDelayDto(restaurantId,userId,targetUserId)));
 	}
 
 }
