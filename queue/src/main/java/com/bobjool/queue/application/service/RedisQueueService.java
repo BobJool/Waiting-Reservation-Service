@@ -16,6 +16,7 @@ import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
 import com.bobjool.queue.application.dto.QueueDelayResDto;
 import com.bobjool.queue.application.dto.QueueRegisterDto;
+import com.bobjool.queue.domain.util.RedisKeyUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,12 +35,12 @@ public class RedisQueueService {
 
 	// 대기 큐에 사용자 추가
 	public Map<String, Object> addUserToQueue(QueueRegisterDto dto) {
-		String redisKey = "queue:restaurant:" + dto.restaurantId() + ":usersList";
-		String userHashKey = "queue:restaurant:" + dto.restaurantId() + ":user:" + dto.userId();
+		String waitingListKey  = RedisKeyUtil.getWaitingListKey(dto.restaurantId());
+		String userQueueDataKey = RedisKeyUtil.getUserQueueDataKey(dto.restaurantId(), dto.userId());
 
-		long position = Optional.ofNullable(redisTemplate.opsForZSet().size(redisKey)).orElse(0L) + 1;
+		long position = Optional.ofNullable(redisTemplate.opsForZSet().size(waitingListKey)).orElse(0L) + 1;
 		double uniqueScore = (double) position;
-		redisTemplate.opsForZSet().add(redisKey, String.valueOf(dto.userId()), uniqueScore);
+		redisTemplate.opsForZSet().add(waitingListKey, String.valueOf(dto.userId()), uniqueScore);
 
 		Map<String, Object> userInfo = Map.of(
 			"restaurant_id", dto.restaurantId(),
@@ -51,38 +52,37 @@ public class RedisQueueService {
 			"delay_count", 0,
 			"created_at", System.currentTimeMillis()
 		);
-		redisTemplate.opsForHash().putAll(userHashKey, userInfo);
+		redisTemplate.opsForHash().putAll(userQueueDataKey, userInfo);
 
-		log.info("Added user {} to queue {} with position {}", dto.userId(), redisKey, position);
+		log.info("Added user {} to queue {} with position {}", dto.userId(), waitingListKey, position);
 		return userInfo;
 	}
 
 	public boolean isUserAlreadyWaiting(Long userId) {
-		String userWaitingKey = "queue:user:" + userId + ":waiting";
-		return Boolean.TRUE.equals(redisTemplate.hasKey(userWaitingKey));
+		String userIsWaitingKey = RedisKeyUtil.getUserIsWaitingKey(userId);
+		return Boolean.TRUE.equals(redisTemplate.hasKey(userIsWaitingKey));
 	}
 
 	public void markUserAsWaiting(Long userId, UUID restaurantId) {
-		String userWaitingKey = "queue:user:" + userId + ":waiting";
-		redisTemplate.opsForValue().set(userWaitingKey, String.valueOf(restaurantId));
-		log.info("Marked user {} as waiting for restaurant {}", userId, restaurantId);
+		String userIsWaitingKey = RedisKeyUtil.getUserIsWaitingKey(userId);
+		redisTemplate.opsForValue().set(userIsWaitingKey, String.valueOf(restaurantId));
 	}
 
-	public long getUserPositionInQueue(UUID restaurantId, Long userId) {
-		String redisKey = "queue:restaurant:" + restaurantId + ":usersList";
+	public Long getUserIndexInQueue(UUID restaurantId, Long userId) {
+		String waitingListKey  = RedisKeyUtil.getWaitingListKey(restaurantId);
 
-		Long rank = redisTemplate.opsForZSet().rank(redisKey, String.valueOf(userId));
-		if (rank == null) {
+		Long index = redisTemplate.opsForZSet().rank(waitingListKey, String.valueOf(userId));
+		if (index == null) {
 			throw new BobJoolException(ErrorCode.USER_NOT_FOUND_IN_QUEUE);
 		}
-		return rank + 1;
+		return index;
 	}
 
 	public List<String> getNextTenUsersWithOrder(UUID restaurantId, Long userId) {
-		String redisKey = "queue:restaurant:" + restaurantId + ":usersList";
-		long userRank = getUserPositionInQueue(restaurantId, userId);
+		String waitingListKey  = RedisKeyUtil.getWaitingListKey(restaurantId);
+		long userRank = getUserIndexInQueue(restaurantId, userId) +1;
 
-		Set<Object> nextUsers = redisTemplate.opsForZSet().range(redisKey, userRank, userRank + 9);
+		Set<Object> nextUsers = redisTemplate.opsForZSet().range(waitingListKey, userRank, userRank + 9);
 		if (nextUsers == null) {
 			return Collections.emptyList();
 		}
@@ -98,71 +98,50 @@ public class RedisQueueService {
 	}
 
 	public QueueDelayResDto delayUserRank(UUID restaurantId, Long userId, Long targetUserId) {
-		String redisKey = "queue:restaurant:" + restaurantId + ":usersList";
-		String userHashKey = "queue:restaurant:" + restaurantId + ":user:" + userId;
+		String waitingListKey  = RedisKeyUtil.getWaitingListKey(restaurantId);
+		String userQueueDataKey = RedisKeyUtil.getUserQueueDataKey(restaurantId, userId);
 
-		// 해시테이블에서 추가 정보 조회
-		Long originalPosition = (Long) redisTemplate.opsForHash().get(userHashKey, "position");
-		Integer member = (Integer) redisTemplate.opsForHash().get(userHashKey, "member");
-
-		if (originalPosition == null || member == null) {
-			throw new BobJoolException(ErrorCode.QUEUE_DATA_NOT_FOUND);
-		}
-
-		// 대상 유저의 score 조회
-		Double targetScore = getUserScore(redisKey, targetUserId);
-
-		// 현재 유저의 score 조회
-		Double userScore = getUserScore(redisKey, userId);
-
-		// 이미 대상 사용자 뒤에 있는 경우 처리하지 않음
+		Double targetScore = getUserScore(waitingListKey, targetUserId);
+		Double userScore = getUserScore(waitingListKey, userId);
 		if (userScore > targetScore) {
 			throw new BobJoolException(ErrorCode.ALREADY_BEHIND_TARGET);
 		}
 
-		// 대상 유저 다음 유저의 score 조회
-		Set<Object> nextUsers = redisTemplate.opsForZSet().rangeByScore(redisKey, targetScore, Double.MAX_VALUE, 1, 1);
-		Double nextScore = nextUsers.isEmpty()
-			? targetScore + 1 // 다음 유저가 없으면 targetScore + 1로 설정
-			: getUserScore(redisKey, Long.parseLong(nextUsers.iterator().next().toString()));
-
-		if (nextScore == null) {
-			nextScore = targetScore + 1; // 다음 유저가 없는 경우 기본값 설정
-		}
-
-		// 새로운 score를 중간값으로 설정
+		Double nextScore = calculateNextScore(waitingListKey, targetScore);
 		double newScore = (targetScore + nextScore) / 2.0;
-		redisTemplate.opsForZSet().add(redisKey, String.valueOf(userId), newScore);
-		updateDelayCount(userHashKey);
-		// 새로운 순번 계산
-		Long newRank = getUserPositionInQueue(restaurantId, userId);
+		redisTemplate.opsForZSet().add(waitingListKey, String.valueOf(userId), newScore);
+		updateDelayCount(userQueueDataKey);
 
-		log.info("Delayed user {} to queue {} with newRank {}", userId, redisKey, newRank);
+		Long originalPosition = getHashValue(userQueueDataKey, "position", Long.class);
+		Integer member = getHashValue(userQueueDataKey, "member", Integer.class);
+		long newRank = getUserIndexInQueue(restaurantId, userId) +1;
 
-		// DTO 생성 및 반환
-		return new QueueDelayResDto(newRank + 1, originalPosition, member);
+		log.info("Delayed user {} to queue {} with newRank {}", userId, waitingListKey, newRank);
+
+		return new QueueDelayResDto(newRank, originalPosition, member);
 	}
 
-	public void validateNotLastInQueue(UUID restaurantId, Long userId) {
-		// 현재 유저의 랭크 조회
-		long userRank = getUserPositionInQueue(restaurantId, userId);
-
-		// 대기열의 총 유저 수 조회
-		String redisKey = "queue:restaurant:" + restaurantId + ":usersList";
-		Long totalUsers = redisTemplate.opsForZSet().size(redisKey);
+	public Long getTotalUsersInQueue(UUID restaurantId) {
+		String waitingListKey = RedisKeyUtil.getWaitingListKey(restaurantId);
+		Long totalUsers = redisTemplate.opsForZSet().size(waitingListKey);
 
 		if (totalUsers == null || totalUsers == 0) {
 			throw new BobJoolException(ErrorCode.QUEUE_EMPTY);
 		}
+		return totalUsers;
+	}
 
-		// 현재 유저가 대기열의 마지막 유저인지 확인
-		if (userRank == totalUsers.intValue()) {
+	public void validateNotLastInQueue(UUID restaurantId, Long userId) {
+		Long userRank = getUserIndexInQueue(restaurantId, userId);
+		Long totalUsers = getTotalUsersInQueue(restaurantId);
+
+		if (userRank.equals(totalUsers)) {
 			throw new BobJoolException(ErrorCode.CANNOT_DELAY);
 		}
 	}
 
-	public void validateDelayCount(String userHashKey) {
-		Integer delayCount = (Integer) redisTemplate.opsForHash().get(userHashKey, "delay_count");
+	public void validateDelayCount(String userQueueDataKey) {
+		Integer delayCount = (Integer) redisTemplate.opsForHash().get(userQueueDataKey, "delay_count");
 		if (delayCount == null) delayCount = 0;
 
 		if (delayCount >= 2) {
@@ -181,5 +160,33 @@ public class RedisQueueService {
 			throw new BobJoolException(ErrorCode.USER_NOT_FOUND_IN_QUEUE);
 		}
 		return score;
+	}
+
+	private <T> T getHashValue(String hashKey, String field, Class<T> type) {
+		Object value = redisTemplate.opsForHash().get(hashKey, field);
+		if (value == null) {
+			throw new BobJoolException(ErrorCode.QUEUE_DATA_NOT_FOUND);
+		}
+
+		if (type == Long.class) {
+			return type.cast(Long.parseLong(value.toString()));
+		} else if (type == Integer.class) {
+			return type.cast(Integer.parseInt(value.toString()));
+		} else if (type == String.class) {
+			return type.cast(value.toString());
+		}
+
+		throw new IllegalArgumentException("Unsupported type: " + type.getName());
+	}
+
+	private Double calculateNextScore(String waitingListKey, Double targetScore) {
+		Set<Object> nextUsers = redisTemplate.opsForZSet().rangeByScore(waitingListKey, targetScore, Double.MAX_VALUE, 1, 1);
+
+		if (nextUsers == null || nextUsers.isEmpty()) {
+			return targetScore + 1; // 다음 유저가 없으면 기본값
+		}
+
+		Object nextUser = nextUsers.iterator().next();
+		return getUserScore(waitingListKey, Long.parseLong(nextUser.toString()));
 	}
 }

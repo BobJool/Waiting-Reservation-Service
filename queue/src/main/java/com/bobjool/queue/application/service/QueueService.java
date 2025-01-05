@@ -13,6 +13,7 @@ import com.bobjool.common.exception.ErrorCode;
 import com.bobjool.queue.application.dto.QueueDelayResDto;
 import com.bobjool.queue.application.dto.QueueRegisterDto;
 import com.bobjool.queue.application.dto.QueueStatusResDto;
+import com.bobjool.queue.domain.util.RedisKeyUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,19 +45,19 @@ public class QueueService {
 
 		Map<String, Object> userInfo = redisQueueService.addUserToQueue(request);
 		redisQueueService.markUserAsWaiting(userId, restaurantId);
-		long rank = redisQueueService.getUserPositionInQueue(restaurantId, userId);
+		long rank = redisQueueService.getUserIndexInQueue(restaurantId, userId) + 1;
 
 		//TODO: 카프카 메세지 발행 > queue.registered
 	}
 
 	public QueueStatusResDto getNextTenUsersWithOrder(UUID restaurantId, Long userId) {
-		long rank = redisQueueService.getUserPositionInQueue(restaurantId, userId);
+		long rank = redisQueueService.getUserIndexInQueue(restaurantId, userId) + 1;
 		List<String> nextUsers = redisQueueService.getNextTenUsersWithOrder(restaurantId, userId);
 		return new QueueStatusResDto(rank, nextUsers);
 	}
 
 	public QueueDelayResDto delayUserRank(UUID restaurantId, Long userId, Long targetUserId) {
-		String userHashKey = "queue:restaurant:" + restaurantId + ":user:" + userId;
+		String userHashKey = RedisKeyUtil.getUserQueueDataKey(restaurantId, userId);
 		redisQueueService.validateNotLastInQueue(restaurantId,userId);
 		redisQueueService.validateDelayCount(userHashKey);
 		QueueDelayResDto response = redisQueueService.delayUserRank(restaurantId, userId, targetUserId);
