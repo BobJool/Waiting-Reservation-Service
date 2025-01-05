@@ -122,5 +122,11 @@ public class RestaurantScheduleService {
   }
 
 
+  public Page<RestaurantScheduleResDto> findAllByRestaurantIdAndDate(UUID restaurantId, LocalDate date, Pageable pageable) {
+    log.info("All RestaurantSchedule info");
 
+    Page<RestaurantSchedule> SchedulePage = scheduleRepository.findAllByRestaurantIdAndDate(restaurantId, date, pageable);
+
+    return SchedulePage.map(RestaurantScheduleResDto::from);
+  }
 }

@@ -9,6 +9,7 @@ import com.bobjool.restaurant.presentation.dto.restaurantSchedule.RestaurantSche
 import com.bobjool.restaurant.presentation.dto.restaurantSchedule.RestaurantScheduleReserveReqDto;
 import com.bobjool.restaurant.presentation.dto.restaurantSchedule.RestaurantScheduleUpdateReqDto;
 import jakarta.validation.Valid;
+import java.time.LocalDate;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -80,7 +81,7 @@ public class RestaurantScheduleController {
 
   //모든 생성된 음식점 스케쥴 전체 조회
   @GetMapping
-  public ResponseEntity<ApiResponse<PageResponse<RestaurantScheduleResDto>>> getAllSchedule(
+  public ResponseEntity<ApiResponse<PageResponse<RestaurantScheduleResDto>>> readAllSchedule(
       @SortDefault(sort = "createdAt", direction = Direction.DESC)
       Pageable pageable) {
     log.info("getAllRestaurantsSchedule");
@@ -103,4 +104,20 @@ public class RestaurantScheduleController {
         = scheduleService.readForOneRestaurant(restaurantId, pageable);
     return ApiResponse.success(SuccessCode.SUCCESS, PageResponse.of(resPage));
   }
+
+  //특정 음식점 날짜 스케쥴 전체 조회
+  @GetMapping("/{restaurantId}/{date}")
+  public ResponseEntity<ApiResponse<PageResponse<RestaurantScheduleResDto>>> readByRestaurantIdAndDate(
+      @SortDefault(sort = "createdAt", direction = Direction.DESC)
+      Pageable pageable,
+      @PathVariable("restaurantId") UUID restaurantId,
+      @PathVariable("date") LocalDate date
+      ) {
+    log.info("getAllRestaurants");
+
+    Page<RestaurantScheduleResDto> resPage
+        = scheduleService.findAllByRestaurantIdAndDate(restaurantId, date, pageable);
+    return ApiResponse.success(SuccessCode.SUCCESS, PageResponse.of(resPage));
+  }
+
 }
