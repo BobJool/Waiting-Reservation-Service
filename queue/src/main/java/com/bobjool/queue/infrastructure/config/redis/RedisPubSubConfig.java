@@ -23,7 +23,7 @@ public class RedisPubSubConfig {
 		container.addMessageListener(registerListenerAdapter, registerTopic());
 		container.addMessageListener(delayListenerAdapter, delayTopic());
 		container.addMessageListener(cancelListenerAdapter, cancelTopic());
-		container.addMessageListener(checkInListenerAdapter, cancelTopic());
+		container.addMessageListener(checkInListenerAdapter, checkInTopic());
 
 		return container;
 	}

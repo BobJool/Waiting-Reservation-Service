@@ -83,5 +83,6 @@ public class QueueService {
 	}
 
 	public void checkInRestaurant(QueueCheckInDto checkInDto) {
+		redisQueueService.checkInRestaurant(checkInDto);
 	}
 }

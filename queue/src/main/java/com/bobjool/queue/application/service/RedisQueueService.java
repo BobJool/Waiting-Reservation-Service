@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
 import com.bobjool.queue.application.dto.QueueCancelDto;
+import com.bobjool.queue.application.dto.QueueCheckInDto;
 import com.bobjool.queue.application.dto.QueueDelayResDto;
 import com.bobjool.queue.application.dto.QueueRegisterDto;
 import com.bobjool.queue.domain.enums.QueueStatus;
@@ -219,5 +220,11 @@ public class RedisQueueService {
 		} else {
 			throw new BobJoolException(ErrorCode.QUEUE_DATA_NOT_FOUND);
 		}
+	}
+
+	public void checkInRestaurant(QueueCheckInDto dto) {
+		removeUserIsWaitingKey(dto.userId());
+		removeUserFromQueue(dto.restaurantId(),dto.userId());
+		updateQueueStatus(dto.restaurantId(), dto.userId(), QueueStatus.CHECK_IN);
 	}
 }
