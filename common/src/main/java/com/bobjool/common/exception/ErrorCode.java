@@ -51,6 +51,7 @@ public enum ErrorCode {
     QUEUE_EMPTY(HttpStatus.BAD_REQUEST, "대기열에 유저가 없습니다."),
     QUEUE_DATA_NOT_FOUND(HttpStatus.BAD_REQUEST, "대기번호 또는 방문인원 정보가 없습니다."),
     ALREADY_BEHIND_TARGET(HttpStatus.BAD_REQUEST, "이미 대상 사용자 뒤에 있습니다."),
+    INVALID_PROCESS_TYPE(HttpStatus.BAD_REQUEST, "유효하지 않은 처리 유형입니다."),
 
     // 예약
     INVALID_GUEST_COUNT(HttpStatus.BAD_REQUEST, "예약 인원수는 양수여야 합니다."),

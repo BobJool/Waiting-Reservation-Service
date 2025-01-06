@@ -35,6 +35,16 @@ public class RedisPubSubConfig {
 	}
 
 	@Bean
+	public MessageListenerAdapter cancelListenerAdapter(QueueMessageSubscriber subscriber) {
+		return new MessageListenerAdapter(subscriber, "onMessage");
+	}
+
+	@Bean
+	public MessageListenerAdapter checkInListenerAdapter(QueueMessageSubscriber subscriber) {
+		return new MessageListenerAdapter(subscriber, "onMessage");
+	}
+
+	@Bean
 	public ChannelTopic registerTopic() {
 		return new ChannelTopic("queue.register");
 	}
@@ -42,6 +52,16 @@ public class RedisPubSubConfig {
 	@Bean
 	public ChannelTopic delayTopic() {
 		return new ChannelTopic("queue.delay");
+	}
+
+	@Bean
+	public ChannelTopic cancelTopic() {
+		return new ChannelTopic("queue.cancel");
+	}
+
+	@Bean
+	public ChannelTopic checkInTopic() {
+		return new ChannelTopic("queue.checkin");
 	}
 
 }
