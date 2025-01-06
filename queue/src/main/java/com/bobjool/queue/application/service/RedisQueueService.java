@@ -9,7 +9,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.bobjool.common.exception.BobJoolException;
@@ -28,9 +27,6 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class RedisQueueService {
 	private final RedisTemplate<String, Object> redisTemplate;
-
-
-
 
 	// 대기 큐에 사용자 추가
 	public Map<String, Object> addUserToQueue(QueueRegisterDto dto) {
