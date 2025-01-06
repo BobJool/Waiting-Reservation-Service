@@ -28,12 +28,9 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class RedisQueueService {
 	private final RedisTemplate<String, Object> redisTemplate;
-	private final StringRedisTemplate stringRedisTemplate;
 
-	// 메시지 발행
-	public void publishMessage(String topic, String message) {
-		stringRedisTemplate.convertAndSend(topic, message);
-	}
+
+
 
 	// 대기 큐에 사용자 추가
 	public Map<String, Object> addUserToQueue(QueueRegisterDto dto) {

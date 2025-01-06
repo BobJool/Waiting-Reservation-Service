@@ -1,5 +1,6 @@
 package com.bobjool.queue.application.service;
 
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class QueueMessagePublisherService {
 
-	private final RedisQueueService redisQueueService;
+	private final StringRedisTemplate stringRedisTemplate;
 	private final ObjectMapper objectMapper;
 	private final ChannelTopic registerTopic;
 	private final ChannelTopic delayTopic;
@@ -37,10 +38,14 @@ public class QueueMessagePublisherService {
 	private String publishMessage(String topic, Object dto, String successMessage) {
 		try {
 			String message = objectMapper.writeValueAsString(dto);
-			redisQueueService.publishMessage(topic, message);
+			publishMessage(topic, message);
 			return successMessage;
 		} catch (Exception e) {
 			throw new BobJoolException(ErrorCode.QUEUE_PUBLISHING_FAILED);
 		}
+	}
+
+	public void publishMessage(String topic, String message) {
+		stringRedisTemplate.convertAndSend(topic, message);
 	}
 }
