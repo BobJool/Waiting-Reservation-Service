@@ -33,8 +33,11 @@ public class RestaurantScheduleService {
   @Transactional
   public RestaurantScheduleResDto createSchedule(RestaurantScheduleCreateDto createDto) {
 
+    if(createDto.userId() == null){ // 추후 추가적인 유효성 검사를 덧붙일 예정이고, 임시구현 상태입니다.
+      throw new BobJoolException(ErrorCode.ENTITY_NOT_FOUND);
+    }
+
     RestaurantSchedule schedule = RestaurantSchedule.create(
-        createDto.userId(),
         createDto.restaurantId(),
         createDto.tableNumber(),
         createDto.date(),
@@ -82,8 +85,11 @@ public class RestaurantScheduleService {
     RestaurantSchedule restaurantSchedule = scheduleRepository.findById(scheduleId)
         .orElseThrow(() -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND));
 
+    if(scheduleUpdateDto.userId() == null){ // 추후 추가적인 유효성 검사를 덧붙일 예정이고, 임시구현 상태입니다.
+      throw new BobJoolException(ErrorCode.ENTITY_NOT_FOUND);
+    }
+
     restaurantSchedule.update(
-        scheduleUpdateDto.userId(),
         scheduleUpdateDto.date(),
         scheduleUpdateDto.timeSlot(),
         scheduleUpdateDto.maxCapacity(),
@@ -148,7 +154,6 @@ public class RestaurantScheduleService {
       log.info("reserveTime={}", reserveTime);
       log.info("restaurant.getCloseTime().getHour()={}", restaurant.getCloseTime().getHour());
       RestaurantSchedule schedule = RestaurantSchedule.create(
-          createDto.userId(),
           createDto.restaurantId(),
           createDto.tableNumber(),
           createDto.date(),
