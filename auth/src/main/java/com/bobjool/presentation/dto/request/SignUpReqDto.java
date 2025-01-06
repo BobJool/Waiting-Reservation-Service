@@ -28,9 +28,8 @@ public record SignUpReqDto (
     @Email(message = "유효한 이메일 주소 형식이어야 합니다.")
     String email,
 
-    @NotBlank(message = "Slack ID는 비워둘 수 없습니다.")
-    @Pattern(regexp = "^[a-zA-Z0-9_-]+$", message = "Slack ID는 알파벳, 숫자, 밑줄(_) 및 대시(-)만 포함할 수 있습니다.")
-    String slackId,
+    @Email(message = "유효한 이메일 주소 형식이어야 합니다.")
+    String slackEmail,
 
     @NotBlank(message = "전화번호는 비워둘 수 없습니다.")
     @Pattern(
@@ -50,7 +49,7 @@ public record SignUpReqDto (
                 name,
                 nickname,
                 email,
-                slackId,
+                slackEmail,
                 phoneNumber,
                 role
         );

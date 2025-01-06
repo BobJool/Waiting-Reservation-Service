@@ -59,8 +59,13 @@ public class AuthService {
         validationService.validateDuplicateEmail(request.email());
         validationService.validateDuplicatePhoneNumber(request.phoneNumber());
 
-        // 슬랙 이메일로 슬랙 ID를 불러오는 API 호출
         String slackId = "";
+
+        if (request.slackEmail() != null && !request.slackEmail().isEmpty()) {
+            // TODO 슬랙 이메일로 슬랙 ID를 불러오는 API 호출 예정
+            slackId = "api로 호출한 slack_id";
+        }
+
 
         User user = User.create(
                 request.username(),
@@ -71,7 +76,7 @@ public class AuthService {
                 request.slackEmail(),
                 slackId,
                 request.phoneNumber(),
-                true,
+                !"OWNER".equalsIgnoreCase(request.role().getAuthority()), // 가입자가 OWNER이면 isApproved = false
                 request.role()
         );
 

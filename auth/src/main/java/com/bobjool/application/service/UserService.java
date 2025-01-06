@@ -50,7 +50,7 @@ public class UserService {
         if (request.slackEmail() != null && !request.slackEmail().isEmpty()) {
             user.updateSlackEmail(request.slackEmail());
 
-            // slack email로 slack id 가져오는 api 호출 후 같이 업데이트
+            // TODO slack email로 slack id 가져오는 api 호출 후 같이 업데이트 예정
             String slackId = "";
 
             user.updateSlackId(slackId);
