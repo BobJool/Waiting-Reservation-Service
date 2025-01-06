@@ -55,7 +55,6 @@ public class RestaurantSchedule extends BaseEntity {
   private boolean available;
 
   public static RestaurantSchedule create(
-   Long userId,
    UUID restaurantId,
    int tableNumber,
    LocalDate date,
@@ -65,7 +64,6 @@ public class RestaurantSchedule extends BaseEntity {
    boolean available
   ) {
     return RestaurantSchedule.builder()
-        .userId(userId)
         .restaurantId(restaurantId)
         .tableNumber(tableNumber)
         .date(date)
@@ -88,14 +86,12 @@ public class RestaurantSchedule extends BaseEntity {
 
   //Owner가 스케쥴에 대한 정보를 수정
   public void update(
-    Long userId,
     LocalDate date,
     LocalTime timeSlot,
     int maxCapacity,
     int currentCapacity,
     boolean available
   ){
-    this.userId = userId;
     this.date = date;
     this.timeSlot = timeSlot;
     this.maxCapacity = maxCapacity;
