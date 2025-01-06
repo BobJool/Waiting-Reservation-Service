@@ -49,8 +49,10 @@ public enum ErrorCode {
     CANNOT_DELAY(HttpStatus.BAD_REQUEST, "대기열의 마지막 유저는 순서를 미룰 수 없습니다."),
     DELAY_LIMIT_REACHED(HttpStatus.BAD_REQUEST, "순서 미루기는 최대 2번까지 가능합니다."),
     QUEUE_EMPTY(HttpStatus.BAD_REQUEST, "대기열에 유저가 없습니다."),
-    QUEUE_DATA_NOT_FOUND(HttpStatus.BAD_REQUEST, "대기번호 또는 방문인원 정보가 없습니다."),
+    QUEUE_DATA_NOT_FOUND(HttpStatus.BAD_REQUEST, "사용자의 대기 정보를 찾을 수 없습니다."),
     ALREADY_BEHIND_TARGET(HttpStatus.BAD_REQUEST, "이미 대상 사용자 뒤에 있습니다."),
+    INVALID_PROCESS_TYPE(HttpStatus.BAD_REQUEST, "유효하지 않은 처리 유형입니다."),
+    USER_IS_NOT_WAITING(HttpStatus.BAD_REQUEST, "사용자는 대기중 상태가 아닙니다."),
 
     // 예약
     INVALID_GUEST_COUNT(HttpStatus.BAD_REQUEST, "예약 인원수는 양수여야 합니다."),
