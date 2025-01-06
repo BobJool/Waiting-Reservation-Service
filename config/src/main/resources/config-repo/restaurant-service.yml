@@ -36,4 +36,6 @@ management:
   endpoints:
     web:
       exposure:
-        include: refresh
+        include: "*"
+
+message: "hello restaurant! "
