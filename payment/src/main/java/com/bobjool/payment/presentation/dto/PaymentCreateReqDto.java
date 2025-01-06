@@ -1,5 +1,6 @@
 package com.bobjool.payment.presentation.dto;
 
+import com.bobjool.payment.application.dto.PaymentCreateDto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;

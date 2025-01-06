@@ -1,12 +1,12 @@
 server:
-  port: 19040
+  port: 19060
 
 spring:
   application:
-    name: reservation-service
+    name: payment-service
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/reservation_db
+    url: jdbc:postgresql://localhost:5432/payment_db
     username: postgres
     password: password
   jpa:
