@@ -140,7 +140,7 @@ public class RestaurantScheduleService {
     Restaurant restaurant = restaurantRepository.findById(createDto.restaurantId())
         .orElseThrow(() -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND));
 
-    int reserveTime = createDto.timeSlot().getHour();
+    int reserveTime = createDto.reserveTime();
     log.info("reserveTime={}", reserveTime);
     log.info("restaurant.getCloseTime().getHour()={}", restaurant.getCloseTime().getHour());
 

@@ -94,7 +94,7 @@ public class RestaurantService {
   }
 
 
-  //단일 음식점 정보 조회 For Owner
+  //단일 음식점 정보 조회 For Customer
   @Transactional(readOnly = true)
   public RestaurantForCustomerResDto readRestaurantsForCustomer(UUID id) {
     log.info("All Restaurant info");
@@ -105,6 +105,7 @@ public class RestaurantService {
     return RestaurantForCustomerResDto.from(restaurant);
   }
 
+  //단일 음식점 정보 조회 For Owner
   @Transactional(readOnly = true)
   public RestaurantResDto readRestaurantsForOwner(UUID id) {
     log.info("All Restaurant info");
