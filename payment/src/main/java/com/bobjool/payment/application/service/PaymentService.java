@@ -2,6 +2,7 @@ package com.bobjool.payment.application.service;
 
 import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
+import com.bobjool.payment.application.dto.PaymentCreateDto;
 import com.bobjool.payment.application.dto.PaymentResDto;
 import com.bobjool.payment.application.dto.PaymentSearchDto;
 import com.bobjool.payment.application.dto.PaymentUpdateDto;
@@ -23,6 +24,16 @@ import java.util.UUID;
 @Service
 public class PaymentService {
     private final PaymentRepository paymentRepository;
+
+    @Transactional
+    public PaymentResDto createPayment(PaymentCreateDto paymentCreateDto) {
+        log.info("createPayment.PaymentCreateDto = {}", paymentCreateDto);
+
+        // todo 레디스 확인하여 10분 이내에 저장된 예약인지 확인
+        // 결제 성공시 payment.completed 토픽에 이벤트 발행
+        // 결제 실패시 payment.failed 토픽에 이벤트 발행
+        return null;
+    }
 
     public Page<PaymentResDto> search(PaymentSearchDto paymentSearchDto, Pageable pageable) {
         log.info("search.PaymentSearchDto = {}, pageable = {}", paymentSearchDto, pageable);

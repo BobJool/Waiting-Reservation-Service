@@ -6,6 +6,7 @@ import com.bobjool.common.presentation.SuccessCode;
 import com.bobjool.payment.application.dto.PaymentResDto;
 import com.bobjool.payment.application.dto.PaymentSearchDto;
 import com.bobjool.payment.application.service.PaymentService;
+import com.bobjool.payment.presentation.dto.PaymentCreateReqDto;
 import com.bobjool.payment.presentation.dto.PaymentUpdateReqDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,13 +28,12 @@ import java.util.UUID;
 public class PaymentController {
     private final PaymentService paymentService;
 
-    // todo 결제 요청
-//    @PostMapping
-//    public ResponseEntity<ApiResponse<PaymentResDto>> createPayment(@Valid @RequestBody PaymentCreateReqDto paymentCreateReqDto) {
-//        log.info("createProduct.paymentCreateReqDto={}", paymentCreateReqDto);
-//        PaymentResDto response = paymentService.createPayment(paymentCreateReqDto.toServiceDto());
-//        return ApiResponse.success(SuccessCode.SUCCESS_INSERT, response);
-//    }
+    @PostMapping
+    public ResponseEntity<ApiResponse<PaymentResDto>> createPayment(@Valid @RequestBody PaymentCreateReqDto paymentCreateReqDto) {
+        log.info("createProduct.paymentCreateReqDto={}", paymentCreateReqDto);
+        PaymentResDto response = paymentService.createPayment(paymentCreateReqDto.toServiceDto());
+        return ApiResponse.success(SuccessCode.SUCCESS_INSERT, response);
+    }
 
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<PaymentResDto>>> search(@RequestParam(value = "userId", required = false) Long userId,
