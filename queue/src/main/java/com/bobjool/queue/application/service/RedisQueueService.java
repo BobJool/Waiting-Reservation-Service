@@ -14,8 +14,10 @@ import org.springframework.stereotype.Service;
 
 import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
+import com.bobjool.queue.application.dto.QueueCancelDto;
 import com.bobjool.queue.application.dto.QueueDelayResDto;
 import com.bobjool.queue.application.dto.QueueRegisterDto;
+import com.bobjool.queue.domain.enums.QueueStatus;
 import com.bobjool.queue.domain.util.RedisKeyUtil;
 
 import lombok.RequiredArgsConstructor;
@@ -49,6 +51,7 @@ public class RedisQueueService {
 			"type", dto.type(),
 			"dining_option", dto.diningOption(),
 			"position", position,
+			"status", QueueStatus.WAITING,
 			"delay_count", 0,
 			"created_at", System.currentTimeMillis()
 		);
@@ -57,7 +60,7 @@ public class RedisQueueService {
 		return userInfo;
 	}
 
-	public boolean isUserAlreadyWaiting(Long userId) {
+	public boolean isUserWaiting(Long userId) {
 		String userIsWaitingKey = RedisKeyUtil.getUserIsWaitingKey(userId);
 		return Boolean.TRUE.equals(redisTemplate.hasKey(userIsWaitingKey));
 	}
@@ -110,6 +113,7 @@ public class RedisQueueService {
 		double newScore = (targetScore + nextScore) / 2.0;
 		redisTemplate.opsForZSet().add(waitingListKey, String.valueOf(userId), newScore);
 		updateDelayCount(userQueueDataKey);
+		updateQueueStatus(restaurantId,userId, QueueStatus.DELAYED);
 
 		Long originalPosition = getHashValue(userQueueDataKey, "position", Long.class);
 		Integer member = getHashValue(userQueueDataKey, "member", Integer.class);
@@ -188,5 +192,39 @@ public class RedisQueueService {
 
 		Object nextUser = nextUsers.iterator().next();
 		return getUserScore(waitingListKey, Long.parseLong(nextUser.toString()));
+	}
+
+	public void cancelWaiting(QueueCancelDto dto) {
+		removeUserIsWaitingKey(dto.userId());
+		removeUserFromQueue(dto.restaurantId(),dto.userId());
+		updateQueueStatus(dto.restaurantId(), dto.userId(), QueueStatus.CANCELED);
+	}
+
+	private void removeUserFromQueue(UUID restaurantId, Long userId) {
+		String waitingListKey  = RedisKeyUtil.getWaitingListKey(restaurantId);
+		Double score = redisTemplate.opsForZSet().score(waitingListKey,String.valueOf(userId));
+		if (score != null) {
+			redisTemplate.opsForZSet().remove(waitingListKey, String.valueOf(userId));
+		} else {
+			throw new BobJoolException(ErrorCode.USER_NOT_FOUND_IN_QUEUE);
+		}
+	}
+
+	public void removeUserIsWaitingKey(Long userId) {
+		String isWaitingKey = RedisKeyUtil.getUserIsWaitingKey(userId);
+		if (isUserWaiting(userId)) {
+			redisTemplate.delete(isWaitingKey);
+		} else {
+			throw new BobJoolException(ErrorCode.USER_IS_NOT_WAITING);
+		}
+	}
+
+	private void updateQueueStatus(UUID restaurantId, Long userId, QueueStatus newStatus) {
+		String userQueueDataKey = RedisKeyUtil.getUserQueueDataKey(restaurantId, userId);
+		if (Boolean.TRUE.equals(redisTemplate.hasKey(userQueueDataKey))) {
+			redisTemplate.opsForHash().put(userQueueDataKey, "status", newStatus);
+		} else {
+			throw new BobJoolException(ErrorCode.QUEUE_DATA_NOT_FOUND);
+		}
 	}
 }

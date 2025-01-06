@@ -58,11 +58,11 @@ public class QueueController {
 	@DeleteMapping("/queues/{restaurantId}/{userId}")
 	public ResponseEntity<ApiResponse<String>> cancelQueue(
 		@PathVariable UUID restaurantId,
-		@PathVariable Long userId,
-		@RequestParam Long targetUserId) {
+		@PathVariable Long userId) {
 		// TODO : 롤검증 /오너라면 자신식당의 웨이팅정보변경인지 검증/ 손님이라면 내 줄서기 정보인지 확인
+		// TODO : 분기 /오너나 관리자라면 QueueCancelDto.reason : owner_or_admin / QueueCancelDto.reason : customer
 		return ApiResponse.success(SuccessCode.SUCCESS_ACCEPTED,
-			queueService.handleQueue(new QueueCancelDto(restaurantId,userId,targetUserId),"cancel"));
+			queueService.handleQueue(new QueueCancelDto(restaurantId,userId,"customer"),"cancel"));
 	}
 
 }

@@ -41,16 +41,16 @@ public class QueueService {
 		Long userId = request.userId();
 		UUID restaurantId = request.restaurantId();
 
-		if (redisQueueService.isUserAlreadyWaiting(userId)) {
+		if (redisQueueService.isUserWaiting(userId)) {
 			throw new BobJoolException(ErrorCode.USER_ALREADY_IN_QUEUE);
 		}
 
 		Map<String, Object> userInfo = redisQueueService.addUserToQueue(request);
 		redisQueueService.markUserAsWaiting(userId, restaurantId);
 		long rank = redisQueueService.getUserIndexInQueue(restaurantId, userId) + 1;
-		//TODO 1: restaurant service : 식당이름 가져오기
-		//TODO 2: auth service : 슬랙ID(혹은 이메일)
-		//TODO: 카프카 메세지 발행 > queue.registered
+		//TODO 1: restaurant service : restaurant_name 가져오기
+		//TODO 2: auth service : 슬랙ID, 사용자명
+		//TODO 3: 카프카 메세지 발행(사용자명,식당명, 대기인원, 대기순번, 대기번호) > queue.registered
 	}
 
 	public QueueStatusResDto getNextTenUsersWithOrder(UUID restaurantId, Long userId) {
@@ -64,11 +64,19 @@ public class QueueService {
 		redisQueueService.validateNotLastInQueue(dto.restaurantId(), dto.userId());
 		redisQueueService.validateDelayCount(userHashKey);
 		QueueDelayResDto response = redisQueueService.delayUserRank(dto.restaurantId(), dto.userId(), dto.targetUserId());
-		//TODO 1: restaurant service : 식당이름 가져오기
-		//TODO 2: auth service : 슬랙ID(혹은 이메일)
-		//TODO 3: 카프카 메세지 발행 > queue.delayed
+		//TODO 1: restaurant service : restaurant_name 가져오기
+		//TODO 2: auth service : 슬랙ID
+		//TODO 3: 카프카 메세지 발행(슬랙ID, 식당명, 대기인원, 바뀐대기순번, 대기번호) > queue.delayed
 	}
 
 	public void cancelWaiting(QueueCancelDto cancelDto) {
+		if (!redisQueueService.isUserWaiting(cancelDto.userId())) {
+			throw new BobJoolException(ErrorCode.USER_IS_NOT_WAITING);
+		}
+		redisQueueService.cancelWaiting(cancelDto);
+
+		//TODO 1: restaurant service : 식당이름 가져오기
+		//TODO 2: auth service : 슬랙ID, 사용자명
+		//TODO 3: 카프카 메세지 발행(슬랙ID, 식당명, 사용자명, 취소사유(reason, 문장만들어서) > queue.canceled
 	}
 }
