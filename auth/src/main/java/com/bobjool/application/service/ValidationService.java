@@ -24,9 +24,9 @@ public class ValidationService {
         }
     }
 
-    public void validateDuplicateSlackId(String slackId) {
-        if (userRepository.findBySlackId(slackId).isPresent()) {
-            throw new BobJoolException(ErrorCode.DUPLICATE_SLACK_ID);
+    public void validateDuplicateSlackEmail(String slackEmail) {
+        if (userRepository.findBySlackEmail(slackEmail).isPresent()) {
+            throw new BobJoolException(ErrorCode.DUPLICATE_SLACK_EMAIL);
         }
     }
 

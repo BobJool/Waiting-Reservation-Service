@@ -3,6 +3,8 @@ package com.bobjool.presentation.dto.response;
 import com.bobjool.domain.entity.User;
 import com.bobjool.domain.entity.UserRole;
 
+import java.time.LocalDateTime;
+
 public record UserResDto(
         Long id,
         String username,
@@ -12,7 +14,9 @@ public record UserResDto(
         String slackId,
         String phoneNumber,
         Boolean isApproved,
-        UserRole role
+        UserRole role,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
 ) {
     public static UserResDto of(User user) {
         return new UserResDto(
@@ -24,7 +28,9 @@ public record UserResDto(
                 user.getSlackId(),
                 user.getPhoneNumber(),
                 user.getIsApproved(),
-                user.getRole()
+                user.getRole(),
+                user.getCreatedAt(),
+                user.getUpdatedAt()
         );
     }
 }

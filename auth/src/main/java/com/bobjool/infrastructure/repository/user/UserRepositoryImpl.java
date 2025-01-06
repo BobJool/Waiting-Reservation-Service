@@ -4,5 +4,5 @@ import com.bobjool.domain.entity.User;
 import com.bobjool.domain.repository.UserRepository;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface UserRepositoryImpl extends JpaRepository<User, Long>, UserRepository {
+public interface UserRepositoryImpl extends JpaRepository<User, Long>, UserRepository, UserRepositoryCustom {
 }

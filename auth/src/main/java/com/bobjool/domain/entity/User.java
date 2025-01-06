@@ -32,6 +32,9 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private String email;
 
+    @Column(name = "slack_email")
+    private String slackEmail;
+
     @Column(name = "slack_id")
     private String slackId;
 
@@ -51,6 +54,7 @@ public class User extends BaseEntity {
             String name,
             String nickname,
             String email,
+            String slackEmail,
             String slackId,
             String phoneNumber,
             Boolean isApproved,
@@ -60,6 +64,7 @@ public class User extends BaseEntity {
         this.name = name;
         this.nickname = nickname;
         this.email = email;
+        this.slackEmail = slackEmail;
         this.slackId = slackId;
         this.phoneNumber = phoneNumber;
         this.isApproved = isApproved;
@@ -72,6 +77,7 @@ public class User extends BaseEntity {
             String name,
             String nickname,
             String email,
+            String slackEmail,
             String slackId,
             String phoneNumber,
             Boolean isApproved,
@@ -82,6 +88,7 @@ public class User extends BaseEntity {
                 name,
                 nickname,
                 email,
+                slackEmail,
                 slackId,
                 phoneNumber,
                 isApproved,

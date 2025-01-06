@@ -54,10 +54,13 @@ public class AuthService {
     public void signUp(final SignUpDto request) {
 
         validationService.validateDuplicateUsername(request.username());
-        validationService.validateDuplicateSlackId(request.slackId());
+        validationService.validateDuplicateSlackEmail(request.slackEmail());
         validationService.validateDuplicateNickname(request.nickname());
         validationService.validateDuplicateEmail(request.email());
         validationService.validateDuplicatePhoneNumber(request.phoneNumber());
+
+        // 슬랙 이메일로 슬랙 ID를 불러오는 API 호출
+        String slackId = "";
 
         User user = User.create(
                 request.username(),
@@ -65,7 +68,8 @@ public class AuthService {
                 request.name(),
                 request.nickname(),
                 request.email(),
-                request.slackId(),
+                request.slackEmail(),
+                slackId,
                 request.phoneNumber(),
                 true,
                 request.role()

@@ -2,14 +2,16 @@ package com.bobjool.presentation.controller;
 
 import com.bobjool.application.service.UserService;
 import com.bobjool.common.presentation.ApiResponse;
+import com.bobjool.common.presentation.PageResponse;
 import com.bobjool.common.presentation.SuccessCode;
 import com.bobjool.presentation.dto.response.UserResDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.SortDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -26,6 +28,20 @@ public class UserController {
         return ApiResponse.success(
                 SuccessCode.SUCCESS,
                 response
+        );
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<PageResponse<UserResDto>>> search(
+            @SortDefault(sort = "createdAt", direction = Sort.Direction.DESC)
+            Pageable pageable){
+
+        Page<UserResDto> responsePage
+                = userService.search(pageable);
+
+        return ApiResponse.success(
+                SuccessCode.SUCCESS,
+                PageResponse.of(responsePage)
         );
     }
 }
