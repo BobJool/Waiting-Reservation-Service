@@ -6,15 +6,12 @@ import com.bobjool.queue.domain.enums.DiningOption;
 import com.bobjool.queue.domain.enums.QueueType;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record QueueRegisterDto(
+public record QueueDelayDto(
+
 	@JsonProperty("restaurantId")
 	UUID restaurantId,
 	@JsonProperty("userId")
 	Long userId,
-	@JsonProperty("member")
-	Integer member,
-	@JsonProperty("type")
-	QueueType type,
-	@JsonProperty("diningOption")
-	DiningOption diningOption
+	@JsonProperty("targetUserId")
+	Long targetUserId
 ) { }

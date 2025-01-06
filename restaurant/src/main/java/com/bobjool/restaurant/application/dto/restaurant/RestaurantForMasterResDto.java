@@ -5,11 +5,12 @@ import com.bobjool.restaurant.domain.entity.restaurant.RestaurantCategory;
 import com.bobjool.restaurant.domain.entity.restaurant.RestaurantRegion;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.UUID;
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public record RestaurantResDto(
+public record RestaurantForMasterResDto(
     UUID RestaurantId,
     Long userId,
     RestaurantCategory restaurantCategory,
@@ -22,14 +23,18 @@ public record RestaurantResDto(
     boolean isReservation,
     boolean isQueue,
     LocalTime openTime,
-    LocalTime closeTime
-//    LocalDateTime createdAt,
-//    LocalDateTime updatedAt
-
+    LocalTime closeTime,
+    LocalDateTime createdAt,
+    String createdBy,
+    LocalDateTime updatedAt,
+    String updatedBy,
+    LocalDateTime deletedAt,
+    String deletedBy,
+    boolean isDeleted
 ) {
 
-  public static RestaurantResDto from(Restaurant restaurant){
-    return new RestaurantResDto(
+  public static RestaurantForMasterResDto from(Restaurant restaurant){
+    return new RestaurantForMasterResDto(
         restaurant.getId(),
         restaurant.getUserId(),
         restaurant.getRestaurantCategory(),
@@ -42,9 +47,14 @@ public record RestaurantResDto(
         restaurant.isReservation(),
         restaurant.isQueue(),
         restaurant.getOpenTime(),
-        restaurant.getCloseTime()
-//        restaurant.getCreatedAt(),
-//        restaurant.getUpdatedAt()
+        restaurant.getCloseTime(),
+        restaurant.getCreatedAt(),
+        restaurant.getCreatedBy(),
+        restaurant.getUpdatedAt(),
+        restaurant.getUpdatedBy(),
+        restaurant.getDeletedAt(),
+        restaurant.getDeletedBy(),
+        restaurant.getIsDeleted()
     );
   }
 

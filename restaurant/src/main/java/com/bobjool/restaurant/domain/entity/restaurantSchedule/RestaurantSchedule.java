@@ -2,8 +2,6 @@ package com.bobjool.restaurant.domain.entity.restaurantSchedule;
 
 
 import com.bobjool.common.domain.entity.BaseEntity;
-import com.bobjool.restaurant.application.dto.restaurantSchedule.RestaurantScheduleReserveDto;
-import com.bobjool.restaurant.application.dto.restaurantSchedule.RestaurantScheduleUpdateDto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -57,7 +55,6 @@ public class RestaurantSchedule extends BaseEntity {
   private boolean available;
 
   public static RestaurantSchedule create(
-   Long userId,
    UUID restaurantId,
    int tableNumber,
    LocalDate date,
@@ -67,7 +64,6 @@ public class RestaurantSchedule extends BaseEntity {
    boolean available
   ) {
     return RestaurantSchedule.builder()
-        .userId(userId)
         .restaurantId(restaurantId)
         .tableNumber(tableNumber)
         .date(date)
@@ -79,22 +75,37 @@ public class RestaurantSchedule extends BaseEntity {
   }
 
   //Customer가 좌석 예약
-  public void reserve(RestaurantScheduleReserveDto scheduleReserveDto){
-    this.userId = scheduleReserveDto.userId();
-    this.date = scheduleReserveDto.date(); // 있는지 조회만
-    this.timeSlot = scheduleReserveDto.timeSlot(); // 있는지 조회만
-    this.currentCapacity = scheduleReserveDto.currentCapacity();
-    this.available = false;
+  public void reserve(
+      Long userId,
+      int currentCapacity
+  ){
+      this.userId = userId;
+      this.currentCapacity = currentCapacity;
+      this.available = false;
   }
 
   //Owner가 스케쥴에 대한 정보를 수정
-  public void update(RestaurantScheduleUpdateDto scheduleUpdateDto){
-    this.userId = scheduleUpdateDto.userId();
-    this.date = scheduleUpdateDto.date(); // 있는지 조회만
-    this.timeSlot = scheduleUpdateDto.timeSlot(); // 있는지 조회만
-    this.maxCapacity = scheduleUpdateDto.maxCapacity();
-    this.currentCapacity = scheduleUpdateDto.currentCapacity();
-    this.available = scheduleUpdateDto.available();
+  public void update(
+    LocalDate date,
+    LocalTime timeSlot,
+    int maxCapacity,
+    int currentCapacity,
+    boolean available
+  ){
+    this.date = date;
+    this.timeSlot = timeSlot;
+    this.maxCapacity = maxCapacity;
+    this.currentCapacity = currentCapacity;
+    this.available = available;
+  }
+
+  /**
+   * 예약 가능 여부를 확인하는 메서드
+   * @param requestedCapacity 요청된 추가 예약 인원
+   * @return true: 수용 가능, false: 초과
+   */
+  public boolean isCapacityExceeded(int requestedCapacity) {
+    return this.maxCapacity > requestedCapacity;
   }
 
 }

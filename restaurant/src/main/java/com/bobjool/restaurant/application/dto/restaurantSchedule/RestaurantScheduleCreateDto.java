@@ -16,4 +16,8 @@ public record RestaurantScheduleCreateDto(
     int maxCapacity
 ){
 
+  public int reserveTime( ){
+    return this.timeSlot().getHour();
+  }
+
 }

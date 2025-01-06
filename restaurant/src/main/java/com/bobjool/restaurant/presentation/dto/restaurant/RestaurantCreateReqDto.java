@@ -12,8 +12,6 @@ import java.time.LocalTime;
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 
 public record RestaurantCreateReqDto (
-//      @NotNull(message = "레스토랑 ID 는 필수 입력값입니다.")
-//      UUID restaurantId,
 
       @NotNull(message = "유저 ID 는 필수 입력값입니다.")
       @Positive(message = "유저 ID 는 양수여야 합니다.")
