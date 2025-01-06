@@ -4,6 +4,8 @@ import com.bobjool.application.service.UserService;
 import com.bobjool.common.presentation.ApiResponse;
 import com.bobjool.common.presentation.PageResponse;
 import com.bobjool.common.presentation.SuccessCode;
+import com.bobjool.presentation.dto.request.UpdateUserReqDto;
+import com.bobjool.presentation.dto.response.UpdateUserResDto;
 import com.bobjool.presentation.dto.response.UserResDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -42,6 +44,21 @@ public class UserController {
         return ApiResponse.success(
                 SuccessCode.SUCCESS,
                 PageResponse.of(responsePage)
+        );
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<ApiResponse<UpdateUserResDto>> updateUser(
+            @PathVariable Long id,
+            @RequestBody UpdateUserReqDto request
+//            HttpServletRequest servletRequest
+    ) {
+
+        UpdateUserResDto response = userService.updateUser(request.toServiceDto(), id);
+
+        return ApiResponse.success(
+                SuccessCode.SUCCESS_UPDATE,
+                response
         );
     }
 }

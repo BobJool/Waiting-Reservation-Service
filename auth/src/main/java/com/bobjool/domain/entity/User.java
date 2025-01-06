@@ -95,5 +95,20 @@ public class User extends BaseEntity {
                 role
         );
     }
-}
 
+    public void updatePassword(String newPassword) {
+        this.password = newPassword;
+    }
+
+    public void updateSlackEmail(String slackEmail) {
+        this.slackEmail = slackEmail;
+    }
+
+    public void updateSlackId(String slackId) {
+        this.slackId = slackId;
+    }
+
+    public void updatePhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+}

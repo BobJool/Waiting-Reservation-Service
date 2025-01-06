@@ -44,6 +44,15 @@ public record SignUpReqDto (
     ) {
 
     public SignUpDto toServiceDto () {
-        return new SignUpDto(username, password, name, nickname, email, slackId, phoneNumber, role);
+        return new SignUpDto(
+                username,
+                password,
+                name,
+                nickname,
+                email,
+                slackId,
+                phoneNumber,
+                role
+        );
     }
 }
