@@ -61,4 +61,30 @@ public class UserController {
                 response
         );
     }
+
+    @PatchMapping("/{id}/approval")
+    public ResponseEntity<ApiResponse<UserResDto>> updateUserApproval(
+            @PathVariable Long id,
+            @RequestBody Boolean approved
+    ) {
+
+        UserResDto response = userService.updateUserApproval(id, approved);
+
+        return ApiResponse.success(
+                SuccessCode.SUCCESS_UPDATE,
+                response
+        );
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<String>> deleteUser(
+            @PathVariable Long id
+    ) {
+
+        userService.deleteUser(id);
+
+        return ApiResponse.success(
+                SuccessCode.SUCCESS_DELETE
+        );
+    }
 }

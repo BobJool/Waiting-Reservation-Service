@@ -30,6 +30,7 @@ public enum ErrorCode {
     EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "만료된 JWT 토큰입니다."),
     UNSUPPORTED_TOKEN(HttpStatus.UNAUTHORIZED, "지원하지 않는 JWT 토큰 형식입니다."),
     UNKNOWN_TOKEN_TYPE(HttpStatus.BAD_REQUEST, "토큰 타입이 확인되지 않았습니다."),
+    MISSING_OWNER_ROLE(HttpStatus.FORBIDDEN, "해당 사용자는 권한이 OWNER가 아닙니다."),
 
     // 레스토랑
     DUPLICATED_NAME(HttpStatus.BAD_REQUEST,"식당 이름이 이미 존재합니다."),

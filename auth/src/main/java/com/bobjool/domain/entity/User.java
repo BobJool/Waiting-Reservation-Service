@@ -111,4 +111,12 @@ public class User extends BaseEntity {
     public void updatePhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
+
+    public void updateUserApproval(Boolean approved) {
+        this.isApproved = approved;
+    }
+
+    public void delete() {
+        this.isApproved = false;
+    }
 }
