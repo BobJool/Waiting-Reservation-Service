@@ -1,5 +1,8 @@
 package com.bobjool.queue.infrastructure.config.redis;
 
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -11,61 +14,42 @@ import com.bobjool.queue.application.service.QueueMessageSubscriber;
 
 @Configuration
 public class RedisPubSubConfig {
+
+	private static final Map<String, String> TOPICS = Map.of(
+		"register", "queue.register",
+		"delay", "queue.delay",
+		"cancel", "queue.cancel",
+		"checkIn", "queue.checkin",
+		"alert", "queue.alert",
+		"reminder", "queue.reminder"
+	);
+
 	@Bean
 	public RedisMessageListenerContainer container(
 		RedisConnectionFactory connectionFactory,
-		MessageListenerAdapter registerListenerAdapter,
-		MessageListenerAdapter delayListenerAdapter,
-		MessageListenerAdapter cancelListenerAdapter,
-		MessageListenerAdapter checkInListenerAdapter) {
+		QueueMessageSubscriber subscriber
+	) {
 		RedisMessageListenerContainer container = new RedisMessageListenerContainer();
 		container.setConnectionFactory(connectionFactory);
-		container.addMessageListener(registerListenerAdapter, registerTopic());
-		container.addMessageListener(delayListenerAdapter, delayTopic());
-		container.addMessageListener(cancelListenerAdapter, cancelTopic());
-		container.addMessageListener(checkInListenerAdapter, checkInTopic());
+
+		TOPICS.forEach((name, topic) ->
+			container.addMessageListener(createListenerAdapter(subscriber), new ChannelTopic(topic))
+		);
 
 		return container;
 	}
 
-	@Bean
-	public MessageListenerAdapter registerListenerAdapter(QueueMessageSubscriber subscriber) {
+	private MessageListenerAdapter createListenerAdapter(QueueMessageSubscriber subscriber) {
 		return new MessageListenerAdapter(subscriber, "onMessage");
 	}
 
 	@Bean
-	public MessageListenerAdapter delayListenerAdapter(QueueMessageSubscriber subscriber) {
-		return new MessageListenerAdapter(subscriber, "onMessage");
-	}
-
-	@Bean
-	public MessageListenerAdapter cancelListenerAdapter(QueueMessageSubscriber subscriber) {
-		return new MessageListenerAdapter(subscriber, "onMessage");
-	}
-
-	@Bean
-	public MessageListenerAdapter checkInListenerAdapter(QueueMessageSubscriber subscriber) {
-		return new MessageListenerAdapter(subscriber, "onMessage");
-	}
-
-	@Bean
-	public ChannelTopic registerTopic() {
-		return new ChannelTopic("queue.register");
-	}
-
-	@Bean
-	public ChannelTopic delayTopic() {
-		return new ChannelTopic("queue.delay");
-	}
-
-	@Bean
-	public ChannelTopic cancelTopic() {
-		return new ChannelTopic("queue.cancel");
-	}
-
-	@Bean
-	public ChannelTopic checkInTopic() {
-		return new ChannelTopic("queue.checkin");
+	public Map<String, ChannelTopic> channelTopics() {
+		return TOPICS.entrySet().stream()
+			.collect(Collectors.toMap(
+				Map.Entry::getKey,
+				entry -> new ChannelTopic(entry.getValue())
+			));
 	}
 
 }
