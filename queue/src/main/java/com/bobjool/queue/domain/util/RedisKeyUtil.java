@@ -23,4 +23,8 @@ public class RedisKeyUtil {
 	public static String getMetadataKey(UUID restaurantId) {
 		return String.format("queue:metadata:%s", restaurantId);
 	}
+
+	public static String getAutoCancelKey(UUID restaurantId, Long userId) {
+		return String.format("queue:autoCancel:%s:%s", restaurantId, userId);
+	}
 }
