@@ -20,7 +20,6 @@ import com.bobjool.queue.application.dto.QueueCheckInDto;
 import com.bobjool.queue.application.dto.QueueDelayDto;
 import com.bobjool.queue.application.dto.QueueStatusResDto;
 import com.bobjool.queue.application.service.QueueService;
-import com.bobjool.queue.application.service.RedisQueueService;
 import com.bobjool.queue.presentation.dto.QueueRegisterReqDto;
 
 import jakarta.validation.Valid;
@@ -37,7 +36,7 @@ public class QueueController {
 	public ResponseEntity<ApiResponse<String>> registerQueue(
 		@Valid @RequestBody QueueRegisterReqDto request) {
 		return ApiResponse.success(SuccessCode.SUCCESS_ACCEPTED,
-			queueService.handleQueue(request.restaurantId(), request.userId(), request.toServiceDto(),"register"));
+			queueService.handleQueue(request.restaurantId(), request.userId(), request.toServiceDto(), "register"));
 	}
 
 	@GetMapping("/queues/{restaurantId}/{userId}")
@@ -55,7 +54,8 @@ public class QueueController {
 		@RequestParam Long targetUserId) {
 		// TODO : 롤검증 /오너라면 자신식당의 웨이팅정보변경인지 검증/ 손님이라면 내 줄서기 정보인지 확인
 		return ApiResponse.success(SuccessCode.SUCCESS_ACCEPTED,
-			queueService.handleQueue(restaurantId, userId, new QueueDelayDto(restaurantId,userId,targetUserId),"delay"));
+			queueService.handleQueue(restaurantId, userId, new QueueDelayDto(restaurantId, userId, targetUserId),
+				"delay"));
 	}
 
 	@DeleteMapping("/queues/{restaurantId}/{userId}")
@@ -65,7 +65,8 @@ public class QueueController {
 		// TODO : 롤검증 /오너라면 자신식당의 웨이팅정보변경인지 검증/ 손님이라면 내 줄서기 정보인지 확인
 		// TODO : 분기 /오너나 관리자라면 QueueCancelDto.reason : owner_or_admin / QueueCancelDto.reason : customer
 		return ApiResponse.success(SuccessCode.SUCCESS_ACCEPTED,
-			queueService.handleQueue(restaurantId, userId, new QueueCancelDto(restaurantId,userId,"customer"),"cancel"));
+			queueService.handleQueue(restaurantId, userId, new QueueCancelDto(restaurantId, userId, "customer"),
+				"cancel"));
 	}
 
 	@PostMapping("/queues/{restaurantId}/{userId}/check-in")
@@ -75,7 +76,7 @@ public class QueueController {
 		// TODO : 롤검증 /오너
 		// TODO 자신식당인지 검증
 		return ApiResponse.success(SuccessCode.SUCCESS_ACCEPTED,
-			queueService.handleQueue(restaurantId, userId, new QueueCheckInDto(restaurantId,userId),"checkin"));
+			queueService.handleQueue(restaurantId, userId, new QueueCheckInDto(restaurantId, userId), "checkin"));
 	}
 
 	@PostMapping("/queues/{restaurantId}/{userId}/alert")

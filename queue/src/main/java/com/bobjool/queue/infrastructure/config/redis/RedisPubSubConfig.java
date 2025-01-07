@@ -7,10 +7,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.listener.ChannelTopic;
+import org.springframework.data.redis.listener.PatternTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 
 import com.bobjool.queue.application.service.QueueMessageSubscriber;
+import com.bobjool.queue.application.service.RedisExpirationListener;
 
 @Configuration
 public class RedisPubSubConfig {
@@ -27,6 +29,7 @@ public class RedisPubSubConfig {
 	@Bean
 	public RedisMessageListenerContainer container(
 		RedisConnectionFactory connectionFactory,
+		RedisExpirationListener expirationListener,
 		QueueMessageSubscriber subscriber
 	) {
 		RedisMessageListenerContainer container = new RedisMessageListenerContainer();
@@ -36,11 +39,16 @@ public class RedisPubSubConfig {
 			container.addMessageListener(createListenerAdapter(subscriber), new ChannelTopic(topic))
 		);
 
+		container.addMessageListener(
+			createListenerAdapter(expirationListener),
+			new PatternTopic("__keyevent@*__:expired") // Redis 키 만료 이벤트 패턴
+		);
+
 		return container;
 	}
 
-	private MessageListenerAdapter createListenerAdapter(QueueMessageSubscriber subscriber) {
-		return new MessageListenerAdapter(subscriber, "onMessage");
+	private MessageListenerAdapter createListenerAdapter(Object listener) {
+		return new MessageListenerAdapter(listener, "onMessage");
 	}
 
 	@Bean
