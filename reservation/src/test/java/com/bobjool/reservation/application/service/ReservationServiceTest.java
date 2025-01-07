@@ -2,6 +2,7 @@ package com.bobjool.reservation.application.service;
 
 import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
+import com.bobjool.reservation.application.client.RestaurantScheduleClient;
 import com.bobjool.reservation.application.dto.reservation.ReservationCreateDto;
 import com.bobjool.reservation.application.dto.reservation.ReservationResDto;
 import com.bobjool.reservation.application.dto.reservation.ReservationSearchDto;
@@ -32,6 +33,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.tuple;
+import static org.mockito.BDDMockito.*;
 
 @ActiveProfiles("test")
 @Transactional
@@ -46,6 +48,9 @@ class ReservationServiceTest {
 
     @MockBean
     ReservationProducer reservationProducer;
+
+    @MockBean
+    RestaurantScheduleClient restaurantScheduleClient;
 
     /**
      * createReservation - 2개 테스트
@@ -65,8 +70,10 @@ class ReservationServiceTest {
                 reservationDate, reservationTime);
 
         // ReservationProducer의 publish 메서드가 호출되더라도 아무 작업도 하지 않도록 설정
-        BDDMockito.willDoNothing().given(reservationProducer)
-                .publish(BDDMockito.anyString(), BDDMockito.any());
+        willDoNothing().given(reservationProducer).publish(anyString(), any());
+
+        // RestaurantScheduleClient 의 reserveSchedule 메서드가 호출되더라도 아무 작업도 하지 않도록 설정
+        doReturn(null).when(restaurantScheduleClient).reserveSchedule(any(), any());
 
         // when - reservationService.createReservation() 호출
         ReservationResDto response = reservationService.createReservation(reservationCreateDto);
@@ -103,6 +110,8 @@ class ReservationServiceTest {
         ReservationCreateDto reservationCreateDto = new ReservationCreateDto(userId, restaurantId, scheduleId, guestCount,
                 reservationDate, reservationTime);
 
+        // RestaurantScheduleClient 의 reserveSchedule 메서드가 호출되더라도 아무 작업도 하지 않도록 설정
+        doReturn(null).when(restaurantScheduleClient).reserveSchedule(any(), any());
             // when & then - 예외 발생 검증
         assertThatThrownBy(() -> reservationService.createReservation(reservationCreateDto))
                 .isInstanceOf(BobJoolException.class)
