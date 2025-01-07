@@ -57,6 +57,8 @@ public enum ErrorCode {
     USER_IS_NOT_WAITING(HttpStatus.BAD_REQUEST, "사용자는 대기중 상태가 아닙니다."),
     CURRENT_STATUS_NOT_FOUND(HttpStatus.BAD_REQUEST, "대상 사용자는 대기상태를 알 수 없습니다."),
     INVALID_STATUS_TRANSITION(HttpStatus.BAD_REQUEST, "현재 상태에서는 대기상태를 변경할 수 없습니다."),
+    ALREADY_SENT_ALERT(HttpStatus.BAD_REQUEST, "이미 입장 알림을 전송하였습니다."),
+    ALREADY_SENT_RUSH_ALERT(HttpStatus.BAD_REQUEST, "이미 입장 호출 알림을 전송하였습니다.."),
 
     // 예약
     INVALID_GUEST_COUNT(HttpStatus.BAD_REQUEST, "예약 인원수는 양수여야 합니다."),

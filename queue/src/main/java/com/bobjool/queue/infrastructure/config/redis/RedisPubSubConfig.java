@@ -21,7 +21,7 @@ public class RedisPubSubConfig {
 		"cancel", "queue.cancel",
 		"checkIn", "queue.checkin",
 		"alert", "queue.alert",
-		"reminder", "queue.reminder"
+		"rush", "queue.rush"
 	);
 
 	@Bean

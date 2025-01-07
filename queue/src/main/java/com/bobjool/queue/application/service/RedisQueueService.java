@@ -4,15 +4,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
+import com.bobjool.queue.application.dto.QueueAlertDto;
 import com.bobjool.queue.application.dto.QueueCancelDto;
 import com.bobjool.queue.application.dto.QueueCheckInDto;
 import com.bobjool.queue.application.dto.QueueDelayResDto;
@@ -61,7 +64,7 @@ public class RedisQueueService {
 
 	public boolean isUserInQueue(UUID restaurantId, Long userId) {
 		String waitingListKey = RedisKeyUtil.getWaitingListKey(restaurantId);
-		return Boolean.TRUE.equals(redisTemplate.opsForZSet().score(waitingListKey, userId) != null);
+		return Boolean.TRUE.equals(redisTemplate.opsForZSet().score(waitingListKey, String.valueOf(userId)) != null);
 	}
 
 	public void markUserAsWaiting(Long userId, UUID restaurantId) {
@@ -114,8 +117,8 @@ public class RedisQueueService {
 		updateDelayCount(userQueueDataKey);
 		updateQueueStatus(restaurantId,userId, QueueStatus.DELAYED);
 
-		Long originalPosition = getHashValue(userQueueDataKey, "position", Long.class);
-		Integer member = getHashValue(userQueueDataKey, "member", Integer.class);
+		Long originalPosition = getHashValue(restaurantId, userId, "position", Long.class);
+		Integer member = getHashValue(restaurantId, userId,"member", Integer.class);
 		long newRank = getUserIndexInQueue(restaurantId, userId) +1;
 
 		log.info("Delayed user {} to queue {} with newRank {}", userId, waitingListKey, newRank);
@@ -134,7 +137,7 @@ public class RedisQueueService {
 	}
 
 	public void validateNotLastInQueue(UUID restaurantId, Long userId) {
-		Long userRank = getUserIndexInQueue(restaurantId, userId);
+		Long userRank = getUserIndexInQueue(restaurantId, userId) +1 ;
 		Long totalUsers = getTotalUsersInQueue(restaurantId);
 
 		if (userRank.equals(totalUsers)) {
@@ -166,8 +169,9 @@ public class RedisQueueService {
 		return score;
 	}
 
-	private <T> T getHashValue(String hashKey, String field, Class<T> type) {
-		Object value = redisTemplate.opsForHash().get(hashKey, field);
+	private <T> T getHashValue(UUID restaurantId, Long userId, String field, Class<T> type) {
+		String userQueueDataKey = RedisKeyUtil.getUserQueueDataKey(restaurantId, userId);
+		Object value = redisTemplate.opsForHash().get(userQueueDataKey, field);
 		if (value == null) {
 			throw new BobJoolException(ErrorCode.QUEUE_DATA_NOT_FOUND);
 		}
@@ -233,4 +237,31 @@ public class RedisQueueService {
 		removeUserFromQueue(dto.restaurantId(),dto.userId());
 		updateQueueStatus(dto.restaurantId(), dto.userId(), QueueStatus.CHECK_IN);
 	}
+
+	public Integer sendAlertNotification(QueueAlertDto dto) {
+		updateQueueStatus(dto.restaurantId(),dto.userId(),QueueStatus.ALERTED);
+		Long originalPosition = getHashValue(dto.restaurantId(),dto.userId(),"position", Long.class);
+		return originalPosition.intValue();
+	}
+
+	public Integer sendRushAlertNotification(QueueAlertDto dto) {
+		updateQueueStatus(dto.restaurantId(),dto.userId(),QueueStatus.RUSH_SENT);
+		Long originalPosition = getHashValue(dto.restaurantId(),dto.userId(),"position", Long.class);
+		return originalPosition.intValue();
+	}
+
+	public void checkUserStatus(UUID restaurantId, Long userId, String process) {
+		String status = getHashValue(restaurantId, userId,"status", String.class);
+		if (process.equals("alert")){
+			if(status == null || List.of("ALERTED", "RUSH_SENT", "CHECK_IN", "CANCELED").contains(status)){
+				throw new BobJoolException(ErrorCode.ALREADY_SENT_ALERT);
+			}
+		} else if (process.equals("rush")) {
+			if(status == null || List.of("RUSH_SENT", "CHECK_IN", "CANCELED").contains(status)){
+				throw new BobJoolException(ErrorCode.ALREADY_SENT_RUSH_ALERT);
+			}
+		}
+	}
+
+
 }

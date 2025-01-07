@@ -42,11 +42,11 @@ public class QueueMessagePublisherService {
 	}
 
 	public String publishAlertQueue(QueueAlertDto dto) {
-		return publishMessage("checkIn", dto, "대기열 식당 체크인 요청 성공");
+		return publishMessage("alert", dto, "대기열 사용자 식당 입장 알림 요청 성공");
 	}
 
-	public String publishReminderQueue(QueueAlertDto dto) {
-		return publishMessage("checkIn", dto, "대기열 식당 체크인 요청 성공");
+	public String publishRushQueue(QueueAlertDto dto) {
+		return publishMessage("rush", dto, "대기열 사용자 식당 입장요청 알림 요청 성공");
 	}
 
 	private String publishMessage(String topicKey, Object dto, String successMessage) {

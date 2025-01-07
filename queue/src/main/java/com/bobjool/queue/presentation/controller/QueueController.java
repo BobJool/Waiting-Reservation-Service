@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bobjool.common.presentation.ApiResponse;
 import com.bobjool.common.presentation.SuccessCode;
+import com.bobjool.queue.application.dto.QueueAlertDto;
 import com.bobjool.queue.application.dto.QueueCancelDto;
 import com.bobjool.queue.application.dto.QueueCheckInDto;
 import com.bobjool.queue.application.dto.QueueDelayDto;
@@ -75,6 +76,26 @@ public class QueueController {
 		// TODO 자신식당인지 검증
 		return ApiResponse.success(SuccessCode.SUCCESS_ACCEPTED,
 			queueService.handleQueue(restaurantId, userId, new QueueCheckInDto(restaurantId,userId),"checkin"));
+	}
+
+	@PostMapping("/queues/{restaurantId}/{userId}/alert")
+	public ResponseEntity<ApiResponse<String>> sendAlertNotification(
+		@PathVariable UUID restaurantId,
+		@PathVariable Long userId) {
+		// TODO: 롤 검증 / 오너
+		// TODO: 자신 식당인지 검증
+		return ApiResponse.success(SuccessCode.SUCCESS_ACCEPTED,
+			queueService.handleQueue(restaurantId, userId, new QueueAlertDto(restaurantId, userId), "alert"));
+	}
+
+	@PostMapping("/queues/{restaurantId}/{userId}/rush")
+	public ResponseEntity<ApiResponse<String>> sendRushNotification(
+		@PathVariable UUID restaurantId,
+		@PathVariable Long userId) {
+		// TODO: 롤 검증 / 오너
+		// TODO: 자신 식당인지 검증
+		return ApiResponse.success(SuccessCode.SUCCESS_ACCEPTED,
+			queueService.handleQueue(restaurantId, userId, new QueueAlertDto(restaurantId, userId), "rush"));
 	}
 
 }

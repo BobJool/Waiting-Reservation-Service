@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
+import com.bobjool.queue.application.dto.QueueAlertDto;
 import com.bobjool.queue.application.dto.QueueCancelDto;
 import com.bobjool.queue.application.dto.QueueCheckInDto;
 import com.bobjool.queue.application.dto.QueueDelayDto;
@@ -63,6 +64,22 @@ public class QueueService {
 					throw new BobJoolException(ErrorCode.USER_NOT_FOUND_IN_QUEUE);
 				}
 			}
+			case "alert" -> {
+				if (isUserInQueue) {
+					redisQueueService.checkUserStatus(restaurantId,userId,"alert");
+					yield queuePublisherService.publishAlertQueue((QueueAlertDto) dto);
+				} else {
+					throw new BobJoolException(ErrorCode.USER_NOT_FOUND_IN_QUEUE);
+				}
+			}
+			case "rush" -> {
+				if (isUserInQueue) {
+					redisQueueService.checkUserStatus(restaurantId,userId,"rush");
+					yield queuePublisherService.publishRushQueue((QueueAlertDto) dto);
+				} else {
+					throw new BobJoolException(ErrorCode.USER_NOT_FOUND_IN_QUEUE);
+				}
+			}
 			default -> throw new BobJoolException(ErrorCode.INVALID_PROCESS_TYPE);
 		};
 	}
@@ -78,13 +95,17 @@ public class QueueService {
 		//TODO 1: restaurant service : restaurant_name 가져오기
 		//TODO 2: auth service : 슬랙ID, 사용자명
 		//TODO 3: 카프카 메세지 발행(사용자명,식당명, 대기인원, 대기순번, 대기번호) > queue.registered
+		//TODO 변경: 카프카 메세지 발행(유저ID, 식당ID, 대기인원, 대기순번, 대기번호) > queue.registered
 	}
 
 	public QueueStatusResDto getNextTenUsersWithOrder(UUID restaurantId, Long userId) {
-		redisQueueService.isUserWaiting(userId);
-		long rank = redisQueueService.getUserIndexInQueue(restaurantId, userId) + 1;
-		List<String> nextUsers = redisQueueService.getNextTenUsersWithOrder(restaurantId, userId);
-		return new QueueStatusResDto(rank, nextUsers);
+		if(redisQueueService.isUserWaiting(userId)){
+			long rank = redisQueueService.getUserIndexInQueue(restaurantId, userId) + 1;
+			List<String> nextUsers = redisQueueService.getNextTenUsersWithOrder(restaurantId, userId);
+			return new QueueStatusResDto(rank, nextUsers);
+		}else {
+			throw new BobJoolException(ErrorCode.USER_NOT_FOUND_IN_QUEUE);
+		}
 	}
 
 	public void delayUserRank(QueueDelayDto dto) {
@@ -92,19 +113,42 @@ public class QueueService {
 		//TODO 1: restaurant service : restaurant_name 가져오기
 		//TODO 2: auth service : 슬랙ID
 		//TODO 3: 카프카 메세지 발행(슬랙ID, 식당명, 대기인원, 바뀐대기순번, 대기번호) > queue.delayed
+		//TODO 변경: 카프카 메세지 발행(유저ID, 식당ID, 대기인원member, 바뀐대기순번rank, 대기번호position) > queue.delayed
 	}
 
 	public void cancelWaiting(QueueCancelDto cancelDto) {
 		redisQueueService.cancelWaiting(cancelDto);
-
 		//TODO 1: restaurant service : 식당이름 가져오기
 		//TODO 2: auth service : 슬랙ID, 사용자명
 		//TODO 3: 카프카 메세지 발행(슬랙ID, 식당명, 사용자명, 취소사유(reason, 문장만들어서) > queue.canceled
+		//TODO 변경: 카프카 메세지 발행(유저ID, 식당ID, 취소사유(reason, 문장만들어서) > queue.canceled
 	}
 
 	public void checkInRestaurant(QueueCheckInDto checkInDto) {
 		redisQueueService.checkInRestaurant(checkInDto);
+		// 체크인 다음 3번째 유저 정보(순번 3, 대기 번호) 가져오기
+		//TODO 1: restaurant service : 식당이름 가져오기
+		//TODO 2: auth service : 슬랙ID, 사용자명
+		//TODO 3: 카프카 메세지 발행(슬랙ID, 식당명, 사용자명, 순번(3), 대기번호) > queue.remind
+		//TODO 변경: 카프카 메세지 발행(유저ID, 식당ID, 순번(3), 대기번호) > queue.remind
+
 	}
 
+	public void sendAlertNotification(QueueAlertDto dto) {
+		Integer position = redisQueueService.sendAlertNotification(dto);
+		log.info("sendAlertNotification() position : " + position);
+		//TODO 1: restaurant service : 식당이름 가져오기
+		//TODO 2: auth service : 슬랙ID, 사용자명
+		//TODO 3: 카프카 메세지 발행(슬랙ID, 식당명, 사용자명, 대기번호) > queue.queue.alerted
+		//TODO 변경: 카프카 메세지 발행(유저ID, 식당ID, 대기번호) > queue.queue.alerted
+	}
 
+	public void sendRushAlertNotification(QueueAlertDto dto) {
+		Integer position = redisQueueService.sendRushAlertNotification(dto);
+		log.info("sendRushAlertNotification() position : " + position);
+		//TODO 1: restaurant service : 식당이름 가져오기
+		//TODO 2: auth service : 슬랙ID
+		//TODO 3: 카프카 메세지 발행(슬랙ID, 식당명, 대기번호) > queue.rush
+		//TODO 변경:: 카프카 메세지 발행(유저ID, 식당ID, 대기번호) > queue.rush
+	}
 }

@@ -52,9 +52,9 @@ public class QueueMessageSubscriber implements MessageListener {
 				queueService.sendAlertNotification(alertDto);
 				break;
 
-			case "queue.reminder":
+			case "queue.rush":
 				QueueAlertDto remindDto = parseMessage(messageBody, QueueAlertDto.class);
-				queueService.sendReminderNotification(remindDto);
+				queueService.sendRushAlertNotification(remindDto);
 				break;
 
 			default:
