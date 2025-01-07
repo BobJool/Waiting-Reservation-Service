@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
 import com.bobjool.queue.application.dto.QueueCancelDto;
+import com.bobjool.queue.application.dto.QueueCheckInDto;
 import com.bobjool.queue.application.dto.QueueDelayDto;
 import com.bobjool.queue.application.dto.QueueDelayResDto;
 import com.bobjool.queue.application.dto.QueueRegisterDto;
@@ -32,6 +33,7 @@ public class QueueService {
 			case "register" -> queuePublisherService.publishRegisterQueue((QueueRegisterDto)dto);
 			case "delay" -> queuePublisherService.publishDelayQueue((QueueDelayDto)dto);
 			case "cancel" -> queuePublisherService.publishCancelQueue((QueueCancelDto)dto);
+			case "checkin" -> queuePublisherService.publishCheckInQueue((QueueCheckInDto)dto);
 			default -> throw new BobJoolException(ErrorCode.INVALID_PROCESS_TYPE);
 		};
 	}
@@ -78,5 +80,9 @@ public class QueueService {
 		//TODO 1: restaurant service : 식당이름 가져오기
 		//TODO 2: auth service : 슬랙ID, 사용자명
 		//TODO 3: 카프카 메세지 발행(슬랙ID, 식당명, 사용자명, 취소사유(reason, 문장만들어서) > queue.canceled
+	}
+
+	public void checkInRestaurant(QueueCheckInDto checkInDto) {
+		redisQueueService.checkInRestaurant(checkInDto);
 	}
 }

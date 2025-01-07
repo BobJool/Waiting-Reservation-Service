@@ -9,12 +9,12 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
 import com.bobjool.queue.application.dto.QueueCancelDto;
+import com.bobjool.queue.application.dto.QueueCheckInDto;
 import com.bobjool.queue.application.dto.QueueDelayResDto;
 import com.bobjool.queue.application.dto.QueueRegisterDto;
 import com.bobjool.queue.domain.enums.QueueStatus;
@@ -28,9 +28,6 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class RedisQueueService {
 	private final RedisTemplate<String, Object> redisTemplate;
-
-
-
 
 	// 대기 큐에 사용자 추가
 	public Map<String, Object> addUserToQueue(QueueRegisterDto dto) {
@@ -223,5 +220,11 @@ public class RedisQueueService {
 		} else {
 			throw new BobJoolException(ErrorCode.QUEUE_DATA_NOT_FOUND);
 		}
+	}
+
+	public void checkInRestaurant(QueueCheckInDto dto) {
+		removeUserIsWaitingKey(dto.userId());
+		removeUserFromQueue(dto.restaurantId(),dto.userId());
+		updateQueueStatus(dto.restaurantId(), dto.userId(), QueueStatus.CHECK_IN);
 	}
 }
