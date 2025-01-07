@@ -5,6 +5,7 @@ import com.bobjool.common.presentation.PageResponse;
 import com.bobjool.common.presentation.SuccessCode;
 import com.bobjool.reservation.application.dto.payment.PaymentResDto;
 import com.bobjool.reservation.application.dto.payment.PaymentSearchDto;
+import com.bobjool.reservation.application.interfaces.RestaurantClient;
 import com.bobjool.reservation.application.service.PaymentService;
 import com.bobjool.reservation.application.service.ReservationPaymentService;
 import com.bobjool.reservation.presentation.dto.payment.PaymentCreateReqDto;
@@ -29,6 +30,7 @@ import java.util.UUID;
 public class PaymentController {
     private final PaymentService paymentService;
     private final ReservationPaymentService reservationPaymentService;
+    private final RestaurantClient restaurantClient;
 
     @PostMapping
     public ResponseEntity<ApiResponse<PaymentResDto>> createPayment(@Valid @RequestBody PaymentCreateReqDto paymentCreateReqDto) {
@@ -70,4 +72,8 @@ public class PaymentController {
         return ApiResponse.success(SuccessCode.SUCCESS, response);
     }
 
+    @GetMapping("/get-data-feign")
+    public ResponseEntity<ApiResponse<PageResponse<?>>> getDataWithFeignClient() {
+        return restaurantClient.getAllRestaurants();
+    }
 }
