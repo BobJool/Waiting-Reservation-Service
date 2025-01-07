@@ -25,6 +25,9 @@ public class Notification extends BaseEntity {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
+    @Column(name = "contact")
+    private String contact;
+
     @Column(name = "json_data")
     private String jsonData;
 
@@ -35,4 +38,14 @@ public class Notification extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private NotificationStatus status;
 
+    public static Notification createNotification(Template templateId, Long userId, String jsonData, String message, String contact) {
+        return Notification.builder()
+                .templateId(templateId)
+                .userId(userId)
+                .jsonData(jsonData)
+                .message(message)
+                .contact(contact)
+                .status(NotificationStatus.SENT)
+                .build();
+    }
 }

@@ -32,6 +32,19 @@ public class TemplateService {
                 .collect(Collectors.toList());
     }
 
+    public TemplateDto selectTemplate(UUID id) {
+        Template template = this.getTemplateById(id);
+        log.info("selected template: {}", template);
+
+        return TemplateDto.from(
+                templateRepository.save(template)
+        );
+    }
+
+    public Template selectTemplateEntity(UUID id){
+        return this.getTemplateById(id);
+    }
+
     @Transactional
     public TemplateDto createTemplate(TemplateCreateDto createDto) {
         Template template = Template.createTemplate(
@@ -41,7 +54,8 @@ public class TemplateService {
                 createDto.title(),
                 createDto.template(),
                 templateConvertService.getVariablesToJson(
-                        createDto.template()
+                        createDto.title()
+                                .concat(createDto.template())
                 )
         );
         log.info("created template: {}", template);
@@ -55,7 +69,8 @@ public class TemplateService {
     public TemplateDto updateTemplate(UUID templateId, TemplateCreateDto createDto) {
         Template template = getTemplateById(templateId);
         String variables = templateConvertService.getVariablesToJson(
-                createDto.template()
+                createDto.title()
+                        .concat(createDto.template())
         );
 
         template.updateTemplate(
