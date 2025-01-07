@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface JwtUtil {
     String createAccessToken(User user);
-    String createRefreshToken(String username);
+    String createRefreshToken(User user);
     boolean validateToken(String token);
     Claims validateAndGetClaims(String token);
     String getTokenFromHeader(String headerName, HttpServletRequest request);

@@ -14,6 +14,15 @@ dependencies {
 
     runtimeOnly 'org.postgresql:postgresql'
 
+    //config server 사용
+    implementation 'org.springframework.cloud:spring-cloud-starter-config'
+
+    // kafka 사용
+    api 'org.springframework.kafka:spring-kafka'
+
+    // Jackson 확장 모듈 - Java 8의 LocalDateTime 변환 지원
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+
     // queryDsl
     implementation "com.querydsl:querydsl-jpa:${querydslVersion}:jakarta"
     annotationProcessor "com.querydsl:querydsl-apt:${querydslVersion}:jakarta"

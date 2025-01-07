@@ -4,6 +4,10 @@ import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.stereotype.Service;
 
+import com.bobjool.common.exception.BobJoolException;
+import com.bobjool.common.exception.ErrorCode;
+import com.bobjool.queue.application.dto.QueueCancelDto;
+import com.bobjool.queue.application.dto.QueueCheckInDto;
 import com.bobjool.queue.application.dto.QueueDelayDto;
 import com.bobjool.queue.application.dto.QueueRegisterDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,8 +36,18 @@ public class QueueMessageSubscriber implements MessageListener {
 				queueService.delayUserRank(delayDto);
 				break;
 
+			case "queue.cancel":
+				QueueCancelDto cancelDto = parseMessage(messageBody, QueueCancelDto.class);
+				queueService.cancelWaiting(cancelDto);
+				break;
+
+			case "queue.checkin":
+				QueueCheckInDto checkInDto = parseMessage(messageBody, QueueCheckInDto.class);
+				queueService.checkInRestaurant(checkInDto);
+				break;
+
 			default:
-				throw new IllegalArgumentException("Unknown topic: " + topic);
+				throw new BobJoolException(ErrorCode.UNKNOWN_TOPIC);
 		}
 	}
 
@@ -41,7 +55,7 @@ public class QueueMessageSubscriber implements MessageListener {
 		try {
 			return objectMapper.readValue(messageBody, valueType);
 		} catch (Exception e) {
-			throw new RuntimeException("Failed to parse message body: " + messageBody, e);
+			throw new BobJoolException(ErrorCode.FAILED_PARSE_MESSAGE);
 		}
 	}
 
