@@ -16,12 +16,14 @@ public class RedisPubSubConfig {
 		RedisConnectionFactory connectionFactory,
 		MessageListenerAdapter registerListenerAdapter,
 		MessageListenerAdapter delayListenerAdapter,
-		MessageListenerAdapter cancelListenerAdapter) {
+		MessageListenerAdapter cancelListenerAdapter,
+		MessageListenerAdapter checkInListenerAdapter) {
 		RedisMessageListenerContainer container = new RedisMessageListenerContainer();
 		container.setConnectionFactory(connectionFactory);
 		container.addMessageListener(registerListenerAdapter, registerTopic());
 		container.addMessageListener(delayListenerAdapter, delayTopic());
 		container.addMessageListener(cancelListenerAdapter, cancelTopic());
+		container.addMessageListener(checkInListenerAdapter, checkInTopic());
 
 		return container;
 	}

@@ -12,6 +12,8 @@ public enum ErrorCode {
     ENTITY_NOT_FOUND(HttpStatus.NOT_FOUND, "일치하는 엔티티가 존재하지 않습니다."),
     ALREADY_DELETED(HttpStatus.CONFLICT, "이미 삭제되었습니다."),
     UNSUPPORTED_SORT_TYPE(HttpStatus.BAD_REQUEST, "지원하지 않는 정렬 조건입니다."),
+    UNKNOWN_TOPIC(HttpStatus.BAD_REQUEST, "알 수 없는 토픽입니다."),
+    FAILED_PARSE_MESSAGE(HttpStatus.BAD_REQUEST, "메시지를 변환에 실패하였습니다."),
 
     // 인증
     FORBIDDEN_ACCESS(HttpStatus.FORBIDDEN, "접근 권한이 존재하지 않습니다."),
@@ -53,6 +55,8 @@ public enum ErrorCode {
     ALREADY_BEHIND_TARGET(HttpStatus.BAD_REQUEST, "이미 대상 사용자 뒤에 있습니다."),
     INVALID_PROCESS_TYPE(HttpStatus.BAD_REQUEST, "유효하지 않은 처리 유형입니다."),
     USER_IS_NOT_WAITING(HttpStatus.BAD_REQUEST, "사용자는 대기중 상태가 아닙니다."),
+    CURRENT_STATUS_NOT_FOUND(HttpStatus.BAD_REQUEST, "대상 사용자는 대기상태를 알 수 없습니다."),
+    INVALID_STATUS_TRANSITION(HttpStatus.BAD_REQUEST, "현재 상태에서는 대기상태를 변경할 수 없습니다."),
 
     // 예약
     INVALID_GUEST_COUNT(HttpStatus.BAD_REQUEST, "예약 인원수는 양수여야 합니다."),
@@ -80,4 +84,8 @@ public enum ErrorCode {
 
     private final HttpStatus httpStatus;
     private final String message;
+    // 동적으로 메시지를 생성하는 메서드
+    public String formatMessage(Object... args) {
+        return String.format(this.message, args);
+    }
 }
