@@ -2,6 +2,7 @@ package com.bobjool.restaurant.application.service.restaurant;
 
 import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
+import com.bobjool.restaurant.application.dto.restaurant.RestaurantContactResDto;
 import com.bobjool.restaurant.application.dto.restaurant.RestaurantCreateDto;
 import com.bobjool.restaurant.application.dto.restaurant.RestaurantForCustomerResDto;
 import com.bobjool.restaurant.application.dto.restaurant.RestaurantForMasterResDto;
@@ -9,6 +10,7 @@ import com.bobjool.restaurant.application.dto.restaurant.RestaurantResDto;
 import com.bobjool.restaurant.application.dto.restaurant.RestaurantUpdateDto;
 import com.bobjool.restaurant.domain.entity.restaurant.Restaurant;
 import com.bobjool.restaurant.domain.repository.RestaurantRepository;
+import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -149,6 +151,15 @@ public class RestaurantService {
     return RestaurantResDto.from(restaurant);
   }
 
+  public RestaurantContactResDto ReadRestaurantContact(@Valid UUID restaurantId) {
+    log.info("ReadRestaurantContact");
+
+    Restaurant restaurant = restaurantRepository.findById(restaurantId)
+        .orElseThrow(() -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND));
+
+    return RestaurantContactResDto.from(restaurant);
+  }
+
   private void validateDuplicate(RestaurantCreateDto restaurantCreateDto) {
     if (restaurantRepository.findByRestaurantName(restaurantCreateDto.restaurantName())
         .isPresent()) {
@@ -179,6 +190,7 @@ public class RestaurantService {
       throw new BobJoolException(ErrorCode.DUPPLICATED_Address);
     }
   }
+
 
 
 }

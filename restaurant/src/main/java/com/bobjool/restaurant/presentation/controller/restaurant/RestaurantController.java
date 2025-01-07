@@ -3,6 +3,7 @@ package com.bobjool.restaurant.presentation.controller.restaurant;
 import com.bobjool.common.presentation.ApiResponse;
 import com.bobjool.common.presentation.PageResponse;
 import com.bobjool.common.presentation.SuccessCode;
+import com.bobjool.restaurant.application.dto.restaurant.RestaurantContactResDto;
 import com.bobjool.restaurant.application.dto.restaurant.RestaurantForCustomerResDto;
 import com.bobjool.restaurant.application.dto.restaurant.RestaurantForMasterResDto;
 import com.bobjool.restaurant.application.dto.restaurant.RestaurantResDto;
@@ -139,7 +140,15 @@ public class RestaurantController {
     return ApiResponse.success(SuccessCode.SUCCESS_UPDATE, response);
   }
 
+  //단일 음식점 정보 조회(for Owner)
+  @GetMapping("/{restaurantId}/contact")
+  public ResponseEntity<ApiResponse<RestaurantContactResDto>> getRestaurantContact(
+      @Valid @PathVariable("restaurantId") UUID restaurantId) {
+    log.info("getRestaurantContact");
 
+    RestaurantContactResDto response = restaurantService.ReadRestaurantContact(restaurantId);
+    return ApiResponse.success(SuccessCode.SUCCESS_ACCEPTED, response);
+  }
 
 
 }
