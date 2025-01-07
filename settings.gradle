@@ -8,4 +8,5 @@ include 'reservation'
 include 'restaurant'
 include 'queue'
 include 'notification'
+include 'payment'
 

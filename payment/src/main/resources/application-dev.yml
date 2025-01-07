@@ -1,6 +1,6 @@
 spring:
   application:
-    name: reservation-service
+    name: payment-service
   config:
     import: "configserver:"
   cloud:
