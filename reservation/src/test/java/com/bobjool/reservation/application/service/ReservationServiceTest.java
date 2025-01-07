@@ -9,7 +9,7 @@ import com.bobjool.reservation.application.dto.reservation.ReservationUpdateDto;
 import com.bobjool.reservation.domain.entity.Reservation;
 import com.bobjool.reservation.domain.enums.ReservationStatus;
 import com.bobjool.reservation.domain.repository.ReservationRepository;
-import com.bobjool.reservation.infra.kafka.ReservationProducer;
+import com.bobjool.reservation.infra.messaging.ReservationProducer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
