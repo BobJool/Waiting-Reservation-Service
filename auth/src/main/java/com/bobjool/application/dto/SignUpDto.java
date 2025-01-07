@@ -8,7 +8,7 @@ public record SignUpDto (
         String name,
         String nickname,
         String email,
-        String slackId,
+        String slackEmail,
         String phoneNumber,
         UserRole role
 ) {
