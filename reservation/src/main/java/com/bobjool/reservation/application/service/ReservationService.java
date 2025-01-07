@@ -36,8 +36,8 @@ public class ReservationService {
     public ReservationResDto createReservation(ReservationCreateDto reservationCreateDto) {
         log.info("createReservation.ReservationCreateDto = {}", reservationCreateDto);
         // restaurantSchedule 예약 api 호출
-        restaurantScheduleClient.reserveSchedule(reservationCreateDto.restaurantScheduleId()
-                , new RestaurantScheduleReserveReqDto(reservationCreateDto.userId(), reservationCreateDto.guestCount()));
+        restaurantScheduleClient.reserveSchedule2(reservationCreateDto.restaurantScheduleId(),
+                new RestaurantScheduleReserveReqDto(reservationCreateDto.userId(), reservationCreateDto.guestCount()));
 
         // 1. DB 저장
         Reservation reservation = Reservation.create(

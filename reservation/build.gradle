@@ -23,9 +23,6 @@ dependencies {
     // Jackson 확장 모듈 - Java 8의 LocalDateTime 변환 지원
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 
-    // okhttp
-    implementation 'io.github.openfeign:feign-httpclient'
-
     // queryDsl
     implementation "com.querydsl:querydsl-jpa:${querydslVersion}:jakarta"
     annotationProcessor "com.querydsl:querydsl-apt:${querydslVersion}:jakarta"

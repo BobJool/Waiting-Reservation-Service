@@ -73,7 +73,7 @@ class ReservationServiceTest {
         willDoNothing().given(reservationProducer).publish(anyString(), any());
 
         // RestaurantScheduleClient 의 reserveSchedule 메서드가 호출되더라도 아무 작업도 하지 않도록 설정
-        doReturn(null).when(restaurantScheduleClient).reserveSchedule(any(), any());
+        doReturn(null).when(restaurantScheduleClient).reserveSchedule2(any(), any());
 
         // when - reservationService.createReservation() 호출
         ReservationResDto response = reservationService.createReservation(reservationCreateDto);
@@ -111,7 +111,7 @@ class ReservationServiceTest {
                 reservationDate, reservationTime);
 
         // RestaurantScheduleClient 의 reserveSchedule 메서드가 호출되더라도 아무 작업도 하지 않도록 설정
-        doReturn(null).when(restaurantScheduleClient).reserveSchedule(any(), any());
+        doReturn(null).when(restaurantScheduleClient).reserveSchedule2(any(), any());
             // when & then - 예외 발생 검증
         assertThatThrownBy(() -> reservationService.createReservation(reservationCreateDto))
                 .isInstanceOf(BobJoolException.class)

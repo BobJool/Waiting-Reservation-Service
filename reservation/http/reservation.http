@@ -5,11 +5,12 @@ Content-Type: application/json
 {
   "user_id": 12345,
   "restaurant_id": "7e699975-7ef8-4aaf-9013-d816023e4ed6",
-  "restaurant_schedule_id": "0b23dcbc-eb51-42c9-89c1-4c4073c52246",
+  "restaurant_schedule_id": "d3f9fc50-b9ee-498b-b452-61217d021044",
   "guest_count": 4,
-  "reservation_date": "2025-01-27",
+  "reservation_date": "2025-01-19",
   "reservation_time": "14:00"
 }
+
 
 ### 예약 상태 변경
 PATCH localhost:19005/api/v1/reservations/status/e47cf394-4a51-416c-a2d7-1b45dd17477b
@@ -29,4 +30,8 @@ Content-Type: application/json
 
 ### 예약 목록 검색
 GET localhost:19005/api/v1/reservations?page=0&size=5&sort=createdAt,DESC&status=PENDING
+Content-Type: application/json
+
+### 페인 테스트
+GET localhost:19005/api/v1/reservations/get-data-feign
 Content-Type: application/json
