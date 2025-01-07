@@ -53,7 +53,7 @@ class PaymentControllerTest {
         PaymentCreateReqDto paymentCreateReqDto = new PaymentCreateReqDto(reservationId, userId, amount, method, pgName);
 
         // when & then - 201 상태코드 반환하는지 본다
-        mockMvc.perform(post("/api/v2/payments")
+        mockMvc.perform(post("/api/v1/payments")
                         .content(objectMapper.writeValueAsString(paymentCreateReqDto))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -73,7 +73,7 @@ class PaymentControllerTest {
         PaymentCreateReqDto paymentCreateReqDto = new PaymentCreateReqDto(reservationId, userId, amount, method, pgName);
 
         // when & then - 400 상태코드 반환하는지 본다
-        mockMvc.perform(post("/api/v2/payments")
+        mockMvc.perform(post("/api/v1/payments")
                         .content(objectMapper.writeValueAsString(paymentCreateReqDto))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -95,7 +95,7 @@ class PaymentControllerTest {
         PaymentCreateReqDto paymentCreateReqDto = new PaymentCreateReqDto(reservationId, userId, amount, method, pgName);
 
         // when & then - 400 상태코드 반환 및 메시지 확인
-        mockMvc.perform(post("/api/v2/payments")
+        mockMvc.perform(post("/api/v1/payments")
                         .content(objectMapper.writeValueAsString(paymentCreateReqDto))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -117,7 +117,7 @@ class PaymentControllerTest {
         PaymentCreateReqDto paymentCreateReqDto = new PaymentCreateReqDto(reservationId, userId, amount, method, pgName);
 
         // when & then - 400 상태코드 반환 및 메시지 확인
-        mockMvc.perform(post("/api/v2/payments")
+        mockMvc.perform(post("/api/v1/payments")
                         .content(objectMapper.writeValueAsString(paymentCreateReqDto))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -139,7 +139,7 @@ class PaymentControllerTest {
         PaymentCreateReqDto paymentCreateReqDto = new PaymentCreateReqDto(reservationId, userId, amount, method, pgName);
 
         // when & then - 400 상태코드 반환 및 메시지 확인
-        mockMvc.perform(post("/api/v2/payments")
+        mockMvc.perform(post("/api/v1/payments")
                         .content(objectMapper.writeValueAsString(paymentCreateReqDto))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -161,7 +161,7 @@ class PaymentControllerTest {
         PaymentCreateReqDto paymentCreateReqDto = new PaymentCreateReqDto(reservationId, userId, amount, method, pgName);
 
         // when & then - 400 상태코드 반환 및 메시지 확인
-        mockMvc.perform(post("/api/v2/payments")
+        mockMvc.perform(post("/api/v1/payments")
                         .content(objectMapper.writeValueAsString(paymentCreateReqDto))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -183,7 +183,7 @@ class PaymentControllerTest {
         PaymentCreateReqDto paymentCreateReqDto = new PaymentCreateReqDto(reservationId, userId, amount, method, pgName);
 
         // when & then - 400 상태코드 반환 및 메시지 확인
-        mockMvc.perform(post("/api/v2/payments")
+        mockMvc.perform(post("/api/v1/payments")
                         .content(objectMapper.writeValueAsString(paymentCreateReqDto))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -205,7 +205,7 @@ class PaymentControllerTest {
         PaymentCreateReqDto paymentCreateReqDto = new PaymentCreateReqDto(reservationId, userId, amount, method, pgName);
 
         // when & then - 400 상태코드 반환 및 메시지 확인
-        mockMvc.perform(post("/api/v2/payments")
+        mockMvc.perform(post("/api/v1/payments")
                         .content(objectMapper.writeValueAsString(paymentCreateReqDto))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -224,7 +224,7 @@ class PaymentControllerTest {
         UUID paymentId = UUID.randomUUID();
 
         // when & then - 200 상태코드 반환하는지 본다
-        mockMvc.perform(patch("/api/v2/payments/status/{paymentId}", paymentId)
+        mockMvc.perform(patch("/api/v1/payments/status/{paymentId}", paymentId)
                         .content(objectMapper.writeValueAsString(paymentUpdateReqDto))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -240,7 +240,7 @@ class PaymentControllerTest {
         UUID paymentId = UUID.randomUUID();
 
         // when & then - 200 상태코드 반환하는지 본다
-        mockMvc.perform(patch("/api/v2/payments/status/{paymentId}", paymentId)
+        mockMvc.perform(patch("/api/v1/payments/status/{paymentId}", paymentId)
                         .content(objectMapper.writeValueAsString(paymentUpdateReqDto))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -257,7 +257,7 @@ class PaymentControllerTest {
         UUID paymentId = UUID.randomUUID();
 
         // when & then - 200 상태코드 반환하는지 본다
-        mockMvc.perform(post("/api/v2/payments/refund/{paymentId}", paymentId)
+        mockMvc.perform(post("/api/v1/payments/refund/{paymentId}", paymentId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk());
@@ -270,7 +270,7 @@ class PaymentControllerTest {
         UUID paymentId = UUID.randomUUID();
 
         //whn & then - 200 상태코드 반환하는지 본다.
-        mockMvc.perform(get("/api/v2/payments/{paymentId}", paymentId)
+        mockMvc.perform(get("/api/v1/payments/{paymentId}", paymentId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk());

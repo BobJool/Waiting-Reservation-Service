@@ -1,5 +1,5 @@
 ### 결제 요청
-POST localhost:19005/api/v2/payments
+POST localhost:19005/api/v1/payments
 Content-Type: application/json
 
 {
@@ -11,11 +11,11 @@ Content-Type: application/json
 }
 
 ### 결제 검색
-GET localhost:19005/api/v2/payments?page=0&size=5&sort=createdAt,DESC
+GET localhost:19005/api/v1/payments?page=0&size=5&sort=createdAt,DESC
 Content-Type: application/json
 
 ### 결제 상태 변경
-PATCH localhost:19005/api/v2/payments/status/9f24d789-6e40-42fc-af7a-f2c03cfd5bff
+PATCH localhost:19005/api/v1/payments/status/9f24d789-6e40-42fc-af7a-f2c03cfd5bff
 Content-Type: application/json
 
 {
@@ -23,9 +23,9 @@ Content-Type: application/json
 }
 
 ### 환불 요청
-POST localhost:19005/api/v2/payments/refund/393fcd8f-9895-4f4f-9ea8-46ba6e9cd2e2
+POST localhost:19005/api/v1/payments/refund/393fcd8f-9895-4f4f-9ea8-46ba6e9cd2e2
 Content-Type: application/json
 
 ### 결제 단건 조회
-GET localhost:19005/api/v2/payments/550e8400-e29b-41d4-a716-446655440002
+GET localhost:19005/api/v1/payments/550e8400-e29b-41d4-a716-446655440002
 Content-Type: application/json

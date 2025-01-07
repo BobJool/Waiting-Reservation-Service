@@ -9,12 +9,15 @@ import com.bobjool.reservation.application.dto.reservation.ReservationUpdateDto;
 import com.bobjool.reservation.domain.entity.Reservation;
 import com.bobjool.reservation.domain.enums.ReservationStatus;
 import com.bobjool.reservation.domain.repository.ReservationRepository;
+import com.bobjool.reservation.infra.kafka.ReservationProducer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -41,6 +44,9 @@ class ReservationServiceTest {
     @Autowired
     ReservationRepository reservationRepository;
 
+    @MockBean
+    ReservationProducer reservationProducer;
+
     /**
      * createReservation - 2개 테스트
      * */
@@ -57,6 +63,10 @@ class ReservationServiceTest {
 
         ReservationCreateDto reservationCreateDto = new ReservationCreateDto(userId, restaurantId, scheduleId, guestCount,
                 reservationDate, reservationTime);
+
+        // ReservationProducer의 publish 메서드가 호출되더라도 아무 작업도 하지 않도록 설정
+        BDDMockito.willDoNothing().given(reservationProducer)
+                .publish(BDDMockito.anyString(), BDDMockito.any());
 
         // when - reservationService.createReservation() 호출
         ReservationResDto response = reservationService.createReservation(reservationCreateDto);
