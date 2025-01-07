@@ -28,12 +28,41 @@ public class QueueService {
 	private final RedisQueueService redisQueueService;
 	private final QueueMessagePublisherService queuePublisherService;
 
-	public String handleQueue(Object dto, String processType) {
+	public String handleQueue(UUID restaurantId, Long userId, Object dto, String processType) {
+		boolean isUserWaiting = redisQueueService.isUserWaiting(userId);
+		boolean isUserInQueue = redisQueueService.isUserInQueue(restaurantId,userId);
 		return switch (processType.toLowerCase()) {
-			case "register" -> queuePublisherService.publishRegisterQueue((QueueRegisterDto)dto);
-			case "delay" -> queuePublisherService.publishDelayQueue((QueueDelayDto)dto);
-			case "cancel" -> queuePublisherService.publishCancelQueue((QueueCancelDto)dto);
-			case "checkin" -> queuePublisherService.publishCheckInQueue((QueueCheckInDto)dto);
+			case "register" -> {
+				if (!isUserWaiting) {
+					yield queuePublisherService.publishRegisterQueue((QueueRegisterDto) dto);
+				} else {
+					throw new BobJoolException(ErrorCode.USER_ALREADY_IN_QUEUE);
+				}
+			}
+			case "delay" -> {
+				if (isUserInQueue) {
+					QueueDelayDto delayDto = (QueueDelayDto) dto;
+					redisQueueService.validateNotLastInQueue(delayDto.restaurantId(), delayDto.userId());
+					redisQueueService.validateDelayCount(delayDto.restaurantId(), delayDto.userId());
+					yield queuePublisherService.publishDelayQueue(delayDto);
+				} else {
+					throw new BobJoolException(ErrorCode.USER_NOT_FOUND_IN_QUEUE);
+				}
+			}
+			case "cancel" -> {
+				if (isUserInQueue) {
+					yield queuePublisherService.publishCancelQueue((QueueCancelDto) dto);
+				} else {
+					throw new BobJoolException(ErrorCode.USER_NOT_FOUND_IN_QUEUE);
+				}
+			}
+			case "checkin" -> {
+				if (isUserInQueue) {
+					yield queuePublisherService.publishCheckInQueue((QueueCheckInDto) dto);
+				} else {
+					throw new BobJoolException(ErrorCode.USER_NOT_FOUND_IN_QUEUE);
+				}
+			}
 			default -> throw new BobJoolException(ErrorCode.INVALID_PROCESS_TYPE);
 		};
 	}
@@ -42,10 +71,6 @@ public class QueueService {
 	public void registerQueue(QueueRegisterDto request) {
 		Long userId = request.userId();
 		UUID restaurantId = request.restaurantId();
-
-		if (redisQueueService.isUserWaiting(userId)) {
-			throw new BobJoolException(ErrorCode.USER_ALREADY_IN_QUEUE);
-		}
 
 		Map<String, Object> userInfo = redisQueueService.addUserToQueue(request);
 		redisQueueService.markUserAsWaiting(userId, restaurantId);
@@ -56,15 +81,13 @@ public class QueueService {
 	}
 
 	public QueueStatusResDto getNextTenUsersWithOrder(UUID restaurantId, Long userId) {
+		redisQueueService.isUserWaiting(userId);
 		long rank = redisQueueService.getUserIndexInQueue(restaurantId, userId) + 1;
 		List<String> nextUsers = redisQueueService.getNextTenUsersWithOrder(restaurantId, userId);
 		return new QueueStatusResDto(rank, nextUsers);
 	}
 
 	public void delayUserRank(QueueDelayDto dto) {
-		String userHashKey = RedisKeyUtil.getUserQueueDataKey(dto.restaurantId(), dto.userId());
-		redisQueueService.validateNotLastInQueue(dto.restaurantId(), dto.userId());
-		redisQueueService.validateDelayCount(userHashKey);
 		QueueDelayResDto response = redisQueueService.delayUserRank(dto.restaurantId(), dto.userId(), dto.targetUserId());
 		//TODO 1: restaurant service : restaurant_name 가져오기
 		//TODO 2: auth service : 슬랙ID
@@ -72,9 +95,6 @@ public class QueueService {
 	}
 
 	public void cancelWaiting(QueueCancelDto cancelDto) {
-		if (!redisQueueService.isUserWaiting(cancelDto.userId())) {
-			throw new BobJoolException(ErrorCode.USER_IS_NOT_WAITING);
-		}
 		redisQueueService.cancelWaiting(cancelDto);
 
 		//TODO 1: restaurant service : 식당이름 가져오기
@@ -85,4 +105,6 @@ public class QueueService {
 	public void checkInRestaurant(QueueCheckInDto checkInDto) {
 		redisQueueService.checkInRestaurant(checkInDto);
 	}
+
+
 }

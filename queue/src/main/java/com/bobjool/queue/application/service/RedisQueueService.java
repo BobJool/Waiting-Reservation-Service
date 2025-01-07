@@ -59,6 +59,11 @@ public class RedisQueueService {
 		return Boolean.TRUE.equals(redisTemplate.hasKey(userIsWaitingKey));
 	}
 
+	public boolean isUserInQueue(UUID restaurantId, Long userId) {
+		String waitingListKey = RedisKeyUtil.getWaitingListKey(restaurantId);
+		return Boolean.TRUE.equals(redisTemplate.opsForZSet().score(waitingListKey, userId) != null);
+	}
+
 	public void markUserAsWaiting(Long userId, UUID restaurantId) {
 		String userIsWaitingKey = RedisKeyUtil.getUserIsWaitingKey(userId);
 		redisTemplate.opsForValue().set(userIsWaitingKey, String.valueOf(restaurantId));
@@ -137,7 +142,8 @@ public class RedisQueueService {
 		}
 	}
 
-	public void validateDelayCount(String userQueueDataKey) {
+	public void validateDelayCount(UUID restaurantId, Long userId) {
+		String userQueueDataKey = RedisKeyUtil.getUserQueueDataKey(restaurantId, userId);
 		Integer delayCount = (Integer) redisTemplate.opsForHash().get(userQueueDataKey, "delay_count");
 		if (delayCount == null) delayCount = 0;
 
