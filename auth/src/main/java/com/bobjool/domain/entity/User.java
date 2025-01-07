@@ -67,7 +67,7 @@ public class User extends BaseEntity {
         this.slackEmail = slackEmail;
         this.slackId = slackId;
         this.phoneNumber = phoneNumber;
-        this.isApproved = isApproved;
+        this.isApproved = determineApproval(role);
         this.role = role;
     }
 
@@ -80,7 +80,6 @@ public class User extends BaseEntity {
             String slackEmail,
             String slackId,
             String phoneNumber,
-            Boolean isApproved,
             UserRole role) {
         return new User(
                 username,
@@ -91,32 +90,40 @@ public class User extends BaseEntity {
                 slackEmail,
                 slackId,
                 phoneNumber,
-                isApproved,
+                determineApproval(role),
                 role
         );
     }
 
-    public void updatePassword(String newPassword) {
-        this.password = newPassword;
+    private static Boolean determineApproval(UserRole role) {
+        return !"OWNER".equalsIgnoreCase(role.getAuthority());
     }
 
-    public void updateSlackEmail(String slackEmail) {
-        this.slackEmail = slackEmail;
-    }
-
-    public void updateSlackId(String slackId) {
-        this.slackId = slackId;
-    }
-
-    public void updatePhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
+    public void update(String password, String slackEmail, String slackId, String phoneNumber) {
+        if (password != null && !password.isEmpty()) {
+            this.password = password;
+        }
+        if (slackEmail != null && !slackEmail.isEmpty()) {
+            this.slackEmail = slackEmail;
+        }
+        if (slackId != null && !slackId.isEmpty()) {
+            this.slackId = slackId;
+        }
+        if (phoneNumber != null && !phoneNumber.isEmpty()) {
+            this.phoneNumber = phoneNumber;
+        }
     }
 
     public void updateUserApproval(Boolean approved) {
         this.isApproved = approved;
     }
 
-    public void delete() {
+    public void delete(Long id) {
         this.isApproved = false;
+        deleteBase(id);
+    }
+
+    public boolean isOwner() {
+        return this.role == UserRole.OWNER;
     }
 }

@@ -43,29 +43,28 @@ public class UserService {
 
         User user = findUserById(id);
 
+        String newPassword = null;
         if (request.currentPassword() != null && request.newPassword() != null) {
             if (!passwordEncoder.matches(request.currentPassword(), user.getPassword())) {
                 throw new BobJoolException(ErrorCode.INVALID_PASSWORD);
             }
-            user.updatePassword(passwordEncoder.encode(request.newPassword()));
+            newPassword = passwordEncoder.encode(request.newPassword());
         }
 
+        String slackId = null;
         if (request.slackEmail() != null && !request.slackEmail().isEmpty()) {
-            user.updateSlackEmail(request.slackEmail());
-
-            // TODO slack email로 slack id 가져오는 api 호출 후 같이 업데이트 예정
-            String slackId = "";
-
-            user.updateSlackId(slackId);
+            // TODO: slack email로 slack id 가져오는 api 호출 후 같이 업데이트 예정
+            slackId = "";
         }
 
-        if (request.phoneNumber() != null && !request.phoneNumber().isEmpty()) {
-            user.updatePhoneNumber(request.phoneNumber());
-        }
+        user.update(
+                newPassword,
+                request.slackEmail(),
+                slackId,
+                request.phoneNumber()
+        );
 
-        User updatedUser = userRepository.save(user);
-
-        return UpdateUserResDto.of(updatedUser);
+        return UpdateUserResDto.of(user);
     }
 
     @Transactional
@@ -73,13 +72,11 @@ public class UserService {
 
         User user = findUserById(id);
 
-        if (user.getRole() != UserRole.OWNER) {
+        if (!user.isOwner()) {
             throw new BobJoolException(ErrorCode.MISSING_OWNER_ROLE);
         }
 
         user.updateUserApproval(approved);
-
-        userRepository.save(user);
 
         return UserResDto.of(user);
     }
@@ -87,11 +84,7 @@ public class UserService {
     @Transactional
     public void deleteUser(Long id) {
         User user = findUserById(id);
-
-        user.delete();
-        user.deleteBase(id);
-
-        userRepository.save(user);
+        user.delete(id);
     }
 
     private User findUserById(Long id) {

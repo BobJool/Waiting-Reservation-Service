@@ -76,7 +76,6 @@ public class AuthService {
                 request.slackEmail(),
                 slackId,
                 request.phoneNumber(),
-                !"OWNER".equalsIgnoreCase(request.role().getAuthority()), // 가입자가 OWNER이면 isApproved = false
                 request.role()
         );
 
