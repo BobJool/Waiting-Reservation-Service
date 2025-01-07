@@ -53,20 +53,22 @@ public class JwtUtilImpl implements JwtUtil {
         // Redis에 AccessToken 저장
 //        String redisKey = "token:" + user.getUsername() + ":access";
 //        redisTemplate.opsForValue().set(redisKey, token, Duration.ofMillis(accessExpiration));
-        return generateToken(user.getUsername(), "access", accessExpiration);
+        return generateToken(user, "access", accessExpiration);
     }
 
     @Override
-    public String createRefreshToken(String username) {
+    public String createRefreshToken(User user) {
         // Redis에 RefreshToken 저장
 //        String redisKey = "token:" + username + ":refresh";
 //        redisTemplate.opsForValue().set(redisKey, token, Duration.ofMillis(REFRESH_TOKEN_TIME));
-        return generateToken(username, "refresh", REFRESH_TOKEN_TIME);
+        return generateToken(user, "refresh", REFRESH_TOKEN_TIME);
     }
 
-    private String generateToken(String subject, String tokenType, long expiration) {
+    private String generateToken(User user, String tokenType, long expiration) {
         return BEARER_PREFIX + Jwts.builder()
-                .setSubject(subject)
+                .setSubject(user.getUsername())
+                .claim("userId", user.getId())
+                .claim("role", user.getRole())
                 .claim("tokenType", tokenType)
                 .setIssuer(issuer)
                 .setIssuedAt(new Date())

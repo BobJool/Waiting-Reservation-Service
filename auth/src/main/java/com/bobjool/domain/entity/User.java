@@ -32,6 +32,9 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private String email;
 
+    @Column(name = "slack_email")
+    private String slackEmail;
+
     @Column(name = "slack_id")
     private String slackId;
 
@@ -51,6 +54,7 @@ public class User extends BaseEntity {
             String name,
             String nickname,
             String email,
+            String slackEmail,
             String slackId,
             String phoneNumber,
             Boolean isApproved,
@@ -60,9 +64,10 @@ public class User extends BaseEntity {
         this.name = name;
         this.nickname = nickname;
         this.email = email;
+        this.slackEmail = slackEmail;
         this.slackId = slackId;
         this.phoneNumber = phoneNumber;
-        this.isApproved = isApproved;
+        this.isApproved = determineApproval(role);
         this.role = role;
     }
 
@@ -72,9 +77,9 @@ public class User extends BaseEntity {
             String name,
             String nickname,
             String email,
+            String slackEmail,
             String slackId,
             String phoneNumber,
-            Boolean isApproved,
             UserRole role) {
         return new User(
                 username,
@@ -82,11 +87,43 @@ public class User extends BaseEntity {
                 name,
                 nickname,
                 email,
+                slackEmail,
                 slackId,
                 phoneNumber,
-                isApproved,
+                determineApproval(role),
                 role
         );
     }
-}
 
+    private static Boolean determineApproval(UserRole role) {
+        return !"OWNER".equalsIgnoreCase(role.getAuthority());
+    }
+
+    public void update(String password, String slackEmail, String slackId, String phoneNumber) {
+        if (password != null && !password.isEmpty()) {
+            this.password = password;
+        }
+        if (slackEmail != null && !slackEmail.isEmpty()) {
+            this.slackEmail = slackEmail;
+        }
+        if (slackId != null && !slackId.isEmpty()) {
+            this.slackId = slackId;
+        }
+        if (phoneNumber != null && !phoneNumber.isEmpty()) {
+            this.phoneNumber = phoneNumber;
+        }
+    }
+
+    public void updateUserApproval(Boolean approved) {
+        this.isApproved = approved;
+    }
+
+    public void delete(Long id) {
+        this.isApproved = false;
+        deleteBase(id);
+    }
+
+    public boolean isOwner() {
+        return this.role == UserRole.OWNER;
+    }
+}
