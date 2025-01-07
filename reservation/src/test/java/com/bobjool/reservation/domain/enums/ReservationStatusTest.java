@@ -29,9 +29,9 @@ class ReservationStatusTest {
         String invalidType = "INVALID";
 
         // when & then
-        assertThatThrownBy(() -> PaymentStatus.of(invalidType))
+        assertThatThrownBy(() -> ReservationStatus.of(invalidType))
                 .isInstanceOf(BobJoolException.class)
-                .hasMessage("지원하지 않는 결제 상태입니다.");
+                .hasMessage("지원하지 않는 예약 상태입니다.");
     }
 
     @DisplayName("canCancel - PENDING, COMPLETE, CANCEL 에서는 예약 취소할 수 있다.")
