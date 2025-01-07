@@ -6,9 +6,12 @@ import com.bobjool.reservation.application.dto.reservation.ReservationCreateDto;
 import com.bobjool.reservation.application.dto.reservation.ReservationResDto;
 import com.bobjool.reservation.application.dto.reservation.ReservationSearchDto;
 import com.bobjool.reservation.application.dto.reservation.ReservationUpdateDto;
+import com.bobjool.reservation.application.events.ReservationCreatedEvent;
 import com.bobjool.reservation.domain.entity.Reservation;
 import com.bobjool.reservation.domain.enums.ReservationStatus;
+import com.bobjool.reservation.domain.enums.ReservationTopic;
 import com.bobjool.reservation.domain.repository.ReservationRepository;
+import com.bobjool.reservation.infra.kafka.ReservationProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -24,12 +27,14 @@ import java.util.UUID;
 @Service
 public class ReservationService {
     private final ReservationRepository reservationRepository;
+    private final ReservationProducer reservationProducer;
 
     @Transactional
     public ReservationResDto createReservation(ReservationCreateDto reservationCreateDto) {
         log.info("createReservation.ReservationCreateDto = {}", reservationCreateDto);
         // todo restaurant schedule 의 current_capacity를 올려주는 로직 필요
-        // 먼저 feignClient 로 호출하는 방식으로 구현해서 부하 테스트 -> 카프카 도입
+
+        // 1. DB 저장
         Reservation reservation = Reservation.create(
                 reservationCreateDto.userId(),
                 reservationCreateDto.restaurantId(),
@@ -37,7 +42,12 @@ public class ReservationService {
                 reservationCreateDto.guestCount(),
                 reservationCreateDto.reservationDate(),
                 reservationCreateDto.reservationTime());
-        return ReservationResDto.from(reservationRepository.save(reservation));
+        reservationRepository.save(reservation);
+
+        // 2. reservation.created 토픽에 이벤트 발행
+        ReservationCreatedEvent event = ReservationCreatedEvent.from(reservation);
+        reservationProducer.publish(ReservationTopic.RESERVATION_CREATED.getTopic(), event);
+        return ReservationResDto.from(reservation);
     }
 
     @Transactional
