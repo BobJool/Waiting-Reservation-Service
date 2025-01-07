@@ -1,7 +1,9 @@
 package com.bobjool.notification.application.service;
 
+import com.bobjool.notification.application.client.UserClient;
 import com.bobjool.notification.application.dto.NotificationDto;
 import com.bobjool.notification.application.dto.TemplateDto;
+import com.bobjool.notification.application.dto.UserContactDto;
 import com.bobjool.notification.domain.entity.NotificationChannel;
 import com.bobjool.notification.domain.service.TemplateConvertService;
 import lombok.RequiredArgsConstructor;
@@ -19,15 +21,15 @@ public class EventService {
     private final TemplateService templateService;
     private final NotificationService notificationService;
     private final TemplateConvertService templateConvertService;
+    private final UserClient userClient;
 
     // TODO 1. 리스너 클래스에서 표현 변환 후 호출
     @Transactional
     public void preProcess(NotificationChannel channel, Long userId, UUID templateId, Map<String, String> data) {
-        // TODO 2. 유저 정보 가져오기(OpenFeign)
-        String userEmail = "";
-        String userSlack = "U0879NNBRFB";
-        String userContact = channel.equals(NotificationChannel.SLACK) ? userSlack : userEmail;
-        log.info("User contact load complete, userEmail: {}, userSlack: {}", userEmail, userSlack);
+
+        UserContactDto user = userClient.getUserContact(userId).data();
+        String userContact = channel.equals(NotificationChannel.SLACK) ? user.slack() : user.email();
+        log.info("User contact load complete, userContact: {}", userContact);
 
         TemplateDto template = templateService.selectTemplate(templateId);
         String templateData = templateConvertService.getMapToJsonString(data);
@@ -38,8 +40,8 @@ public class EventService {
 
         NotificationDto dto = new NotificationDto(
                 userId,
-                userEmail,
-                userSlack,
+                user.email(),
+                user.slack(),
                 channel,
                 messageTitle,
                 messageContent,
