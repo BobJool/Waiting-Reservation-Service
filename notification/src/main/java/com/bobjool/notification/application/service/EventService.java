@@ -51,8 +51,8 @@ public class EventService {
 
         NotificationDto dto = new NotificationDto(
                 userId,
-                userSlack,
                 userEmail,
+                userSlack,
                 channel,
                 messageTitle,
                 messageContent,

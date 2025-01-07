@@ -53,6 +53,7 @@ public class TemplateConvertService {
                 .append("*")
                 .append(title)
                 .append("*")
+                .append("\n")
                 .toString();
     }
 
