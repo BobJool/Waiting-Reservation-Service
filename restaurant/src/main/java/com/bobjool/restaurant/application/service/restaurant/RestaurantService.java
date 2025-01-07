@@ -171,7 +171,7 @@ public class RestaurantService {
     }
     if (restaurantRepository.findByRestaurantAddressDetail(
         restaurantCreateDto.restaurantAddressDetail()).isPresent()) {
-      throw new BobJoolException(ErrorCode.DUPPLICATED_Address);
+      throw new BobJoolException(ErrorCode.DUPLICATED_ADDRESS);
     }
   }
 
@@ -187,7 +187,7 @@ public class RestaurantService {
     }
     if (restaurantRepository.findByRestaurantAddressDetail(
         restaurantUpdateDto.restaurantAddressDetail()).isPresent()) {
-      throw new BobJoolException(ErrorCode.DUPPLICATED_Address);
+      throw new BobJoolException(ErrorCode.DUPLICATED_PHONE);
     }
   }
 

@@ -6,15 +6,4 @@ public enum RestaurantRegion {
   SEOUL,
   GYEONGGI
 
-//  private final String RestaurantRegion;
-//
-//  private RestaurantRegion(String RestaurantRegion) {
-//    this.RestaurantRegion = RestaurantRegion;
-//  }
-//
-//  public static class Region {
-//    public static final String SEOUL = "SEOUL";
-//    public static final String GYEONGGI = "GYEONGGI";
-//  }
-
 }

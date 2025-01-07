@@ -37,7 +37,7 @@ public enum ErrorCode {
     // 레스토랑
     DUPLICATED_NAME(HttpStatus.BAD_REQUEST,"식당 이름이 이미 존재합니다."),
     DUPLICATED_PHONE(HttpStatus.BAD_REQUEST, "식당 연락처가 이미 존재합니다."),
-    DUPPLICATED_Address(HttpStatus.BAD_REQUEST,"식당 주소가 이미 존재합니다."),
+    DUPLICATED_ADDRESS(HttpStatus.BAD_REQUEST,"식당 주소가 이미 존재합니다."),
 
     // 레스토랑 스케쥴
     CAPACITY_OVERFLOW(HttpStatus.BAD_REQUEST,"요청한 인원수가 테이블 최대 인원수를 초과합니다."),
