@@ -17,18 +17,18 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class RequestLoggingAspect {
 
-    private final HttpServletRequest request;
+	private final HttpServletRequest request;
 
-    @Before("execution(* com.bobjool.queue.*Controller.*(..))") // 모든 컨트롤러의 메서드 실행 전에 동작
-    public void logRequestDetails() {
-        // 요청 URL
-        String requestURL = request.getRequestURL().toString();
+	@Before("execution(* com.bobjool.queue.*Controller.*(..))") // 모든 컨트롤러의 메서드 실행 전에 동작
+	public void logRequestDetails() {
+		// 요청 URL
+		String requestURL = request.getRequestURL().toString();
 
-        // 헤더 값 추출
-        String userId = request.getHeader("X-User-Id");
-        String role = request.getHeader("X-Role");
+		// 헤더 값 추출
+		String userId = request.getHeader("X-User-Id");
+		String role = request.getHeader("X-Role");
 
-        // 로그 출력
-        log.info("API Request - URL: {}, X-User-Id: {}, X-Role: {}", requestURL, userId, role);
-    }
+		// 로그 출력
+		log.info("API Request - URL: {}, X-User-Id: {}, X-Role: {}", requestURL, userId, role);
+	}
 }

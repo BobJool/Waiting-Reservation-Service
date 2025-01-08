@@ -1,21 +1,24 @@
 package com.bobjool.queue.application.service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
-import com.bobjool.queue.application.dto.QueueAlertDto;
-import com.bobjool.queue.application.dto.QueueCancelDto;
-import com.bobjool.queue.application.dto.QueueCheckInDto;
-import com.bobjool.queue.application.dto.QueueDelayDto;
-import com.bobjool.queue.application.dto.QueueDelayResDto;
-import com.bobjool.queue.application.dto.QueueRegisterDto;
 import com.bobjool.queue.application.dto.QueueStatusResDto;
+import com.bobjool.queue.application.dto.kafka.QueueAlertedEvent;
+import com.bobjool.queue.application.dto.kafka.QueueCanceledEvent;
+import com.bobjool.queue.application.dto.kafka.QueueDelayedEvent;
+import com.bobjool.queue.application.dto.kafka.QueueRegisteredEvent;
+import com.bobjool.queue.application.dto.kafka.QueueRemindEvent;
+import com.bobjool.queue.application.dto.redis.QueueAlertDto;
+import com.bobjool.queue.application.dto.redis.QueueCancelDto;
+import com.bobjool.queue.application.dto.redis.QueueCheckInDto;
+import com.bobjool.queue.application.dto.redis.QueueDelayDto;
+import com.bobjool.queue.application.dto.redis.QueueRegisterDto;
+import com.bobjool.queue.infrastructure.messaging.QueueKafkaProducer;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +29,8 @@ import lombok.extern.slf4j.Slf4j;
 public class QueueService {
 
 	private final RedisQueueService redisQueueService;
-	private final QueueMessagePublisherService queuePublisherService;
+	private final QueueMessagePublisher queuePublisherService;
+	private final QueueKafkaProducer queueKafkaProducer;
 
 	public String handleQueue(UUID restaurantId, Long userId, Object dto, String processType) {
 		boolean isUserWaiting = redisQueueService.isUserWaiting(userId);
@@ -83,18 +87,9 @@ public class QueueService {
 		};
 	}
 
-	@Transactional
-	public void registerQueue(QueueRegisterDto request) {
-		Long userId = request.userId();
-		UUID restaurantId = request.restaurantId();
-
-		Map<String, Object> userInfo = redisQueueService.addUserToQueue(request);
-		redisQueueService.markUserAsWaiting(userId, restaurantId);
-		long rank = redisQueueService.getUserIndexInQueue(restaurantId, userId) + 1;
-		//TODO 1: restaurant service : restaurant_name 가져오기
-		//TODO 2: auth service : 슬랙ID, 사용자명
-		//TODO 3: 카프카 메세지 발행(사용자명,식당명, 대기인원, 대기순번, 대기번호) > queue.registered
-		//TODO 변경: 카프카 메세지 발행(유저ID, 식당ID, 대기인원, 대기순번, 대기번호) > queue.registered
+	public void registerQueue(QueueRegisterDto dto) {
+		QueueRegisteredEvent event = redisQueueService.addUserToQueue(dto);
+		queueKafkaProducer.publishQueueRegistered(event);
 	}
 
 	public QueueStatusResDto getNextTenUsersWithOrder(UUID restaurantId, Long userId) {
@@ -108,48 +103,27 @@ public class QueueService {
 	}
 
 	public void delayUserRank(QueueDelayDto dto) {
-		QueueDelayResDto response = redisQueueService.delayUserRank(dto.restaurantId(), dto.userId(),
-			dto.targetUserId());
-		//TODO 1: restaurant service : restaurant_name 가져오기
-		//TODO 2: auth service : 슬랙ID
-		//TODO 3: 카프카 메세지 발행(슬랙ID, 식당명, 대기인원, 바뀐대기순번, 대기번호) > queue.delayed
-		//TODO 변경: 카프카 메세지 발행(유저ID, 식당ID, 대기인원member, 바뀐대기순번rank, 대기번호position) > queue.delayed
+		QueueDelayedEvent event = redisQueueService.delayUserRank(dto.restaurantId(), dto.userId(), dto.targetUserId());
+		queueKafkaProducer.publishQueueDelayed(event);
 	}
 
-	public void cancelWaiting(QueueCancelDto cancelDto) {
-		redisQueueService.cancelWaiting(cancelDto);
-		//TODO 1: restaurant service : 식당이름 가져오기
-		//TODO 2: auth service : 슬랙ID, 사용자명
-		//TODO 3: 카프카 메세지 발행(슬랙ID, 식당명, 사용자명, 취소사유(reason, 문장만들어서) > queue.canceled
-		//TODO 변경: 카프카 메세지 발행(유저ID, 식당ID, 취소사유(reason, 문장만들어서) > queue.canceled
+	public void cancelWaiting(QueueCancelDto dto) {
+		QueueCanceledEvent event = redisQueueService.cancelWaiting(dto);
+		queueKafkaProducer.publishQueueCanceled(event);
 	}
 
-	public void checkInRestaurant(QueueCheckInDto checkInDto) {
-		redisQueueService.checkInRestaurant(checkInDto);
-		// 체크인 다음 3번째 유저 정보(순번 3, 대기 번호) 가져오기
-		//TODO 1: restaurant service : 식당이름 가져오기
-		//TODO 2: auth service : 슬랙ID, 사용자명
-		//TODO 3: 카프카 메세지 발행(슬랙ID, 식당명, 사용자명, 순번(3), 대기번호) > queue.remind
-		//TODO 변경: 카프카 메세지 발행(유저ID, 식당ID, 순번(3), 대기번호) > queue.remind
-
+	public void checkInRestaurant(QueueCheckInDto dto) {
+		QueueRemindEvent event = redisQueueService.checkInRestaurant(dto);
+		queueKafkaProducer.publishQueueRemind(event);
 	}
 
 	public void sendAlertNotification(QueueAlertDto dto) {
-		Integer position = redisQueueService.sendAlertNotification(dto);
-		log.info("sendAlertNotification() position : " + position);
-		//TODO 1: restaurant service : 식당이름 가져오기
-		//TODO 2: auth service : 슬랙ID, 사용자명
-		//TODO 3: 카프카 메세지 발행(슬랙ID, 식당명, 사용자명, 대기번호) > queue.queue.alerted
-		//TODO 변경: 카프카 메세지 발행(유저ID, 식당ID, 대기번호) > queue.queue.alerted
+		QueueAlertedEvent event = redisQueueService.sendAlertNotification(dto);
+		queueKafkaProducer.publishQueueAlerted(event);
 	}
 
 	public void sendRushAlertNotification(QueueAlertDto dto) {
-		Integer position = redisQueueService.sendRushAlertNotification(dto);
-		log.info("sendRushAlertNotification() 실행");
-		log.info("sendRushAlertNotification() 유저의 대기번호 : " + position);
-		//TODO 1: restaurant service : 식당이름 가져오기
-		//TODO 2: auth service : 슬랙ID
-		//TODO 3: 카프카 메세지 발행(슬랙ID, 식당명, 대기번호) > queue.rush
-		//TODO 변경:: 카프카 메세지 발행(유저ID, 식당ID, 대기번호) > queue.rush
+		QueueAlertedEvent event = redisQueueService.sendRushAlertNotification(dto);
+		queueKafkaProducer.publishQueueRush(event);
 	}
 }

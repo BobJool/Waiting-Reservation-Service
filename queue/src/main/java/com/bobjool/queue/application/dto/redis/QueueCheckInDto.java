@@ -1,4 +1,4 @@
-package com.bobjool.queue.application.dto;
+package com.bobjool.queue.application.dto.redis;
 
 import java.util.UUID;
 
@@ -9,4 +9,5 @@ public record QueueCheckInDto(
 	UUID restaurantId,
 	@JsonProperty("userId")
 	Long userId
-) { }
+) {
+}
