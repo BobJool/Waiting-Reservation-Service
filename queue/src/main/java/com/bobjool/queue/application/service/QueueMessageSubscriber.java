@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
+import com.bobjool.queue.application.dto.QueueAlertDto;
 import com.bobjool.queue.application.dto.QueueCancelDto;
 import com.bobjool.queue.application.dto.QueueCheckInDto;
 import com.bobjool.queue.application.dto.QueueDelayDto;
@@ -44,6 +45,16 @@ public class QueueMessageSubscriber implements MessageListener {
 			case "queue.checkin":
 				QueueCheckInDto checkInDto = parseMessage(messageBody, QueueCheckInDto.class);
 				queueService.checkInRestaurant(checkInDto);
+				break;
+
+			case "queue.alert":
+				QueueAlertDto alertDto = parseMessage(messageBody, QueueAlertDto.class);
+				queueService.sendAlertNotification(alertDto);
+				break;
+
+			case "queue.rush":
+				QueueAlertDto remindDto = parseMessage(messageBody, QueueAlertDto.class);
+				queueService.sendRushAlertNotification(remindDto);
 				break;
 
 			default:

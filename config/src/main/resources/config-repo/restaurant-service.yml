@@ -26,6 +26,7 @@ eureka:
       defaultZone: http://localhost:19000/eureka/
 
 
+
 management:
   zipkin:
     tracing:
@@ -36,4 +37,4 @@ management:
   endpoints:
     web:
       exposure:
-        include: refresh
+        include: "*"
