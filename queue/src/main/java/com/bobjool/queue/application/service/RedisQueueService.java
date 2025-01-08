@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
-import com.bobjool.queue.application.dto.redis.QueueRegisterDto;
 import com.bobjool.queue.application.dto.kafka.QueueAlertedEvent;
 import com.bobjool.queue.application.dto.kafka.QueueCanceledEvent;
 import com.bobjool.queue.application.dto.kafka.QueueDelayedEvent;
@@ -23,6 +22,7 @@ import com.bobjool.queue.application.dto.kafka.QueueRemindEvent;
 import com.bobjool.queue.application.dto.redis.QueueAlertDto;
 import com.bobjool.queue.application.dto.redis.QueueCancelDto;
 import com.bobjool.queue.application.dto.redis.QueueCheckInDto;
+import com.bobjool.queue.application.dto.redis.QueueRegisterDto;
 import com.bobjool.queue.domain.enums.QueueStatus;
 import com.bobjool.queue.domain.util.RedisKeyUtil;
 
