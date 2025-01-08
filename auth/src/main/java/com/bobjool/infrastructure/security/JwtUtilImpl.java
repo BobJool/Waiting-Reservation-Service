@@ -67,7 +67,7 @@ public class JwtUtilImpl implements JwtUtil {
     private String generateToken(User user, String tokenType, long expiration) {
         return BEARER_PREFIX + Jwts.builder()
                 .setSubject(user.getUsername())
-                .claim("userId", user.getId())
+                .claim("userId", String.valueOf(user.getId()))
                 .claim("role", user.getRole())
                 .claim("tokenType", tokenType)
                 .setIssuer(issuer)
