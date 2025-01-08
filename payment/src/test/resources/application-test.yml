@@ -26,6 +26,8 @@ spring:
     config:
       enabled: false
 
+
+
 sql:
   init:
     mode: never
