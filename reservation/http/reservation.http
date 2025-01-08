@@ -5,9 +5,9 @@ Content-Type: application/json
 {
   "user_id": 12345,
   "restaurant_id": "7e699975-7ef8-4aaf-9013-d816023e4ed6",
-  "restaurant_schedule_id": "d3f9fc50-b9ee-498b-b452-61217d021044",
+  "restaurant_schedule_id": "0803caeb-0d2d-4661-89d5-d76c30d05c28",
   "guest_count": 4,
-  "reservation_date": "2025-01-19",
+  "reservation_date": "2025-01-20",
   "reservation_time": "14:00"
 }
 

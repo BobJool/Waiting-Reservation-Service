@@ -25,7 +25,7 @@ Content-Type: application/json
   "user_id": 123,
   "restaurant_id": "7e699975-7ef8-4aaf-9013-d816023e4ed6",
   "table_number": 1,
-  "date": "2025-01-19",
+  "date": "2025-01-20",
   "time_slot": "14:00",
   "max_capacity": 8
 }

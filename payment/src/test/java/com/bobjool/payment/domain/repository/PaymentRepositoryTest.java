@@ -9,9 +9,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +31,10 @@ class PaymentRepositoryTest {
 
     @Autowired
     private PaymentRepository paymentRepository;
+
+    // 테스트에서 카프카 실행되지 않도록
+    @MockBean
+    KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry;
 
     @DisplayName("search - userId를 조건으로 주었을 때")
     @Test

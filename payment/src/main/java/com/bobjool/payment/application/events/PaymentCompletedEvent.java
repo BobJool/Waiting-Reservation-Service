@@ -5,7 +5,7 @@ import com.bobjool.payment.domain.entity.Payment;
 import java.util.UUID;
 
 public record PaymentCompletedEvent(
-        UUID PaymentId,
+        UUID paymentId,
         UUID reservationId,
         Long userId,
         Integer amount,

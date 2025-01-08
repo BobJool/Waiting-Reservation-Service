@@ -7,21 +7,21 @@ import com.bobjool.reservation.application.dto.reservation.ReservationCreateDto;
 import com.bobjool.reservation.application.dto.reservation.ReservationResDto;
 import com.bobjool.reservation.application.dto.reservation.ReservationSearchDto;
 import com.bobjool.reservation.application.dto.reservation.ReservationUpdateDto;
+import com.bobjool.reservation.application.interfaces.ReservationProducer;
 import com.bobjool.reservation.domain.entity.Reservation;
 import com.bobjool.reservation.domain.enums.ReservationStatus;
 import com.bobjool.reservation.domain.repository.ReservationRepository;
-import com.bobjool.reservation.infra.messaging.ReservationProducer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,6 +49,10 @@ class ReservationServiceTest {
     @MockBean
     ReservationProducer reservationProducer;
 
+    // 테스트에서 카프카 실행되지 않도록
+    @MockBean
+    KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry;
+
     @MockBean
     RestaurantScheduleClient restaurantScheduleClient;
 
@@ -70,7 +74,7 @@ class ReservationServiceTest {
                 reservationDate, reservationTime);
 
         // ReservationProducer의 publish 메서드가 호출되더라도 아무 작업도 하지 않도록 설정
-        willDoNothing().given(reservationProducer).publish(anyString(), any());
+        willDoNothing().given(reservationProducer).publishReservationCreated(anyString(), any());
 
         // RestaurantScheduleClient 의 reserveSchedule 메서드가 호출되더라도 아무 작업도 하지 않도록 설정
         doReturn(null).when(restaurantScheduleClient).reserveSchedule2(any(), any());
