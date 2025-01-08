@@ -15,7 +15,9 @@ import com.bobjool.queue.application.dto.QueueCheckInDto;
 import com.bobjool.queue.application.dto.QueueDelayDto;
 import com.bobjool.queue.application.dto.QueueDelayResDto;
 import com.bobjool.queue.application.dto.QueueRegisterDto;
+import com.bobjool.queue.application.dto.QueueRegisteredEvent;
 import com.bobjool.queue.application.dto.QueueStatusResDto;
+import com.bobjool.queue.infrastructure.messaging.QueueKafkaProducer;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +29,7 @@ public class QueueService {
 
 	private final RedisQueueService redisQueueService;
 	private final QueueMessagePublisherService queuePublisherService;
+	private final QueueKafkaProducer queueKafkaProducer;
 
 	public String handleQueue(UUID restaurantId, Long userId, Object dto, String processType) {
 		boolean isUserWaiting = redisQueueService.isUserWaiting(userId);
@@ -91,10 +94,8 @@ public class QueueService {
 		Map<String, Object> userInfo = redisQueueService.addUserToQueue(request);
 		redisQueueService.markUserAsWaiting(userId, restaurantId);
 		long rank = redisQueueService.getUserIndexInQueue(restaurantId, userId) + 1;
-		//TODO 1: restaurant service : restaurant_name 가져오기
-		//TODO 2: auth service : 슬랙ID, 사용자명
-		//TODO 3: 카프카 메세지 발행(사용자명,식당명, 대기인원, 대기순번, 대기번호) > queue.registered
 		//TODO 변경: 카프카 메세지 발행(유저ID, 식당ID, 대기인원, 대기순번, 대기번호) > queue.registered
+		queueKafkaProducer.publishQueueRegistered(QueueRegisteredEvent.from(userId, restaurantId, userInfo, rank));
 	}
 
 	public QueueStatusResDto getNextTenUsersWithOrder(UUID restaurantId, Long userId) {
