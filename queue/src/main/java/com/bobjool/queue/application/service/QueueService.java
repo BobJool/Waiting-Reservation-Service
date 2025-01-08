@@ -1,21 +1,24 @@
 package com.bobjool.queue.application.service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
-import com.bobjool.queue.application.dto.QueueCancelDto;
-import com.bobjool.queue.application.dto.QueueCheckInDto;
-import com.bobjool.queue.application.dto.QueueDelayDto;
-import com.bobjool.queue.application.dto.QueueDelayResDto;
-import com.bobjool.queue.application.dto.QueueRegisterDto;
 import com.bobjool.queue.application.dto.QueueStatusResDto;
-import com.bobjool.queue.domain.util.RedisKeyUtil;
+import com.bobjool.queue.application.dto.kafka.QueueAlertedEvent;
+import com.bobjool.queue.application.dto.kafka.QueueCanceledEvent;
+import com.bobjool.queue.application.dto.kafka.QueueDelayedEvent;
+import com.bobjool.queue.application.dto.kafka.QueueRegisteredEvent;
+import com.bobjool.queue.application.dto.kafka.QueueRemindEvent;
+import com.bobjool.queue.application.dto.redis.QueueAlertDto;
+import com.bobjool.queue.application.dto.redis.QueueCancelDto;
+import com.bobjool.queue.application.dto.redis.QueueCheckInDto;
+import com.bobjool.queue.application.dto.redis.QueueDelayDto;
+import com.bobjool.queue.application.dto.redis.QueueRegisterDto;
+import com.bobjool.queue.infrastructure.messaging.QueueKafkaProducer;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,63 +29,101 @@ import lombok.extern.slf4j.Slf4j;
 public class QueueService {
 
 	private final RedisQueueService redisQueueService;
-	private final QueueMessagePublisherService queuePublisherService;
+	private final QueueMessagePublisher queuePublisherService;
+	private final QueueKafkaProducer queueKafkaProducer;
 
-	public String handleQueue(Object dto, String processType) {
+	public String handleQueue(UUID restaurantId, Long userId, Object dto, String processType) {
+		boolean isUserWaiting = redisQueueService.isUserWaiting(userId);
+		boolean isUserInQueue = redisQueueService.isUserInQueue(restaurantId, userId);
 		return switch (processType.toLowerCase()) {
-			case "register" -> queuePublisherService.publishRegisterQueue((QueueRegisterDto)dto);
-			case "delay" -> queuePublisherService.publishDelayQueue((QueueDelayDto)dto);
-			case "cancel" -> queuePublisherService.publishCancelQueue((QueueCancelDto)dto);
-			case "checkin" -> queuePublisherService.publishCheckInQueue((QueueCheckInDto)dto);
+			case "register" -> {
+				if (!isUserWaiting) {
+					yield queuePublisherService.publishRegisterQueue((QueueRegisterDto)dto);
+				} else {
+					throw new BobJoolException(ErrorCode.USER_ALREADY_IN_QUEUE);
+				}
+			}
+			case "delay" -> {
+				if (isUserInQueue) {
+					QueueDelayDto delayDto = (QueueDelayDto)dto;
+					redisQueueService.validateNotLastInQueue(delayDto.restaurantId(), delayDto.userId());
+					redisQueueService.validateDelayCount(delayDto.restaurantId(), delayDto.userId());
+					yield queuePublisherService.publishDelayQueue(delayDto);
+				} else {
+					throw new BobJoolException(ErrorCode.USER_NOT_FOUND_IN_QUEUE);
+				}
+			}
+			case "cancel" -> {
+				if (isUserInQueue) {
+					yield queuePublisherService.publishCancelQueue((QueueCancelDto)dto);
+				} else {
+					throw new BobJoolException(ErrorCode.USER_NOT_FOUND_IN_QUEUE);
+				}
+			}
+			case "checkin" -> {
+				if (isUserInQueue) {
+					yield queuePublisherService.publishCheckInQueue((QueueCheckInDto)dto);
+				} else {
+					throw new BobJoolException(ErrorCode.USER_NOT_FOUND_IN_QUEUE);
+				}
+			}
+			case "alert" -> {
+				if (isUserInQueue) {
+					redisQueueService.checkUserStatus(restaurantId, userId, "alert");
+					yield queuePublisherService.publishAlertQueue((QueueAlertDto)dto);
+				} else {
+					throw new BobJoolException(ErrorCode.USER_NOT_FOUND_IN_QUEUE);
+				}
+			}
+			case "rush" -> {
+				if (isUserInQueue) {
+					redisQueueService.checkUserStatus(restaurantId, userId, "rush");
+					yield queuePublisherService.publishRushQueue((QueueAlertDto)dto);
+				} else {
+					throw new BobJoolException(ErrorCode.USER_NOT_FOUND_IN_QUEUE);
+				}
+			}
 			default -> throw new BobJoolException(ErrorCode.INVALID_PROCESS_TYPE);
 		};
 	}
 
-	@Transactional
-	public void registerQueue(QueueRegisterDto request) {
-		Long userId = request.userId();
-		UUID restaurantId = request.restaurantId();
-
-		if (redisQueueService.isUserWaiting(userId)) {
-			throw new BobJoolException(ErrorCode.USER_ALREADY_IN_QUEUE);
-		}
-
-		Map<String, Object> userInfo = redisQueueService.addUserToQueue(request);
-		redisQueueService.markUserAsWaiting(userId, restaurantId);
-		long rank = redisQueueService.getUserIndexInQueue(restaurantId, userId) + 1;
-		//TODO 1: restaurant service : restaurant_name 가져오기
-		//TODO 2: auth service : 슬랙ID, 사용자명
-		//TODO 3: 카프카 메세지 발행(사용자명,식당명, 대기인원, 대기순번, 대기번호) > queue.registered
+	public void registerQueue(QueueRegisterDto dto) {
+		QueueRegisteredEvent event = redisQueueService.addUserToQueue(dto);
+		queueKafkaProducer.publishQueueRegistered(event);
 	}
 
 	public QueueStatusResDto getNextTenUsersWithOrder(UUID restaurantId, Long userId) {
-		long rank = redisQueueService.getUserIndexInQueue(restaurantId, userId) + 1;
-		List<String> nextUsers = redisQueueService.getNextTenUsersWithOrder(restaurantId, userId);
-		return new QueueStatusResDto(rank, nextUsers);
+		if (redisQueueService.isUserWaiting(userId)) {
+			long rank = redisQueueService.getUserIndexInQueue(restaurantId, userId) + 1;
+			List<String> nextUsers = redisQueueService.getNextTenUsersWithOrder(restaurantId, userId);
+			return new QueueStatusResDto(rank, nextUsers);
+		} else {
+			throw new BobJoolException(ErrorCode.USER_NOT_FOUND_IN_QUEUE);
+		}
 	}
 
 	public void delayUserRank(QueueDelayDto dto) {
-		String userHashKey = RedisKeyUtil.getUserQueueDataKey(dto.restaurantId(), dto.userId());
-		redisQueueService.validateNotLastInQueue(dto.restaurantId(), dto.userId());
-		redisQueueService.validateDelayCount(userHashKey);
-		QueueDelayResDto response = redisQueueService.delayUserRank(dto.restaurantId(), dto.userId(), dto.targetUserId());
-		//TODO 1: restaurant service : restaurant_name 가져오기
-		//TODO 2: auth service : 슬랙ID
-		//TODO 3: 카프카 메세지 발행(슬랙ID, 식당명, 대기인원, 바뀐대기순번, 대기번호) > queue.delayed
+		QueueDelayedEvent event = redisQueueService.delayUserRank(dto.restaurantId(), dto.userId(), dto.targetUserId());
+		queueKafkaProducer.publishQueueDelayed(event);
 	}
 
-	public void cancelWaiting(QueueCancelDto cancelDto) {
-		if (!redisQueueService.isUserWaiting(cancelDto.userId())) {
-			throw new BobJoolException(ErrorCode.USER_IS_NOT_WAITING);
-		}
-		redisQueueService.cancelWaiting(cancelDto);
-
-		//TODO 1: restaurant service : 식당이름 가져오기
-		//TODO 2: auth service : 슬랙ID, 사용자명
-		//TODO 3: 카프카 메세지 발행(슬랙ID, 식당명, 사용자명, 취소사유(reason, 문장만들어서) > queue.canceled
+	public void cancelWaiting(QueueCancelDto dto) {
+		QueueCanceledEvent event = redisQueueService.cancelWaiting(dto);
+		queueKafkaProducer.publishQueueCanceled(event);
 	}
 
-	public void checkInRestaurant(QueueCheckInDto checkInDto) {
-		redisQueueService.checkInRestaurant(checkInDto);
+	public void checkInRestaurant(QueueCheckInDto dto) {
+		QueueRemindEvent event = redisQueueService.checkInRestaurant(dto);
+		queueKafkaProducer.publishQueueRemind(event);
+	}
+
+	public void sendAlertNotification(QueueAlertDto dto) {
+		QueueAlertedEvent event = redisQueueService.sendAlertNotification(dto);
+		queueKafkaProducer.publishQueueAlerted(event);
+	}
+
+	public void sendRushAlertNotification(QueueAlertDto dto) {
+		QueueAlertedEvent event = redisQueueService.sendRushAlertNotification(dto);
+		queueKafkaProducer.publishQueueRush(event);
 	}
 }

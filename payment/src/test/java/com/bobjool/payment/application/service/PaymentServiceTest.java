@@ -17,9 +17,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +41,10 @@ class PaymentServiceTest {
 
     @Autowired
     private PaymentRepository paymentRepository;
+
+    // 테스트에서 카프카 실행되지 않도록
+    @MockBean
+    KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry;
 
     @Autowired
     private EntityManager em;

@@ -1,15 +1,13 @@
-package com.bobjool.queue.application.dto;
+package com.bobjool.queue.application.dto.redis;
 
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record QueueCancelDto(
-
+public record QueueAlertDto(
 	@JsonProperty("restaurantId")
 	UUID restaurantId,
 	@JsonProperty("userId")
-	Long userId,
-	@JsonProperty("reason")
-	String reason
-) { }
+	Long userId
+) {
+}
