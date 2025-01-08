@@ -1,7 +1,6 @@
-package com.bobjool.reservation.infra.kafka;
+package com.bobjool.reservation.infra.messaging;
 
 
-import com.bobjool.reservation.EventSerializer;
 import com.bobjool.reservation.application.events.ReservationCreatedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -2,6 +2,8 @@ package com.bobjool.reservation.application.service;
 
 import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
+import com.bobjool.reservation.application.client.RestaurantScheduleClient;
+import com.bobjool.reservation.application.client.RestaurantScheduleReserveReqDto;
 import com.bobjool.reservation.application.dto.reservation.ReservationCreateDto;
 import com.bobjool.reservation.application.dto.reservation.ReservationResDto;
 import com.bobjool.reservation.application.dto.reservation.ReservationSearchDto;
@@ -11,7 +13,7 @@ import com.bobjool.reservation.domain.entity.Reservation;
 import com.bobjool.reservation.domain.enums.ReservationStatus;
 import com.bobjool.reservation.domain.enums.ReservationTopic;
 import com.bobjool.reservation.domain.repository.ReservationRepository;
-import com.bobjool.reservation.infra.kafka.ReservationProducer;
+import com.bobjool.reservation.infra.messaging.ReservationProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -28,11 +30,14 @@ import java.util.UUID;
 public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationProducer reservationProducer;
+    private final RestaurantScheduleClient restaurantScheduleClient;
 
     @Transactional
     public ReservationResDto createReservation(ReservationCreateDto reservationCreateDto) {
         log.info("createReservation.ReservationCreateDto = {}", reservationCreateDto);
-        // todo restaurant schedule 의 current_capacity를 올려주는 로직 필요
+        // restaurantSchedule 예약 api 호출
+        restaurantScheduleClient.reserveSchedule2(reservationCreateDto.restaurantScheduleId(),
+                new RestaurantScheduleReserveReqDto(reservationCreateDto.userId(), reservationCreateDto.guestCount()));
 
         // 1. DB 저장
         Reservation reservation = Reservation.create(

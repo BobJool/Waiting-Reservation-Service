@@ -59,6 +59,17 @@ public class RestaurantScheduleController {
     return ApiResponse.success(SuccessCode.SUCCESS_UPDATE, response);
   }
 
+  // 해성: reserveSchedule을 post로
+  @PostMapping("/reserve/{scheduleId}")
+  public ResponseEntity<ApiResponse<RestaurantScheduleResDto>> reserveSchedule2(
+          @Valid @RequestBody RestaurantScheduleReserveReqDto scheduleReserveReqDto,
+          @PathVariable("scheduleId") UUID scheduleId) {
+    log.info("update.RestaurantUpdateReqDto={}", scheduleReserveReqDto);
+    RestaurantScheduleResDto response = scheduleService.reserveSchedule(scheduleId,
+            scheduleReserveReqDto.toServiceDto());
+    return ApiResponse.success(SuccessCode.SUCCESS_UPDATE, response);
+  }
+
   //음식점 스케쥴 Owner가 수정
   @PatchMapping("/owner/{scheduleId}")
   public ResponseEntity<ApiResponse<RestaurantScheduleResDto>> updateSchedule(
