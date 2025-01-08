@@ -11,6 +11,9 @@ public record SignInReqDto(
 ) {
 
         public SignInDto toServiceDto() {
-                return new SignInDto(username, password);
+                return new SignInDto(
+                        username,
+                        password
+                );
         }
 }

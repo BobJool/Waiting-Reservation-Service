@@ -1,4 +1,4 @@
-package com.bobjool.infrastructure.config;
+package com.bobjool.infrastructure.config.redis;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

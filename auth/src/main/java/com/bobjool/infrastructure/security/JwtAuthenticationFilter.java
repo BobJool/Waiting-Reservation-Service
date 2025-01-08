@@ -7,6 +7,7 @@ import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -55,8 +56,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
             Claims claims = jwtUtil.validateAndGetClaims(token);
+
+            // userId와 role 추출
+            Integer userId = claims.get("userId", Integer.class);
+            String role = claims.get("role", String.class);
+
+            // 요청 객체를 래핑하여 헤더에 추가
+            HttpServletRequestWrapper wrappedRequest = new HttpServletRequestWrapper(request) {
+                @Override
+                public String getHeader(String name) {
+                    if ("X-User-Id".equalsIgnoreCase(name)) {
+                        return String.valueOf(userId);
+                    }
+                    if ("X-Role".equalsIgnoreCase(name)) {
+                        return role;
+                    }
+                    return super.getHeader(name);
+                }
+            };
+
             setAuthentication(claims.getSubject());
-            filterChain.doFilter(request, response);
+            filterChain.doFilter(wrappedRequest, response);
 
         } catch (BobJoolException e) {
             log.error("JWT Exception: {}", e.getMessage());

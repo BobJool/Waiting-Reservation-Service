@@ -1,11 +1,14 @@
 package com.bobjool.queue.application.service;
 
+import java.util.Map;
+
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.stereotype.Service;
 
 import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
+import com.bobjool.queue.application.dto.QueueAlertDto;
 import com.bobjool.queue.application.dto.QueueCancelDto;
 import com.bobjool.queue.application.dto.QueueCheckInDto;
 import com.bobjool.queue.application.dto.QueueDelayDto;
@@ -20,29 +23,35 @@ public class QueueMessagePublisherService {
 
 	private final StringRedisTemplate stringRedisTemplate;
 	private final ObjectMapper objectMapper;
-	private final ChannelTopic registerTopic;
-	private final ChannelTopic delayTopic;
-	private final ChannelTopic cancelTopic;
-	private final ChannelTopic checkInTopic;
+	private final Map<String, ChannelTopic> channelTopics;
 
 	public String publishRegisterQueue(QueueRegisterDto dto) {
-		return publishMessage(registerTopic.getTopic(), dto, "대기열 요청 성공");
+		return publishMessage("register", dto, "대기열 요청 성공");
 	}
 
 	public String publishDelayQueue(QueueDelayDto dto) {
-		return publishMessage(delayTopic.getTopic(), dto, "대기열 내 순서 미루기 요청 성공");
+		return publishMessage("delay", dto, "대기열 내 순서 미루기 요청 성공");
 	}
 
 	public String publishCancelQueue(QueueCancelDto dto) {
-		return publishMessage(cancelTopic.getTopic(), dto, "대기열 줄서기 취소 요청 성공");
+		return publishMessage("cancel", dto, "대기열 줄서기 취소 요청 성공");
 	}
 
 	public String publishCheckInQueue(QueueCheckInDto dto) {
-		return publishMessage(checkInTopic.getTopic(), dto, "대기열 식당 체크인 요청 성공");
+		return publishMessage("checkIn", dto, "대기열 식당 체크인 요청 성공");
 	}
 
-	private String publishMessage(String topic, Object dto, String successMessage) {
+	public String publishAlertQueue(QueueAlertDto dto) {
+		return publishMessage("alert", dto, "대기열 사용자 식당 입장 알림 요청 성공");
+	}
+
+	public String publishRushQueue(QueueAlertDto dto) {
+		return publishMessage("rush", dto, "대기열 사용자 식당 입장요청 알림 요청 성공");
+	}
+
+	private String publishMessage(String topicKey, Object dto, String successMessage) {
 		try {
+			String topic = channelTopics.get(topicKey).getTopic();
 			String message = objectMapper.writeValueAsString(dto);
 			publishMessage(topic, message);
 			return successMessage;
