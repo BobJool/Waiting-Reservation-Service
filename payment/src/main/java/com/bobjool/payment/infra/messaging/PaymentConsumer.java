@@ -29,7 +29,7 @@ public class PaymentConsumer {
         String redisKey = String.format("reservation:autoCancel:%s", event.reservationId());
 
         // Redis에 데이터 저장 및 TTL 설정 (10분)
-        redisTemplate.opsForValue().set(redisKey, event, 1, TimeUnit.MINUTES);
+        redisTemplate.opsForValue().set(redisKey, event, 10, TimeUnit.MINUTES);
 
         log.info("Saved reservation to Redis with key: {}", redisKey);
     }
