@@ -58,7 +58,7 @@ public class RestaurantService {
   public RestaurantResDto updateRestaurant(UUID Id, RestaurantUpdateDto restaurantUpdateDto) {
     log.info("updateRestaurant.restaurantUpdateDto = {}", restaurantUpdateDto);
 
-    validateDuplicate(restaurantUpdateDto);
+    validateDuplicate(Id, restaurantUpdateDto);
     Restaurant restaurant = restaurantRepository.findById(Id)
         .orElseThrow(() -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND));
 
@@ -141,6 +141,7 @@ public class RestaurantService {
 
     return RestaurantResDto.from(restaurant);
   }
+
   @Transactional
   public RestaurantResDto isQueue(UUID restaurantId, boolean isQueue) {
     log.info("isQueue={}", isQueue);
@@ -167,11 +168,11 @@ public class RestaurantService {
   @Transactional(readOnly = true)
   public Page<RestaurantForCustomerResDto> searchByDetail(
       String name, String region, String AddressDetail,
-      String Description, Pageable pageable){
+      String Description, Pageable pageable) {
     Page<Restaurant> restaurantPageForCustomer = restaurantRepositoryCustomImpl.findByRestaurantDetail(
         name, region, AddressDetail, Description, pageable
     );
-    if(restaurantPageForCustomer.isEmpty()){
+    if (restaurantPageForCustomer.isEmpty()) {
       throw new BobJoolException(ErrorCode.NO_SEARCH_RESULTS);
     }
     return restaurantPageForCustomer.map(RestaurantForCustomerResDto::from);
@@ -180,11 +181,11 @@ public class RestaurantService {
   //키워드 검색
   @Transactional(readOnly = true)
   public Page<RestaurantForCustomerResDto> searchByKeyWord(
-      String keyword, Pageable pageable){
+      String keyword, Pageable pageable) {
     Page<Restaurant> restaurantPageForCustomer = restaurantRepositoryCustomImpl.findByRestaurantKeyword(
         keyword, pageable
     );
-    if(restaurantPageForCustomer.isEmpty()){
+    if (restaurantPageForCustomer.isEmpty()) {
       throw new BobJoolException(ErrorCode.NO_SEARCH_RESULTS);
     }
     return restaurantPageForCustomer.map(RestaurantForCustomerResDto::from);
@@ -206,7 +207,21 @@ public class RestaurantService {
   }
 
   //  Update 임시 예외처리로 Create와 공용사용중. 추후 세분화(바꾸기 이전 값을 따로 예외처리)
-  private void validateDuplicate(RestaurantUpdateDto restaurantUpdateDto) {
+  private void validateDuplicate(UUID id, RestaurantUpdateDto restaurantUpdateDto) {
+
+    Restaurant existingRestaurant = restaurantRepository.findById(id)
+        .orElseThrow(() -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND));
+    if (existingRestaurant.getRestaurantName().equals(restaurantUpdateDto.restaurantName()) &&
+        existingRestaurant.getRestaurantRegion().equals(restaurantUpdateDto.restaurantRegion()) &&
+        existingRestaurant.getRestaurantAddressDetail()
+            .equals(restaurantUpdateDto.restaurantAddressDetail()) &&
+        existingRestaurant.getRestaurantDescription()
+            .equals(restaurantUpdateDto.restaurantDescription())) {
+
+      throw new BobJoolException(ErrorCode.DUPLICATE_UPDATE);
+
+    }
+
     if (restaurantRepository.findByRestaurantName(restaurantUpdateDto.restaurantName())
         .isPresent()) {
       throw new BobJoolException(ErrorCode.DUPLICATED_NAME);
