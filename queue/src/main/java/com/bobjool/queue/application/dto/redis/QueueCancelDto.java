@@ -1,4 +1,4 @@
-package com.bobjool.queue.application.dto;
+package com.bobjool.queue.application.dto.redis;
 
 import java.util.UUID;
 
@@ -12,13 +12,6 @@ public record QueueCancelDto(
 	@JsonProperty("userId")
 	Long userId,
 	@JsonProperty("reason")
-	String reason
+	CancelType reason
 ) {
-	public static QueueCancelDto of(UUID restaurantId, Long userId, CancelType cancelType) {
-		return new QueueCancelDto(
-			restaurantId,
-			userId,
-			cancelType.getDescription()
-		);
-	}
 }
