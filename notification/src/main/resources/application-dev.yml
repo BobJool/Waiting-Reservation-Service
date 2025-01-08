@@ -26,12 +26,13 @@ spring:
     consumer:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      group-id: ${spring.application.name}-group
     bootstrap-servers: ${KAFKA_SERVER_URL}
 
 notification:
   template-mapping:
     queue:
-      registered: b2e9aebb-001d-462b-8012-854ee6aca1f5
+      registered: e1abddb1-c899-404d-8b15-5d32a6463139
       delayed: b2e9aebb-001d-462b-8012-854ee6aca1f5
       remind: b2e9aebb-001d-462b-8012-854ee6aca1f5
       alerted: b2e9aebb-001d-462b-8012-854ee6aca1f5

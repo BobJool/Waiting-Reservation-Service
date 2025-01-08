@@ -23,17 +23,18 @@ public class NotificationListener {
     private final TemplateMappingConfig templateMappingConfig;
 
     @KafkaListener(topics = {
-            "waiting.registered",
-            "waiting.delayed",
-            "waiting.canceled",
-            "waiting.remind",
-            "waiting.alerted",
-            "waiting.rush"
+            "queue.registered",
+            "queue.delayed",
+            "queue.canceled",
+            "queue.remind",
+            "queue.alerted",
+            "queue.rush"
     })
     public void handleQueueEvent(Map<String, String> data,
                                  @Header("kafka_receivedTopic") String topic) {
         NotificationChannel channel = NotificationChannel.SLACK;
         UUID templateId = this.getTemplateId(BobjoolServiceType.QUEUE, topic);
+        log.info("Received kafka message. topic: {}, templateId: {}", topic, templateId);
 
         eventService.preProcess(channel, templateId, data);
     }
@@ -51,6 +52,7 @@ public class NotificationListener {
 
         this.setTimeFormat(data);
         this.setDateFormat(data);
+        log.info("Received kafka message. topic: {}, templateId: {}", topic, templateId);
 
         eventService.preProcess(channel, templateId, data);
     }
@@ -67,6 +69,10 @@ public class NotificationListener {
         return UUID.fromString(templateId);
     }
 
+    /**
+     * 시간 포맷을 적용합니다.
+     * 20:45 -> 오후 8시 45분
+     */
     private void setTimeFormat(Map<String, String> data) {
         data.put("time",
                 templateConvertService.formatLocalTime(
@@ -75,6 +81,10 @@ public class NotificationListener {
         );
     }
 
+    /**
+     * 날짜 포맷을 적용합니다.
+     * 2025-01-03 -> 2025년 1월 3일
+     */
     private void setDateFormat(Map<String, String> data) {
         data.put("date",
                 templateConvertService.formatLocalDate(
