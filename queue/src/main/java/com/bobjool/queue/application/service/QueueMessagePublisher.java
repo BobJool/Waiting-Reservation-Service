@@ -8,18 +8,18 @@ import org.springframework.stereotype.Service;
 
 import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
-import com.bobjool.queue.application.dto.QueueAlertDto;
-import com.bobjool.queue.application.dto.QueueCancelDto;
-import com.bobjool.queue.application.dto.QueueCheckInDto;
-import com.bobjool.queue.application.dto.QueueDelayDto;
-import com.bobjool.queue.application.dto.QueueRegisterDto;
+import com.bobjool.queue.application.dto.redis.QueueRegisterDto;
+import com.bobjool.queue.application.dto.redis.QueueAlertDto;
+import com.bobjool.queue.application.dto.redis.QueueCancelDto;
+import com.bobjool.queue.application.dto.redis.QueueCheckInDto;
+import com.bobjool.queue.application.dto.redis.QueueDelayDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class QueueMessagePublisherService {
+public class QueueMessagePublisher {
 
 	private final StringRedisTemplate stringRedisTemplate;
 	private final ObjectMapper objectMapper;
