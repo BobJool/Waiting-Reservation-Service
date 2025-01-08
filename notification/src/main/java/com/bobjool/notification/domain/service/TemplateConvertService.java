@@ -14,23 +14,25 @@ import java.util.regex.Pattern;
 @Service
 public class TemplateConvertService {
     /**
-     * LocalData 타입 객체를 문자열로 반환합니다.
+     * 문자열 날짜의 포맷을 변경합니다.
      * @param date 2025-01-03
      * @return 2025년 1월 3일
      */
-    public String formatLocalDate(LocalDate date) {
+    public String formatLocalDate(String date) {
+        LocalDate localDate = LocalDate.parse(date);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일", Locale.KOREAN);
-        return date.format(formatter);
+        return localDate.format(formatter);
     }
 
     /**
-     * LocalTime 객체를 문자열로 반환합니다.
+     * 문자열 시간의 포맷을 변경합니다.
      * @param time 20:45
      * @return 오후 8시 45분
      */
-    public String formatLocalTime(LocalTime time) {
+    public String formatLocalTime(String time) {
+        LocalTime localTime = LocalTime.parse(time);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("a hh시 mm분", Locale.KOREAN);
-        return time.format(formatter);
+        return localTime.format(formatter);
     }
 
     /**

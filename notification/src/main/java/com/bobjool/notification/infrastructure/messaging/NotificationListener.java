@@ -1,14 +1,16 @@
 package com.bobjool.notification.infrastructure.messaging;
 
 import com.bobjool.notification.application.service.EventService;
+import com.bobjool.notification.domain.entity.BobjoolServiceType;
 import com.bobjool.notification.domain.entity.NotificationChannel;
+import com.bobjool.notification.domain.service.TemplateConvertService;
+import com.bobjool.notification.infrastructure.config.template.TemplateMappingConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -16,117 +18,69 @@ import java.util.UUID;
 @Component
 @RequiredArgsConstructor
 public class NotificationListener {
-
+    private final TemplateConvertService templateConvertService;
     private final EventService eventService;
+    private final TemplateMappingConfig templateMappingConfig;
 
-    @Value("${notification.template-mapping.queue.registered}")
-    private String queueRegisteredTemplateId;
-
-    @Value("${notification.template-mapping.queue.delayed}")
-    private String queueDelayedTemplateId;
-
-    @Value("${notification.template-mapping.queue.canceled}")
-    private String queueCanceledTemplateId;
-
-    @Value("${notification.template-mapping.queue.remind}")
-    private String queueRemindTemplateId;
-
-    @Value("${notification.template-mapping.queue.alerted}")
-    private String queueAlertedTemplateId;
-
-    @Value("${notification.template-mapping.queue.rush}")
-    private String queueRushTemplateId;
-
-    @Value("${notification.template-mapping.reservation.completed}")
-    private String reservationCompletedTemplateId;
-
-    @Value("${notification.template-mapping.reservation.failed}")
-    private String reservationFailedTemplateId;
-
-    @Value("${notification.template-mapping.reservation.refund}")
-    private String reservationRefundTemplateId;
-
-    @Value("${notification.template-mapping.reservation.remind}")
-    private String reservationRemindTemplateId;
-
-    @KafkaListener(topics = "queue.registered")
-    public void handleRegisteredQueue(String message) {
+    @KafkaListener(topics = {
+            "waiting.registered",
+            "waiting.delayed",
+            "waiting.canceled",
+            "waiting.remind",
+            "waiting.alerted",
+            "waiting.rush"
+    })
+    public void handleQueueEvent(Map<String, String> data,
+                                 @Header("kafka_receivedTopic") String topic) {
         NotificationChannel channel = NotificationChannel.SLACK;
-        UUID templateId = UUID.fromString(queueRegisteredTemplateId);
-        Map<String, String> data = new HashMap<>();
+        UUID templateId = this.getTemplateId(BobjoolServiceType.QUEUE, topic);
+
         eventService.preProcess(channel, templateId, data);
     }
 
-    @KafkaListener(topics = "queue.delayed")
-    public void handleDelayedQueue(String message) {
+    @KafkaListener(topics = {
+            "reservation.completed",
+            "reservation.failed",
+            "reservation.refund",
+            "reservation.remind"
+    })
+    public void handleReservationEvent(Map<String, String> data,
+                                       @Header("kafka_receivedTopic") String topic) {
         NotificationChannel channel = NotificationChannel.SLACK;
-        UUID templateId = UUID.fromString(queueDelayedTemplateId);
-        Map<String, String> data = new HashMap<>();
+        UUID templateId = this.getTemplateId(BobjoolServiceType.RESERVATION, topic);
+
+        this.setTimeFormat(data);
+        this.setDateFormat(data);
+
         eventService.preProcess(channel, templateId, data);
     }
 
-    @KafkaListener(topics = "queue.remind")
-    public void handleRemindQueue(String message) {
-        NotificationChannel channel = NotificationChannel.SLACK;
-        UUID templateId = UUID.fromString(queueRemindTemplateId);
-        Map<String, String> data = new HashMap<>();
-        eventService.preProcess(channel, templateId, data);
+    private UUID getTemplateId(BobjoolServiceType category, String topic) {
+        String[] depth = topic.split("\\.");
+
+        String action = depth[1];
+        String templateId = switch (category) {
+            case QUEUE -> templateMappingConfig.getQueue().get(action);
+            case RESERVATION -> templateMappingConfig.getReservation().get(action);
+        };
+
+        return UUID.fromString(templateId);
     }
 
-    @KafkaListener(topics = "queue.alerted")
-    public void handleAlertedQueue(String message) {
-        NotificationChannel channel = NotificationChannel.SLACK;
-        UUID templateId = UUID.fromString(queueAlertedTemplateId);
-        Map<String, String> data = new HashMap<>();
-        eventService.preProcess(channel, templateId, data);
+    private void setTimeFormat(Map<String, String> data) {
+        data.put("time",
+                templateConvertService.formatLocalTime(
+                        data.get("time")
+                )
+        );
     }
 
-    @KafkaListener(topics = "queue.rush")
-    public void handleRushQueue(String message) {
-        NotificationChannel channel = NotificationChannel.SLACK;
-        UUID templateId = UUID.fromString(queueRushTemplateId);
-        Map<String, String> data = new HashMap<>();
-        eventService.preProcess(channel, templateId, data);
-    }
-
-    @KafkaListener(topics = "queue.canceled")
-    public void handleCanceledQueue(String message) {
-        NotificationChannel channel = NotificationChannel.SLACK;
-        UUID templateId = UUID.fromString(queueCanceledTemplateId);
-        Map<String, String> data = new HashMap<>();
-        eventService.preProcess(channel, templateId, data);
-    }
-
-    @KafkaListener(topics = "reservation.completed")
-    public void handleCompletedReservation(String message) {
-        NotificationChannel channel = NotificationChannel.SLACK;
-        UUID templateId = UUID.fromString(reservationCompletedTemplateId);
-        Map<String, String> data = new HashMap<>();
-        eventService.preProcess(channel, templateId, data);
-    }
-
-    @KafkaListener(topics = "reservation.failed")
-    public void handleFailedReservation(String message) {
-        NotificationChannel channel = NotificationChannel.SLACK;
-        UUID templateId = UUID.fromString(reservationFailedTemplateId);
-        Map<String, String> data = new HashMap<>();
-        eventService.preProcess(channel, templateId, data);
-    }
-
-    @KafkaListener(topics = "reservation.refund")
-    public void handleRefundReservation(String message) {
-        NotificationChannel channel = NotificationChannel.SLACK;
-        UUID templateId = UUID.fromString(reservationRefundTemplateId);
-        Map<String, String> data = new HashMap<>();
-        eventService.preProcess(channel, templateId, data);
-    }
-
-    @KafkaListener(topics = "reservation.remind")
-    public void handleRemindReservation(String message) {
-        NotificationChannel channel = NotificationChannel.SLACK;
-        UUID templateId = UUID.fromString(reservationRemindTemplateId);
-        Map<String, String> data = new HashMap<>();
-        eventService.preProcess(channel, templateId, data);
+    private void setDateFormat(Map<String, String> data) {
+        data.put("date",
+                templateConvertService.formatLocalDate(
+                        data.get("date")
+                )
+        );
     }
 
 }
