@@ -23,6 +23,9 @@ dependencies {
     // Gson
     api 'com.google.code.gson:gson:2.10.1'
 
+    // Kafka
+    implementation 'org.springframework.kafka:spring-kafka'
+    testImplementation 'org.springframework.kafka:spring-kafka-test'
 }
 
 def querydslSrcDir = 'src/main/generated'

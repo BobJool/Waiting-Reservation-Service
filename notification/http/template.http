@@ -3,11 +3,11 @@ POST localhost:19050/api/v1/notifications/templates
 Content-Type: application/json
 
 {
-  "service_type": "RESERVATION",
+  "service_type": "QUEUE",
   "channel": "SLACK",
-  "type": "SUCCESS",
-  "title": "제목",
-  "template" : "안녕하세요. ${username}님! ${restaurant} 웨이팅 정보를 알려드립니다."
+  "type": "REGISTERED",
+  "title": "밥줄에 웨이팅이 등록됐습니다!",
+  "template" : "${user_name}님, ${restaurant_name} 웨이팅이 등록되었습니다!\n\n웨이팅 정보\n인원: ${member}명\n순서: ${rank}번째\n번호: ${position}"
 }
 
 ### 템플릿 조회
