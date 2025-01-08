@@ -6,9 +6,16 @@ import com.bobjool.payment.application.dto.PaymentCreateDto;
 import com.bobjool.payment.application.dto.PaymentResDto;
 import com.bobjool.payment.application.dto.PaymentSearchDto;
 import com.bobjool.payment.application.dto.PaymentUpdateDto;
+import com.bobjool.payment.application.events.PaymentCompletedEvent;
+import com.bobjool.payment.application.events.PaymentFailedEvent;
+import com.bobjool.payment.application.interfaces.PgClient;
 import com.bobjool.payment.domain.entity.Payment;
+import com.bobjool.payment.domain.enums.PaymentMethod;
 import com.bobjool.payment.domain.enums.PaymentStatus;
+import com.bobjool.payment.domain.enums.PaymentTopic;
+import com.bobjool.payment.domain.enums.PgName;
 import com.bobjool.payment.domain.repository.PaymentRepository;
+import com.bobjool.payment.infra.messaging.PaymentProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -24,15 +31,41 @@ import java.util.UUID;
 @Service
 public class PaymentService {
     private final PaymentRepository paymentRepository;
+    private final PgClient pgClient;
+    private final PaymentProducer paymentProducer;
 
     @Transactional
     public PaymentResDto createPayment(PaymentCreateDto paymentCreateDto) {
         log.info("createPayment.PaymentCreateDto = {}", paymentCreateDto);
-
         // todo 레디스 확인하여 10분 이내에 저장된 예약인지 확인
-        // 결제 성공시 payment.completed 토픽에 이벤트 발행
-        // 결제 실패시 payment.failed 토픽에 이벤트 발행
-        return null;
+
+        Payment payment = Payment.create(
+                                paymentCreateDto.reservationId(),
+                                paymentCreateDto.userId(),
+                                paymentCreateDto.amount(),
+                                PaymentMethod.of(paymentCreateDto.method()),
+                                PgName.of(paymentCreateDto.PgName())
+                        );
+        // pg 사의 결제 요청
+        PaymentStatus status = PaymentStatus.COMPLETE;
+        if (!pgClient.requestPayment(payment)) {
+            status = PaymentStatus.FAIL;
+        }
+        payment.updateStatus(status);
+        paymentRepository.save(payment);
+
+        // 카프카 토픽 발행
+        // 결제 성공 상황
+        if (status == PaymentStatus.COMPLETE) {
+            PaymentCompletedEvent event = PaymentCompletedEvent.from(payment);
+            paymentProducer.send(PaymentTopic.PAYMENT_COMPLETED.getTopic(), event);
+        } else {
+            // 결제 실패 상황
+            PaymentFailedEvent event = PaymentFailedEvent.from(payment);
+            paymentProducer.send(PaymentTopic.PAYMENT_FAILED.getTopic(), event);
+        }
+
+        return PaymentResDto.from(payment);
     }
 
     public Page<PaymentResDto> search(PaymentSearchDto paymentSearchDto, Pageable pageable) {
