@@ -14,12 +14,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bobjool.common.presentation.ApiResponse;
 import com.bobjool.common.presentation.SuccessCode;
-import com.bobjool.queue.application.dto.QueueAlertDto;
-import com.bobjool.queue.application.dto.QueueCancelDto;
-import com.bobjool.queue.application.dto.QueueCheckInDto;
-import com.bobjool.queue.application.dto.QueueDelayDto;
 import com.bobjool.queue.application.dto.QueueStatusResDto;
+import com.bobjool.queue.application.dto.redis.QueueAlertDto;
+import com.bobjool.queue.application.dto.redis.QueueCancelDto;
+import com.bobjool.queue.application.dto.redis.QueueCheckInDto;
+import com.bobjool.queue.application.dto.redis.QueueDelayDto;
 import com.bobjool.queue.application.service.QueueService;
+import com.bobjool.queue.domain.enums.CancelType;
 import com.bobjool.queue.presentation.dto.QueueRegisterReqDto;
 
 import jakarta.validation.Valid;
@@ -65,7 +66,8 @@ public class QueueController {
 		// TODO : 롤검증 /오너라면 자신식당의 웨이팅정보변경인지 검증/ 손님이라면 내 줄서기 정보인지 확인
 		// TODO : 분기 /오너나 관리자라면 QueueCancelDto.reason : owner_or_admin / QueueCancelDto.reason : customer
 		return ApiResponse.success(SuccessCode.SUCCESS_ACCEPTED,
-			queueService.handleQueue(restaurantId, userId, new QueueCancelDto(restaurantId, userId, "customer"),
+			queueService.handleQueue(restaurantId, userId,
+				new QueueCancelDto(restaurantId, userId, CancelType.COSTUMER),
 				"cancel"));
 	}
 

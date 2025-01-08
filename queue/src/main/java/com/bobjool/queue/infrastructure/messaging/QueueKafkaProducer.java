@@ -3,7 +3,11 @@ package com.bobjool.queue.infrastructure.messaging;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
-import com.bobjool.queue.application.dto.QueueRegisteredEvent;
+import com.bobjool.queue.application.dto.kafka.QueueAlertedEvent;
+import com.bobjool.queue.application.dto.kafka.QueueCanceledEvent;
+import com.bobjool.queue.application.dto.kafka.QueueDelayedEvent;
+import com.bobjool.queue.application.dto.kafka.QueueRegisteredEvent;
+import com.bobjool.queue.application.dto.kafka.QueueRemindEvent;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,5 +26,25 @@ public class QueueKafkaProducer {
 
 	public void publishQueueRegistered(QueueRegisteredEvent event) {
 		publishKafka("queue.registered", event);
+	}
+
+	public void publishQueueDelayed(QueueDelayedEvent event) {
+		publishKafka("queue.delayed", event);
+	}
+
+	public void publishQueueCanceled(QueueCanceledEvent event) {
+		publishKafka("queue.canceled", event);
+	}
+
+	public void publishQueueRemind(QueueRemindEvent event) {
+		publishKafka("queue.remind", event);
+	}
+
+	public void publishQueueAlerted(QueueAlertedEvent event) {
+		publishKafka("queue.alerted", event);
+	}
+
+	public void publishQueueRush(QueueAlertedEvent event) {
+		publishKafka("queue.rush", event);
 	}
 }

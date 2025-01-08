@@ -2,7 +2,7 @@ package com.bobjool.queue.presentation.dto;
 
 import java.util.UUID;
 
-import com.bobjool.queue.application.dto.QueueRegisterDto;
+import com.bobjool.queue.application.dto.redis.QueueRegisterDto;
 import com.bobjool.queue.domain.enums.DiningOption;
 import com.bobjool.queue.domain.enums.QueueType;
 
