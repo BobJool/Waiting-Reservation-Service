@@ -164,4 +164,16 @@ public class RestaurantController {
     return ApiResponse.success(SuccessCode.SUCCESS_ACCEPTED, PageResponse.of(resPage));
   }
 
+  //전체 검색
+  @GetMapping("/keyword")
+  public ResponseEntity<ApiResponse<PageResponse<RestaurantResDto>>> searchByDetail(
+      @RequestParam(required = false) String keyword,
+      @SortDefault(sort = "createdAt", direction = Direction.DESC)
+      Pageable pageable)
+  {
+    Page<RestaurantResDto> resPage = restaurantService.searchByKeyWord(keyword, pageable);
+    return ApiResponse.success(SuccessCode.SUCCESS_ACCEPTED, PageResponse.of(resPage));
+  }
+
+
 }

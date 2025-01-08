@@ -168,8 +168,18 @@ public class RestaurantService {
   public Page<RestaurantResDto> searchByDetail(
       String name, String region, String AddressDetail,
       String Description, Pageable pageable){
-    Page<Restaurant> restaurantPageForCustomer = restaurantRepositoryImpl.findRestaurantPageByDeletedAtIsNull(
+    Page<Restaurant> restaurantPageForCustomer = restaurantRepositoryImpl.findByRestaurantDetail(
         name, region, AddressDetail, Description, pageable
+    );
+    return restaurantPageForCustomer.map(RestaurantResDto::from);
+  }
+
+  //키워드 검색
+  @Transactional(readOnly = true)
+  public Page<RestaurantResDto> searchByKeyWord(
+      String keyword, Pageable pageable){
+    Page<Restaurant> restaurantPageForCustomer = restaurantRepositoryImpl.findByRestaurantKeyword(
+        keyword, pageable
     );
     return restaurantPageForCustomer.map(RestaurantResDto::from);
   }

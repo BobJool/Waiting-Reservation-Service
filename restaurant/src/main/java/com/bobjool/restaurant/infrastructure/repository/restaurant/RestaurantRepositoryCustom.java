@@ -9,7 +9,12 @@ public interface RestaurantRepositoryCustom {
   /**
    * QueryDSl 인터페이스
    * */
-  Page<Restaurant> findRestaurantPageByDeletedAtIsNull(
+  Page<Restaurant> findByRestaurantDetail(
       String name, String region, String addressDetail, String description, Pageable pageable
   );
+
+  Page<Restaurant> findByRestaurantKeyword(
+      String keyword, Pageable pageable
+  );
+
 }

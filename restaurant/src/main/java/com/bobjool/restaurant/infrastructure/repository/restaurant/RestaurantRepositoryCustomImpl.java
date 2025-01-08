@@ -4,7 +4,6 @@ import com.bobjool.restaurant.domain.entity.restaurant.QRestaurant;
 import com.bobjool.restaurant.domain.entity.restaurant.Restaurant;
 import com.bobjool.restaurant.domain.entity.restaurant.RestaurantRegion;
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
@@ -22,42 +21,40 @@ public class RestaurantRepositoryCustomImpl implements RestaurantRepositoryCusto
 
   private final JPAQueryFactory queryFactory;
 
-//  public Page<Restaurant> findRestaurantPageByDeletedAtIsNull(
-//      String name, String region, String addressDetail, String description, Pageable pageable
-//  ) {
-//    QRestaurant restaurant = QRestaurant.restaurant; // Q 클래스를 가져옵니다.
-//
-//
-//    // QueryDSL의 페이징 지원
-//    List<Restaurant> content = queryFactory
-//        .selectFrom(restaurant)
-//        .where(
-//            restaurantDeletedAtIsNull(),
-//            restaurantRegionEq(region),
-//            restaurantNameLike(name),
-//            restaurantAddressDetailLike(addressDetail),
-//            restaurantDescriptionLike(description)
-//        )
-//        .offset(pageable.getOffset())
-//        .limit(pageable.getPageSize())
-//        .fetch();
-//
-//    long total = queryFactory
-//        .select(restaurant.count())
-//        .from(restaurant)
-//        .where(
-//            restaurantDeletedAtIsNull(),
-//            restaurantRegionEq(region),
-//            restaurantNameLike(name),
-//            restaurantAddressDetailLike(addressDetail),
-//            restaurantDescriptionLike(description)
-//        )
-//        .fetchOne();
-//
-//    return new PageImpl<>(content, pageable, total);
-//  }
+  //전체 키워드 검색
+  public Page<Restaurant> findByRestaurantKeyword(
+      String keyword, Pageable pageable
+  ) {
+    QRestaurant restaurant = QRestaurant.restaurant; // Q 클래스를 가져옵니다.
 
-  public Page<Restaurant> findRestaurantPageByDeletedAtIsNull(
+    BooleanExpression keywordCondition = createKeywordCondition(keyword);
+
+
+    // QueryDSL의 페이징 지원
+    List<Restaurant> results = queryFactory
+        .selectFrom(restaurant)
+        .where(
+            restaurantDeletedAtIsNull(),
+            keywordCondition
+        )
+        .offset(pageable.getOffset())
+        .limit(pageable.getPageSize())
+        .fetch();
+
+    long total = queryFactory
+        .select(restaurant.count())
+        .from(restaurant)
+        .where(
+            restaurantDeletedAtIsNull(),
+            keywordCondition
+        )
+        .fetchOne();
+
+    return new PageImpl<>(results, pageable, total);
+  }
+
+  //상세 검색
+  public Page<Restaurant> findByRestaurantDetail(
       String name, String region, String addressDetail, String description, Pageable pageable
   ) {
     QRestaurant restaurant = QRestaurant.restaurant; // Q 클래스를 가져옵니다.
@@ -116,5 +113,18 @@ public class RestaurantRepositoryCustomImpl implements RestaurantRepositoryCusto
   // description 검색 조건 (like 검색)
   private BooleanExpression restaurantDescriptionLike(String description) {
     return description != null ? QRestaurant.restaurant.restaurantDescription.containsIgnoreCase(description) : null;
+  }
+
+  // 검색 조건 생성 메서드(키워드 검색)
+  private BooleanExpression createKeywordCondition(String keyword) {
+    QRestaurant restaurant = QRestaurant.restaurant;
+
+    if (keyword == null || keyword.isEmpty()) {
+      return null;
+    }
+
+    return restaurant.restaurantName.containsIgnoreCase(keyword)
+        .or(restaurant.restaurantDescription.containsIgnoreCase(keyword))
+        .or(restaurant.restaurantAddressDetail.containsIgnoreCase(keyword));
   }
 }
