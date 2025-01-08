@@ -75,6 +75,7 @@ public enum ErrorCode {
     INVALID_PAYMENT_AMOUNT(HttpStatus.BAD_REQUEST, "결제 금액은 양수여야 합니다."),
     PAYMENT_FAIL(HttpStatus.BAD_REQUEST, "대기 상태의 예약만 결제 가능합니다."),
     CANNOT_REFUND(HttpStatus.CONFLICT, "환불할 수 없는 상태입니다."),
+    EXPIRED_RESERVATION(HttpStatus.BAD_REQUEST, "만료된 예약은 결제할 수 없습니다."),
 
     // 알림
     INVALID_SLACK_EMAIL(HttpStatus.BAD_REQUEST, "Slack 이메일이 존재하지 않습니다."),

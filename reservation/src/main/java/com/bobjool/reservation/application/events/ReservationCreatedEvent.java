@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record ReservationCreatedEvent(
+        UUID reservationId,
         Long userId,
         UUID restaurantScheduleId,
         LocalDateTime createdAt,
@@ -16,6 +17,7 @@ public record ReservationCreatedEvent(
         LocalDateTime expiredAt = createdAt.plusMinutes(10);
 
         return new ReservationCreatedEvent(
+                reservation.getId(),
                 reservation.getUserId(),
                 reservation.getRestaurantScheduleId(),
                 createdAt,

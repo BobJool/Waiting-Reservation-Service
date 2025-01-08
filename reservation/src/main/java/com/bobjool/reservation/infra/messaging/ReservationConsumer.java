@@ -2,6 +2,7 @@ package com.bobjool.reservation.infra.messaging;
 
 import com.bobjool.reservation.application.events.PaymentCompletedEvent;
 import com.bobjool.reservation.application.events.PaymentFailedEvent;
+import com.bobjool.reservation.application.events.PaymentTimeoutEvent;
 import com.bobjool.reservation.application.service.ReservationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +20,7 @@ public class ReservationConsumer {
      */
     @KafkaListener(topics = "payment.completed")
     public void listenPaymentCompleted(String kafkaMessage) {
-        log.info("ReservatioConsumer.listen.kafkaMessage = {}", kafkaMessage);
+        log.info("ReservatioConsumer.listenPaymentCompleted.kafkaMessage = {}", kafkaMessage);
 
         PaymentCompletedEvent paymentCompletedEvent
                 = EventSerializer.deserialize(kafkaMessage, PaymentCompletedEvent.class);
@@ -31,10 +32,22 @@ public class ReservationConsumer {
      * */
     @KafkaListener(topics = "payment.failed")
     public void listenPaymentFailed(String kafkaMessage) {
-        log.info("ReservatioConsumer.listen.kafkaMessage = {}", kafkaMessage);
+        log.info("ReservatioConsumer.listenPaymentFailed.kafkaMessage = {}", kafkaMessage);
 
         PaymentFailedEvent paymentFailedEvent
                 = EventSerializer.deserialize(kafkaMessage, PaymentFailedEvent.class);
         reservationService.updateReservationFailed(paymentFailedEvent);
+    }
+
+    /**
+     * 결제 시간 초과에 대한 이벤트 구독, 처리
+     * */
+    @KafkaListener(topics = "payment.timeout")
+    public void listenPaymentTimeout(String kafkaMessage) {
+        log.info("ReservatioConsumer.listenPaymentTimeout.kafkaMessage = {}", kafkaMessage);
+
+        PaymentTimeoutEvent paymentTimeoutEvent
+                = EventSerializer.deserialize(kafkaMessage, PaymentTimeoutEvent.class);
+        reservationService.updateReservationFailed(paymentTimeoutEvent);
     }
 }
