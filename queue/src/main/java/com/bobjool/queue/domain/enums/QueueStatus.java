@@ -23,7 +23,7 @@ public enum QueueStatus {
 
 	// 허용되는 상태 전환 정의
 	private static final Map<QueueStatus, List<QueueStatus>> TRANSITIONS = Map.of(
-		WAITING, List.of(DELAYED, ALERTED, RUSH_SENT,CHECK_IN, CANCELED),
+		WAITING, List.of(DELAYED, ALERTED, RUSH_SENT, CHECK_IN, CANCELED),
 		DELAYED, List.of(ALERTED, CHECK_IN, RUSH_SENT, CANCELED),
 		ALERTED, List.of(RUSH_SENT, CHECK_IN, CANCELED),
 		RUSH_SENT, List.of(CHECK_IN, CANCELED),

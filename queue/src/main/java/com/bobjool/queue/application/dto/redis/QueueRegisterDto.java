@@ -1,4 +1,4 @@
-package com.bobjool.queue.application.dto;
+package com.bobjool.queue.application.dto.redis;
 
 import java.util.UUID;
 
@@ -17,4 +17,5 @@ public record QueueRegisterDto(
 	QueueType type,
 	@JsonProperty("diningOption")
 	DiningOption diningOption
-) { }
+) {
+}

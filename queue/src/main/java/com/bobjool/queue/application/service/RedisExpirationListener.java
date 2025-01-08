@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
-import com.bobjool.queue.application.dto.QueueCancelDto;
+import com.bobjool.queue.application.dto.redis.QueueCancelDto;
 import com.bobjool.queue.domain.enums.CancelType;
 
 import lombok.RequiredArgsConstructor;
@@ -34,7 +34,7 @@ public class RedisExpirationListener implements MessageListener {
 				UUID restaurantId = UUID.fromString(parts[2]);
 				Long userId = Long.parseLong(parts[3]);
 
-				QueueCancelDto cancelDto = new QueueCancelDto(restaurantId, userId, CancelType.SYSTEM.getDescription());
+				QueueCancelDto cancelDto = new QueueCancelDto(restaurantId, userId, CancelType.SYSTEM);
 				log.info("redis 키 만료 이벤트 수신하여 자동 줄서기 취소 실행");
 				queueService.cancelWaiting(cancelDto);
 			} catch (Exception e) {

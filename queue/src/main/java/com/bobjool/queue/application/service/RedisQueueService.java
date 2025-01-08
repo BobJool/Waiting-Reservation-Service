@@ -14,11 +14,15 @@ import org.springframework.stereotype.Service;
 
 import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
-import com.bobjool.queue.application.dto.QueueAlertDto;
-import com.bobjool.queue.application.dto.QueueCancelDto;
-import com.bobjool.queue.application.dto.QueueCheckInDto;
-import com.bobjool.queue.application.dto.QueueDelayResDto;
-import com.bobjool.queue.application.dto.QueueRegisterDto;
+import com.bobjool.queue.application.dto.kafka.QueueAlertedEvent;
+import com.bobjool.queue.application.dto.kafka.QueueCanceledEvent;
+import com.bobjool.queue.application.dto.kafka.QueueDelayedEvent;
+import com.bobjool.queue.application.dto.kafka.QueueRegisteredEvent;
+import com.bobjool.queue.application.dto.kafka.QueueRemindEvent;
+import com.bobjool.queue.application.dto.redis.QueueAlertDto;
+import com.bobjool.queue.application.dto.redis.QueueCancelDto;
+import com.bobjool.queue.application.dto.redis.QueueCheckInDto;
+import com.bobjool.queue.application.dto.redis.QueueRegisterDto;
 import com.bobjool.queue.domain.enums.QueueStatus;
 import com.bobjool.queue.domain.util.RedisKeyUtil;
 
@@ -32,7 +36,7 @@ public class RedisQueueService {
 	private final RedisTemplate<String, Object> redisTemplate;
 
 	// 대기 큐에 사용자 추가
-	public Map<String, Object> addUserToQueue(QueueRegisterDto dto) {
+	public QueueRegisteredEvent addUserToQueue(QueueRegisterDto dto) {
 		String waitingListKey = RedisKeyUtil.getWaitingListKey(dto.restaurantId());
 		String userQueueDataKey = RedisKeyUtil.getUserQueueDataKey(dto.restaurantId(), dto.userId());
 
@@ -53,7 +57,9 @@ public class RedisQueueService {
 		);
 		redisTemplate.opsForHash().putAll(userQueueDataKey, userInfo);
 		log.info("Added user {} to queue {} with position {}", dto.userId(), waitingListKey, position);
-		return userInfo;
+		markUserAsWaiting(dto.userId(), dto.restaurantId());
+		long rank = getUserIndexInQueue(dto.restaurantId(), dto.userId()) + 1;
+		return QueueRegisteredEvent.from(dto.userId(), dto.restaurantId(), position, rank, dto.member());
 	}
 
 	public boolean isUserWaiting(Long userId) {
@@ -100,7 +106,7 @@ public class RedisQueueService {
 		return result;
 	}
 
-	public QueueDelayResDto delayUserRank(UUID restaurantId, Long userId, Long targetUserId) {
+	public QueueDelayedEvent delayUserRank(UUID restaurantId, Long userId, Long targetUserId) {
 		String waitingListKey = RedisKeyUtil.getWaitingListKey(restaurantId);
 		String userQueueDataKey = RedisKeyUtil.getUserQueueDataKey(restaurantId, userId);
 
@@ -118,11 +124,11 @@ public class RedisQueueService {
 
 		Long originalPosition = getHashValue(restaurantId, userId, "position", Long.class);
 		Integer member = getHashValue(restaurantId, userId, "member", Integer.class);
-		long newRank = getUserIndexInQueue(restaurantId, userId) + 1;
+		Long newRank = getUserIndexInQueue(restaurantId, userId) + 1;
 
 		log.info("Delayed user {} to queue {} with newRank {}", userId, waitingListKey, newRank);
 
-		return new QueueDelayResDto(newRank, originalPosition, member);
+		return QueueDelayedEvent.from(userId, restaurantId, newRank, originalPosition, member);
 	}
 
 	public Long getTotalUsersInQueue(UUID restaurantId) {
@@ -201,10 +207,11 @@ public class RedisQueueService {
 		return getUserScore(waitingListKey, Long.parseLong(nextUser.toString()));
 	}
 
-	public void cancelWaiting(QueueCancelDto dto) {
+	public QueueCanceledEvent cancelWaiting(QueueCancelDto dto) {
 		removeUserIsWaitingKey(dto.userId());
 		removeUserFromQueue(dto.restaurantId(), dto.userId());
 		updateQueueStatus(dto.restaurantId(), dto.userId(), QueueStatus.CANCELED);
+		return QueueCanceledEvent.from(dto.restaurantId(), dto.userId(), dto.reason());
 	}
 
 	private void removeUserFromQueue(UUID restaurantId, Long userId) {
@@ -235,23 +242,24 @@ public class RedisQueueService {
 		}
 	}
 
-	public void checkInRestaurant(QueueCheckInDto dto) {
+	public QueueRemindEvent checkInRestaurant(QueueCheckInDto dto) {
 		removeUserIsWaitingKey(dto.userId());
 		removeUserFromQueue(dto.restaurantId(), dto.userId());
 		updateQueueStatus(dto.restaurantId(), dto.userId(), QueueStatus.CHECK_IN);
+		return getThirdUserInfo(dto.restaurantId());
 	}
 
-	public Integer sendAlertNotification(QueueAlertDto dto) {
+	public QueueAlertedEvent sendAlertNotification(QueueAlertDto dto) {
 		updateQueueStatus(dto.restaurantId(), dto.userId(), QueueStatus.ALERTED);
 		Long originalPosition = getHashValue(dto.restaurantId(), dto.userId(), "position", Long.class);
-		return originalPosition.intValue();
+		return QueueAlertedEvent.from(dto.userId(), dto.restaurantId(), originalPosition);
 	}
 
-	public Integer sendRushAlertNotification(QueueAlertDto dto) {
+	public QueueAlertedEvent sendRushAlertNotification(QueueAlertDto dto) {
 		updateQueueStatus(dto.restaurantId(), dto.userId(), QueueStatus.RUSH_SENT);
 		addUserToAutoCancelQueue(dto.restaurantId(), dto.userId());
 		Long originalPosition = getHashValue(dto.restaurantId(), dto.userId(), "position", Long.class);
-		return originalPosition.intValue();
+		return QueueAlertedEvent.from(dto.userId(), dto.restaurantId(), originalPosition);
 	}
 
 	public void checkUserStatus(UUID restaurantId, Long userId, String process) {
@@ -271,6 +279,23 @@ public class RedisQueueService {
 		String key = RedisKeyUtil.getAutoCancelKey(restaurantId, userId);
 		redisTemplate.opsForValue().set(key, "", Duration.ofMinutes(10)); // TTL 10분 설정
 		log.info("재촉 알람 발행 시, 10분 자동취소 되도록 rediskey 적재");
+	}
+
+	public QueueRemindEvent getThirdUserInfo(UUID restaurantId) {
+		String waitingListKey = RedisKeyUtil.getWaitingListKey(restaurantId);
+		Set<Object> thirdUserSet = redisTemplate.opsForZSet().range(waitingListKey, 2, 2);
+		if (thirdUserSet != null && !thirdUserSet.isEmpty()) {
+			Object thirdUserInfo = thirdUserSet.iterator().next();
+			try {
+				long userId = Long.parseLong(thirdUserInfo.toString());
+				Long position = getHashValue(restaurantId, userId, "position", Long.class);
+				return QueueRemindEvent.from(userId, restaurantId, 3L, position);
+			} catch (NumberFormatException e) {
+				throw new BobJoolException(ErrorCode.INVALID_USER_ID_FORMAT);
+			}
+		} else {
+			throw new BobJoolException(ErrorCode.QUEUE_DATA_NOT_FOUND);
+		}
 	}
 
 }

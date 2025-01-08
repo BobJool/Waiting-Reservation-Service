@@ -1,9 +1,7 @@
-package com.bobjool.queue.application.dto;
+package com.bobjool.queue.application.dto.redis;
 
 import java.util.UUID;
 
-import com.bobjool.queue.domain.enums.DiningOption;
-import com.bobjool.queue.domain.enums.QueueType;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public record QueueDelayDto(
@@ -14,4 +12,5 @@ public record QueueDelayDto(
 	Long userId,
 	@JsonProperty("targetUserId")
 	Long targetUserId
-) { }
+) {
+}
