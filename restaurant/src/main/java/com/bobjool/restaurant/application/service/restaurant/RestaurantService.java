@@ -27,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class RestaurantService {
 
   private final RestaurantRepository restaurantRepository;
-  private final RestaurantRepositoryCustom restaurantRepositoryImpl;
+  private final RestaurantRepositoryCustom restaurantRepositoryCustomImpl;
 
   @Transactional
   public RestaurantResDto createRestaurant(RestaurantCreateDto restaurantCreateDto) {
@@ -165,23 +165,29 @@ public class RestaurantService {
 
   //상세 검색
   @Transactional(readOnly = true)
-  public Page<RestaurantResDto> searchByDetail(
+  public Page<RestaurantForCustomerResDto> searchByDetail(
       String name, String region, String AddressDetail,
       String Description, Pageable pageable){
-    Page<Restaurant> restaurantPageForCustomer = restaurantRepositoryImpl.findByRestaurantDetail(
+    Page<Restaurant> restaurantPageForCustomer = restaurantRepositoryCustomImpl.findByRestaurantDetail(
         name, region, AddressDetail, Description, pageable
     );
-    return restaurantPageForCustomer.map(RestaurantResDto::from);
+    if(restaurantPageForCustomer.isEmpty()){
+      throw new BobJoolException(ErrorCode.NO_SEARCH_RESULTS);
+    }
+    return restaurantPageForCustomer.map(RestaurantForCustomerResDto::from);
   }
 
   //키워드 검색
   @Transactional(readOnly = true)
-  public Page<RestaurantResDto> searchByKeyWord(
+  public Page<RestaurantForCustomerResDto> searchByKeyWord(
       String keyword, Pageable pageable){
-    Page<Restaurant> restaurantPageForCustomer = restaurantRepositoryImpl.findByRestaurantKeyword(
+    Page<Restaurant> restaurantPageForCustomer = restaurantRepositoryCustomImpl.findByRestaurantKeyword(
         keyword, pageable
     );
-    return restaurantPageForCustomer.map(RestaurantResDto::from);
+    if(restaurantPageForCustomer.isEmpty()){
+      throw new BobJoolException(ErrorCode.NO_SEARCH_RESULTS);
+    }
+    return restaurantPageForCustomer.map(RestaurantForCustomerResDto::from);
   }
 
   private void validateDuplicate(RestaurantCreateDto restaurantCreateDto) {

@@ -31,6 +31,7 @@ public class RestaurantExceptionHandler extends GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
             .body(ApiResponse.fail(HttpStatus.BAD_REQUEST, "잘못된 Category 값입니다."));
       }
+      //RestaurantRegion Enum인지 확인
       if (RestaurantRegion.class.equals(targetType)) {
         log.error("[ERROR] 잘못된 Region 값입니다. {}", invalidFormatException.getValue());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)

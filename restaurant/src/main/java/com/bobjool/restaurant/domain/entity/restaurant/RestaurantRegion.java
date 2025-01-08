@@ -4,6 +4,11 @@ public enum RestaurantRegion {
 
   //임시 Region
   SEOUL,
-  GYEONGGI
+  GYEONGGI,
+  GANGWON,
+  CHUNGCHEONG,
+  JEOLLA,
+  GYEONGSANG,
+  JEJU
 
 }

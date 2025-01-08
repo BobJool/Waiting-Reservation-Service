@@ -152,7 +152,7 @@ public class RestaurantController {
 
   //상세 검색
   @GetMapping("/detail")
-  public ResponseEntity<ApiResponse<PageResponse<RestaurantResDto>>> searchByDetail(
+  public ResponseEntity<ApiResponse<PageResponse<RestaurantForCustomerResDto>>> searchByDetail(
       @RequestParam(required = false) String name,
       @RequestParam(required = false) String region,
       @RequestParam(required = false) String addressDetail,
@@ -160,18 +160,18 @@ public class RestaurantController {
       @SortDefault(sort = "createdAt", direction = Direction.DESC)
       Pageable pageable)
   {
-    Page<RestaurantResDto> resPage = restaurantService.searchByDetail( name, region, addressDetail, description, pageable);
+    Page<RestaurantForCustomerResDto> resPage = restaurantService.searchByDetail( name, region, addressDetail, description, pageable);
     return ApiResponse.success(SuccessCode.SUCCESS_ACCEPTED, PageResponse.of(resPage));
   }
 
   //전체 검색
   @GetMapping("/keyword")
-  public ResponseEntity<ApiResponse<PageResponse<RestaurantResDto>>> searchByDetail(
+  public ResponseEntity<ApiResponse<PageResponse<RestaurantForCustomerResDto>>> searchByDetail(
       @RequestParam(required = false) String keyword,
       @SortDefault(sort = "createdAt", direction = Direction.DESC)
       Pageable pageable)
   {
-    Page<RestaurantResDto> resPage = restaurantService.searchByKeyWord(keyword, pageable);
+    Page<RestaurantForCustomerResDto> resPage = restaurantService.searchByKeyWord(keyword, pageable);
     return ApiResponse.success(SuccessCode.SUCCESS_ACCEPTED, PageResponse.of(resPage));
   }
 
