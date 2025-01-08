@@ -1,4 +1,4 @@
-package com.bobjool.reservation;
+package com.bobjool.payment.infra.messaging;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

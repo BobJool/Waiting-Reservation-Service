@@ -5,7 +5,7 @@ name: Run Test
 on:
   push:
     # 배열로 여러 브랜치를 넣을 수 있다.
-    branches: [ develop, feat/* ]
+    branches: [ develop, feat/*, refactor/*, chore/* ]
   # github pull request 생성시
   pull_request:
     branches:

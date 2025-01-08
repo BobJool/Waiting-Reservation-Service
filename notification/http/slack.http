@@ -1,0 +1,3 @@
+### 슬랙 ID 조회
+GET localhost:19050/api/v1/slack/users?email=jisuyang@kakao.com
+

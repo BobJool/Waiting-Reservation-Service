@@ -82,7 +82,9 @@ public enum ErrorCode {
     UNSUPPORTED_SERVICE_TYPE(HttpStatus.BAD_REQUEST, "지원하지 않는 서비스 입니다."),
     UNSUPPORTED_CHANNEL_TYPE(HttpStatus.BAD_REQUEST, "지원하지 않는 채널 입니다."),
     UNSUPPORTED_NOTIFICATION_TYPE(HttpStatus.BAD_REQUEST, "지원하지 않는 알림 종류 입니다."),
-    INVALID_NOTIFICATION_STATUS(HttpStatus.BAD_REQUEST, "유효하지 않은 알림 상태 입니다.")
+    INVALID_NOTIFICATION_STATUS(HttpStatus.BAD_REQUEST, "유효하지 않은 알림 상태 입니다."),
+    UNSUPPORTED_NOTIFICATION_FIELD(HttpStatus.BAD_REQUEST, "지원하지 않는 템플릿 변수 입니다."),
+
     // AI
 
     ;

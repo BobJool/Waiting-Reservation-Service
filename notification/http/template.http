@@ -3,7 +3,7 @@ POST localhost:19050/api/v1/notifications/templates
 Content-Type: application/json
 
 {
-  "serviceType": "RESERVATION",
+  "service_type": "RESERVATION",
   "channel": "SLACK",
   "type": "SUCCESS",
   "title": "제목",
@@ -14,16 +14,16 @@ Content-Type: application/json
 GET localhost:19050/api/v1/notifications/templates
 
 ### 템플릿 수정
-PUT localhost:19050/api/v1/notifications/templates/1471d39e-472d-4261-9a6f-dfb4b290fb75
+PUT localhost:19050/api/v1/notifications/templates/8c591d85-e0b7-4f47-a90d-3a85821ab645
 Content-Type: application/json
 
 {
-  "serviceType": "RESERVATION",
+  "service_type": "RESERVATION",
   "channel": "SLACK",
   "type": "FAIL",
-  "title": "제목",
-  "template" : "안녕하세요. ${username}님! ${restaurant} 웨이팅 정보를 알려드립니다."
+  "title": "${restaurant_name} 웨이팅이 취소되었습니다.\n",
+  "template" : "${reason} ${name}님의 웨이팅이 취소되었어요.\n다음에 방문해주세요!"
 }
 
 ### 템플릿 삭제
-DELETE localhost:19050/api/v1/notifications/templates/1471d39e-472d-4261-9a6f-dfb4b290fb75
+DELETE localhost:19050/api/v1/notifications/templates/937e5b08-bd6d-4d39-bb12-083e0531dba5

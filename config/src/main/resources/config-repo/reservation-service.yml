@@ -38,8 +38,6 @@ eureka:
     serviceUrl:
       defaultZone: http://localhost:19000/eureka/
 
-
-
 management:
   zipkin:
     tracing:

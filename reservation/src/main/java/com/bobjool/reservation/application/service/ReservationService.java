@@ -2,16 +2,18 @@ package com.bobjool.reservation.application.service;
 
 import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
+import com.bobjool.reservation.application.client.RestaurantScheduleClient;
+import com.bobjool.reservation.application.client.RestaurantScheduleReserveReqDto;
 import com.bobjool.reservation.application.dto.reservation.ReservationCreateDto;
 import com.bobjool.reservation.application.dto.reservation.ReservationResDto;
 import com.bobjool.reservation.application.dto.reservation.ReservationSearchDto;
 import com.bobjool.reservation.application.dto.reservation.ReservationUpdateDto;
-import com.bobjool.reservation.application.events.ReservationCreatedEvent;
+import com.bobjool.reservation.application.events.*;
+import com.bobjool.reservation.application.interfaces.ReservationProducer;
 import com.bobjool.reservation.domain.entity.Reservation;
 import com.bobjool.reservation.domain.enums.ReservationStatus;
 import com.bobjool.reservation.domain.enums.ReservationTopic;
 import com.bobjool.reservation.domain.repository.ReservationRepository;
-import com.bobjool.reservation.infra.kafka.ReservationProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -28,11 +30,14 @@ import java.util.UUID;
 public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationProducer reservationProducer;
+    private final RestaurantScheduleClient restaurantScheduleClient;
 
     @Transactional
     public ReservationResDto createReservation(ReservationCreateDto reservationCreateDto) {
         log.info("createReservation.ReservationCreateDto = {}", reservationCreateDto);
-        // todo restaurant schedule 의 current_capacity를 올려주는 로직 필요
+        // restaurantSchedule 예약 api 호출
+        restaurantScheduleClient.reserveSchedule2(reservationCreateDto.restaurantScheduleId(),
+                new RestaurantScheduleReserveReqDto(reservationCreateDto.userId(), reservationCreateDto.guestCount()));
 
         // 1. DB 저장
         Reservation reservation = Reservation.create(
@@ -46,7 +51,7 @@ public class ReservationService {
 
         // 2. reservation.created 토픽에 이벤트 발행
         ReservationCreatedEvent event = ReservationCreatedEvent.from(reservation);
-        reservationProducer.publish(ReservationTopic.RESERVATION_CREATED.getTopic(), event);
+        reservationProducer.publishReservationCreated(ReservationTopic.RESERVATION_CREATED.getTopic(), event);
         return ReservationResDto.from(reservation);
     }
 
@@ -60,6 +65,40 @@ public class ReservationService {
 
         reservation.updateStatus(ReservationStatus.of(reservationUpdateDto.status()));
         return ReservationResDto.from(reservation);
+    }
+
+    /**
+     * 예약 완료 처리 후, reservation.completed 이벤트 발행
+     * */
+    @Transactional
+    public void updateReservationCompleted(PaymentCompletedEvent event) {
+        log.info("updateReservationCompleted.PaymentCompletedEvent = {}", event);
+
+        Reservation reservation = reservationRepository.findById(event.reservationId())
+                .orElseThrow(() -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND));
+
+        reservation.updateStatus(ReservationStatus.COMPLETE);
+
+        // reservation.completed 이벤트 발행
+        ReservationCompletedEvent reservationCompletedEvent = ReservationCompletedEvent.from(reservation);
+        reservationProducer.publishReservationCompleted(ReservationTopic.RESERVATION_COMPLETED.getTopic(), reservationCompletedEvent);
+    }
+
+    /**
+     * 예약 실패 처리 후, reservation.failed 이벤트 발행
+     * */
+    @Transactional
+    public void updateReservationFailed(PaymentFailedEvent event) {
+        log.info("updateReservationFailed.PaymentFailedEvent = {}", event);
+
+        Reservation reservation = reservationRepository.findById(event.reservationId())
+                .orElseThrow(() -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND));
+
+        reservation.updateStatus(ReservationStatus.FAIL);
+
+        // reservation.failed 이벤트 발행
+        ReservationFailedEvent reservationFailedEvent = ReservationFailedEvent.from(reservation);
+        reservationProducer.publishReservationFailed(ReservationTopic.RESERVATION_FAILED.getTopic(), reservationFailedEvent);
     }
 
     /**

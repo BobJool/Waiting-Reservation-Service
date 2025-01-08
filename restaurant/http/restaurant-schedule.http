@@ -1,0 +1,31 @@
+### 음식점 생성
+POST localhost:19005/api/v1/restaurants
+Content-Type: application/json
+
+{
+  "user_id": 123,
+  "restaurant_category": "KOREA",
+  "restaurant_phone": "010-2436-5678",
+  "restaurant_name": "식당 이름1",
+  "restaurant_region": "SEOUL",
+  "restaurant_address_detail": "서울시 마산구 부산동",
+  "restaurant_description": "식당 이름1의 상세 설명",
+  "restaurant_volume": 100,
+  "is_reservation": "true",
+  "is_queue": "true",
+  "open_time": "13:00",
+  "close_time": "22:00"
+}
+
+### 식당 스케줄 새성
+POST localhost:19005/api/v1/restaurants/schedule/7e699975-7ef8-4aaf-9013-d816023e4ed6
+Content-Type: application/json
+
+{
+  "user_id": 123,
+  "restaurant_id": "7e699975-7ef8-4aaf-9013-d816023e4ed6",
+  "table_number": 1,
+  "date": "2025-01-20",
+  "time_slot": "14:00",
+  "max_capacity": 8
+}
