@@ -10,6 +10,7 @@ import com.bobjool.restaurant.application.dto.restaurant.RestaurantResDto;
 import com.bobjool.restaurant.application.dto.restaurant.RestaurantUpdateDto;
 import com.bobjool.restaurant.domain.entity.restaurant.Restaurant;
 import com.bobjool.restaurant.domain.repository.RestaurantRepository;
+import com.bobjool.restaurant.infrastructure.repository.restaurant.RestaurantRepositoryCustom;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class RestaurantService {
 
   private final RestaurantRepository restaurantRepository;
+  private final RestaurantRepositoryCustom restaurantRepositoryImpl;
 
   @Transactional
   public RestaurantResDto createRestaurant(RestaurantCreateDto restaurantCreateDto) {
@@ -151,6 +153,7 @@ public class RestaurantService {
     return RestaurantResDto.from(restaurant);
   }
 
+  @Transactional(readOnly = true)
   public RestaurantContactResDto ReadRestaurantContact(@Valid UUID restaurantId) {
     log.info("ReadRestaurantContact");
 
@@ -158,6 +161,17 @@ public class RestaurantService {
         .orElseThrow(() -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND));
 
     return RestaurantContactResDto.from(restaurant);
+  }
+
+  //상세 검색
+  @Transactional(readOnly = true)
+  public Page<RestaurantResDto> searchByDetail(
+      String name, String region, String AddressDetail,
+      String Description, Pageable pageable){
+    Page<Restaurant> restaurantPageForCustomer = restaurantRepositoryImpl.findRestaurantPageByDeletedAtIsNull(
+        name, region, AddressDetail, Description, pageable
+    );
+    return restaurantPageForCustomer.map(RestaurantResDto::from);
   }
 
   private void validateDuplicate(RestaurantCreateDto restaurantCreateDto) {
@@ -187,7 +201,7 @@ public class RestaurantService {
     }
     if (restaurantRepository.findByRestaurantAddressDetail(
         restaurantUpdateDto.restaurantAddressDetail()).isPresent()) {
-      throw new BobJoolException(ErrorCode.DUPLICATED_PHONE);
+      throw new BobJoolException(ErrorCode.DUPLICATED_ADDRESS);
     }
   }
 
