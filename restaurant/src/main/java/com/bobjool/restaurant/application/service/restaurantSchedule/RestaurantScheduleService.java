@@ -33,6 +33,21 @@ public class RestaurantScheduleService {
   @Transactional
   public RestaurantScheduleResDto createSchedule(RestaurantScheduleCreateDto createDto) {
 
+    restaurantRepository.findById(createDto.restaurantId())
+        .orElseThrow(() -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND));
+
+    boolean isDuplicate = scheduleRepository.existsByRestaurantIdAndTableNumberAndDateAndTimeSlot(
+    createDto.restaurantId(),
+    createDto.tableNumber(),
+    createDto.date(),
+    createDto.timeSlot()
+  );
+
+    if (isDuplicate) {
+      throw new BobJoolException(ErrorCode.DUPLICATE_SCHEDULE);
+    }
+
+
     RestaurantSchedule schedule = RestaurantSchedule.create(
         createDto.restaurantId(),
         createDto.tableNumber(),

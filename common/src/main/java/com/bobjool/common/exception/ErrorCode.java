@@ -44,6 +44,7 @@ public enum ErrorCode {
     // 레스토랑 스케쥴
     CAPACITY_OVERFLOW(HttpStatus.BAD_REQUEST,"요청한 인원수가 테이블 최대 인원수를 초과합니다."),
     ALREADEY_RESERVED(HttpStatus.CONFLICT,"해당 예약이 만료되어 예약이 불가능 합니다."),
+    DUPLICATE_SCHEDULE(HttpStatus.BAD_REQUEST, "중복된 스케쥴이 존재합니다."),
 
     // 대기열
     USER_ALREADY_IN_QUEUE(HttpStatus.CONFLICT, "사용자가 이미 다른 대기열에 등록되어 있습니다."),
