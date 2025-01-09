@@ -1,10 +1,10 @@
-package com.bobjool.presentation.dto.response;
+package com.bobjool.application.dto;
 
 public record SignInResDto(
         String accessToken
 ) {
 
-    public static SignInResDto of(String accessToken) {
+    public static SignInResDto from(String accessToken) {
         return new SignInResDto(accessToken);
     }
 }

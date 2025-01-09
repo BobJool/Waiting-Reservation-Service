@@ -1,7 +1,6 @@
 package com.bobjool.application.interfaces;
 
 import com.bobjool.domain.entity.User;
-import com.bobjool.presentation.dto.response.SignInResDto;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 

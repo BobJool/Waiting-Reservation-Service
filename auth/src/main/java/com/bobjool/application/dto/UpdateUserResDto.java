@@ -1,4 +1,4 @@
-package com.bobjool.presentation.dto.response;
+package com.bobjool.application.dto;
 
 import com.bobjool.domain.entity.User;
 
@@ -7,7 +7,7 @@ public record UpdateUserResDto (
         String slackId,
         String phoneNumber
 ) {
-    public static UpdateUserResDto of(User user) {
+    public static UpdateUserResDto from(User user) {
         return new UpdateUserResDto(
                 user.getSlackEmail(),
                 user.getSlackId(),

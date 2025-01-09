@@ -22,6 +22,8 @@ spring:
     redis:
       host: localhost
       port: 6379
+  jackson:
+    property-naming-strategy: SNAKE_CASE
 
 eureka:
   client:

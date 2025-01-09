@@ -5,7 +5,7 @@ import com.bobjool.common.presentation.ApiResponse;
 import com.bobjool.common.presentation.SuccessCode;
 import com.bobjool.presentation.dto.request.SignInReqDto;
 import com.bobjool.presentation.dto.request.SignUpReqDto;
-import com.bobjool.presentation.dto.response.SignInResDto;
+import com.bobjool.application.dto.SignInResDto;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
