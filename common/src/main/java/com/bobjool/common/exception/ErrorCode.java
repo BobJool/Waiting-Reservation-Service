@@ -14,6 +14,9 @@ public enum ErrorCode {
     UNSUPPORTED_SORT_TYPE(HttpStatus.BAD_REQUEST, "지원하지 않는 정렬 조건입니다."),
     UNKNOWN_TOPIC(HttpStatus.BAD_REQUEST, "알 수 없는 토픽입니다."),
     FAILED_PARSE_MESSAGE(HttpStatus.BAD_REQUEST, "메시지를 변환에 실패하였습니다."),
+    TRANSACTION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "트랜젝션 실패하여 롤백하였습니다."),
+    FAILED_ACQUIRE_LOCK(HttpStatus.INTERNAL_SERVER_ERROR, "해당 키에 대한 락 획득이 실패했습니다."),
+    INTERRUPTED_WHILE_ACQUIRE_LOCK(HttpStatus.INTERNAL_SERVER_ERROR, "키에 대한 락을 획득하려는 도중 인터럽트가 발생했습니다."),
 
     // 인증
     FORBIDDEN_ACCESS(HttpStatus.FORBIDDEN, "접근 권한이 존재하지 않습니다."),
@@ -62,6 +65,8 @@ public enum ErrorCode {
     ALREADY_SENT_ALERT(HttpStatus.BAD_REQUEST, "이미 입장 알림을 전송하였습니다."),
     ALREADY_SENT_RUSH_ALERT(HttpStatus.BAD_REQUEST, "이미 입장 호출 알림을 전송하였습니다."),
     INVALID_USER_ID_FORMAT(HttpStatus.BAD_REQUEST, "유효한 사용자 ID 형식이 아닙니다."),
+    FAILED_SAVE(HttpStatus.INTERNAL_SERVER_ERROR, "사용자의 대기정보를 저장하는데 실패했습니다."),
+    FAILED_ADD_TO_QUEUE(HttpStatus.INTERNAL_SERVER_ERROR, "해당 식당의 대기열에 등록하는데 실패했습니다."),
 
     // 예약
     INVALID_GUEST_COUNT(HttpStatus.BAD_REQUEST, "예약 인원수는 양수여야 합니다."),

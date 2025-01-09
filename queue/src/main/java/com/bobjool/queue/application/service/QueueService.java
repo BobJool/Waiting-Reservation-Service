@@ -88,7 +88,7 @@ public class QueueService {
 	}
 
 	public void registerQueue(QueueRegisterDto dto) {
-		QueueRegisteredEvent event = redisQueueService.addUserToQueue(dto);
+		QueueRegisteredEvent event = redisQueueService.registerQueue(dto);
 		queueKafkaProducer.publishQueueRegistered(event);
 	}
 

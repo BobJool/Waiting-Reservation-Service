@@ -8,7 +8,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -34,16 +37,58 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class RedisQueueService {
 	private final RedisTemplate<String, Object> redisTemplate;
+	private final RedissonClient redissonClient;
 
-	// 대기 큐에 사용자 추가
-	public QueueRegisteredEvent addUserToQueue(QueueRegisterDto dto) {
+	public QueueRegisteredEvent registerQueue(QueueRegisterDto dto) {
+		String lockKey = "registerLock:" + dto.restaurantId();
+		RLock lock = redissonClient.getLock(lockKey);
+
+		try {
+			if (lock.tryLock(5, 7, TimeUnit.SECONDS)) {
+				try {
+					long position = getNextQueuePosition(dto.restaurantId(), dto.userId());
+					addToWaitingQueue(dto, position);
+					saveUserInfoToRedis(dto, position);
+					markUserAsWaiting(dto.userId(), dto.restaurantId());
+
+					long rank = getUserIndexInQueue(dto.restaurantId(), dto.userId()) + 1;
+					return QueueRegisteredEvent.from(dto.userId(), dto.restaurantId(), position, rank, dto.member());
+
+				} catch (Exception e) {
+					log.error("Error during processing: {}", e.getMessage(), e);
+					log.info("Rolling back changes...");
+					rollbackQueueOperations(dto);
+
+					throw new BobJoolException(ErrorCode.TRANSACTION_FAILED);
+				} finally {
+					if (lock.isHeldByCurrentThread()) {
+						lock.unlock();
+						log.info("Lock released for key: {}", lockKey);
+					}
+				}
+			} else {
+				log.warn("Failed to acquire lock for key: {}", lockKey);
+				throw new BobJoolException (ErrorCode.FAILED_ACQUIRE_LOCK);
+			}
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			log.error("Thread interrupted while trying to acquire lock for key: {}", lockKey, e);
+			throw new BobJoolException (ErrorCode.INTERRUPTED_WHILE_ACQUIRE_LOCK);
+		}
+	}
+
+	private void addToWaitingQueue(QueueRegisterDto dto, long position) {
 		String waitingListKey = RedisKeyUtil.getWaitingListKey(dto.restaurantId());
+		double uniqueScore = (double) position;
+		boolean addedToQueue = Boolean.TRUE.equals(
+			redisTemplate.opsForZSet().add(waitingListKey, String.valueOf(dto.userId()), uniqueScore));
+		if (!addedToQueue) {
+			throw new BobJoolException(ErrorCode.FAILED_ADD_TO_QUEUE);
+		}
+	}
+
+	private void saveUserInfoToRedis(QueueRegisterDto dto, long position) {
 		String userQueueDataKey = RedisKeyUtil.getUserQueueDataKey(dto.restaurantId(), dto.userId());
-
-		long position = Optional.ofNullable(redisTemplate.opsForZSet().size(waitingListKey)).orElse(0L) + 1;
-		double uniqueScore = (double)position;
-		redisTemplate.opsForZSet().add(waitingListKey, String.valueOf(dto.userId()), uniqueScore);
-
 		Map<String, Object> userInfo = Map.of(
 			"restaurant_id", dto.restaurantId(),
 			"user_id", dto.userId(),
@@ -55,12 +100,48 @@ public class RedisQueueService {
 			"delay_count", 0,
 			"created_at", System.currentTimeMillis()
 		);
-		redisTemplate.opsForHash().putAll(userQueueDataKey, userInfo);
-		log.info("Added user {} to queue {} with position {}", dto.userId(), waitingListKey, position);
-		markUserAsWaiting(dto.userId(), dto.restaurantId());
-		long rank = getUserIndexInQueue(dto.restaurantId(), dto.userId()) + 1;
-		return QueueRegisteredEvent.from(dto.userId(), dto.restaurantId(), position, rank, dto.member());
+		try {
+			redisTemplate.opsForHash().putAll(userQueueDataKey, userInfo);
+		} catch (Exception e) {
+			log.error("Failed to save user info to Redis for key: {}", userQueueDataKey, e);
+			throw new BobJoolException(ErrorCode.FAILED_SAVE);
+		}
 	}
+
+	private void rollbackQueueOperations(QueueRegisterDto dto) {
+		String waitingListKey = RedisKeyUtil.getWaitingListKey(dto.restaurantId());
+		String userQueueDataKey = RedisKeyUtil.getUserQueueDataKey(dto.restaurantId(), dto.userId());
+		String userIsWaitingKey = RedisKeyUtil.getUserIsWaitingKey(dto.userId());
+		redisTemplate.opsForZSet().remove(waitingListKey, String.valueOf(dto.userId()));
+		redisTemplate.delete(userQueueDataKey);
+		redisTemplate.delete(userIsWaitingKey);
+	}
+	// @RedissonLock(prefix = "registerLock:", value = "#dto.restaurantId")
+	// public QueueRegisteredEvent addUserToQueue(QueueRegisterDto dto) {
+	// 	String waitingListKey = RedisKeyUtil.getWaitingListKey(dto.restaurantId());
+	// 	String userQueueDataKey = RedisKeyUtil.getUserQueueDataKey(dto.restaurantId(), dto.userId());
+	//
+	// 	long position = getNextQueuePosition(dto.restaurantId(),dto.userId());
+	// 	double uniqueScore = (double)position;
+	// 	redisTemplate.opsForZSet().add(waitingListKey, String.valueOf(dto.userId()), uniqueScore);
+	//
+	// 	Map<String, Object> userInfo = Map.of(
+	// 		"restaurant_id", dto.restaurantId(),
+	// 		"user_id", dto.userId(),
+	// 		"member", dto.member(),
+	// 		"type", dto.type(),
+	// 		"dining_option", dto.diningOption(),
+	// 		"position", position,
+	// 		"status", QueueStatus.WAITING,
+	// 		"delay_count", 0,
+	// 		"created_at", System.currentTimeMillis()
+	// 	);
+	// 	redisTemplate.opsForHash().putAll(userQueueDataKey, userInfo);
+	// 	log.info("Added user {} to queue {} with position {}", dto.userId(), waitingListKey, position);
+	// 	markUserAsWaiting(dto.userId(), dto.restaurantId());
+	// 	long rank = getUserIndexInQueue(dto.restaurantId(), dto.userId()) + 1;
+	// 	return QueueRegisteredEvent.from(dto.userId(), dto.restaurantId(), position, rank, dto.member());
+	// }
 
 	public boolean isUserWaiting(Long userId) {
 		String userIsWaitingKey = RedisKeyUtil.getUserIsWaitingKey(userId);
@@ -75,6 +156,12 @@ public class RedisQueueService {
 	public void markUserAsWaiting(Long userId, UUID restaurantId) {
 		String userIsWaitingKey = RedisKeyUtil.getUserIsWaitingKey(userId);
 		redisTemplate.opsForValue().set(userIsWaitingKey, String.valueOf(restaurantId));
+	}
+
+	public long getNextQueuePosition(UUID restaurantId, Long userId) {
+		String waitingListKey = RedisKeyUtil.getWaitingListKey(restaurantId);
+		Long size = redisTemplate.opsForZSet().size(waitingListKey);
+		return Optional.ofNullable(size).orElse(0L) + 1;
 	}
 
 	public Long getUserIndexInQueue(UUID restaurantId, Long userId) {
