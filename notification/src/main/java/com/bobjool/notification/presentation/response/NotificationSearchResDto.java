@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record NotificationSearchResDto(
+        UUID id,
         Long userId,
         String category,
         String action,
@@ -18,6 +19,7 @@ public record NotificationSearchResDto(
 ) {
     public static NotificationSearchResDto from(NotificationHistoryDto historyDto) {
         return new NotificationSearchResDto(
+                historyDto.id(),
                 historyDto.userId(),
                 historyDto.category().name(),
                 historyDto.action().name(),
