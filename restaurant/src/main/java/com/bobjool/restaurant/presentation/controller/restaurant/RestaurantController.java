@@ -181,6 +181,7 @@ public class RestaurantController {
       @SortDefault(sort = "createdAt", direction = Direction.DESC)
       Pageable pageable)
   {
+    log.info("keyword = {}", keyword);
     Page<RestaurantForCustomerResDto> resPage = restaurantService.searchByKeyWord(keyword, pageable);
     return ApiResponse.success(SuccessCode.SUCCESS_ACCEPTED, PageResponse.of(resPage));
   }

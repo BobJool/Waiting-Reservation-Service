@@ -25,7 +25,7 @@ public class RestaurantRepositoryCustomImpl implements RestaurantRepositoryCusto
   public Page<Restaurant> findByRestaurantKeyword(
       String keyword, Pageable pageable
   ) {
-    QRestaurant restaurant = QRestaurant.restaurant; // Q 클래스를 가져옵니다.
+    QRestaurant restaurant = QRestaurant.restaurant;
 
     BooleanExpression keywordCondition = createKeywordCondition(keyword);
 
@@ -57,7 +57,7 @@ public class RestaurantRepositoryCustomImpl implements RestaurantRepositoryCusto
   public Page<Restaurant> findByRestaurantDetail(
       String name, String region, String addressDetail, String description, Pageable pageable
   ) {
-    QRestaurant restaurant = QRestaurant.restaurant; // Q 클래스를 가져옵니다.
+    QRestaurant restaurant = QRestaurant.restaurant;
     BooleanBuilder booleanBuilder = new BooleanBuilder();
 
     if (region != null) {
@@ -73,10 +73,11 @@ public class RestaurantRepositoryCustomImpl implements RestaurantRepositoryCusto
       booleanBuilder.and(restaurantDescriptionLike(description));
     }
 
-    // QueryDSL의 페이징 지원
     List<Restaurant> results = queryFactory
         .selectFrom(restaurant)
-        .where(booleanBuilder)
+        .where(
+            restaurantDeletedAtIsNull(),
+            booleanBuilder)
         .offset(pageable.getOffset())
         .limit(pageable.getPageSize())
         .fetch();
@@ -84,7 +85,9 @@ public class RestaurantRepositoryCustomImpl implements RestaurantRepositoryCusto
     long total = queryFactory
         .select(restaurant.count())
         .from(restaurant)
-        .where(booleanBuilder)
+        .where(
+            restaurantDeletedAtIsNull(),
+          booleanBuilder)
         .fetchOne();
 
     return new PageImpl<>(results, pageable, total);
@@ -120,7 +123,7 @@ public class RestaurantRepositoryCustomImpl implements RestaurantRepositoryCusto
     QRestaurant restaurant = QRestaurant.restaurant;
 
     if (keyword == null || keyword.isEmpty()) {
-      return null;
+      return restaurant.isNotNull(); // 기본 조건을 추가
     }
 
     return restaurant.restaurantName.containsIgnoreCase(keyword)

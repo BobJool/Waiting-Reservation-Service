@@ -180,6 +180,11 @@ public class RestaurantService {
   @Transactional(readOnly = true)
   public Page<RestaurantForCustomerResDto> searchByKeyWord(
       String keyword, Pageable pageable) {
+
+    if (keyword == null || keyword.isBlank()) {
+      throw new BobJoolException(ErrorCode.NOT_KEYWORD);
+    }
+
     Page<Restaurant> restaurantPageForCustomer = restaurantRepository.findByRestaurantKeyword(
         keyword, pageable
     );
