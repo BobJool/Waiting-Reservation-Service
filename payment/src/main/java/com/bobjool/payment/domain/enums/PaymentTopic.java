@@ -17,6 +17,9 @@ public enum PaymentTopic {
 
     // 결제 실패 이벤트 (payment-service 가 발행)
     PAYMENT_FAILED("payment.failed"),
+
+    // 결제 시간 초과 이벤트 (payment-service 가 발행)
+    PAYMENT_TIMEOUT("payment.timeout"),
     ;
 
     private final String topic;

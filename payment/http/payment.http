@@ -3,7 +3,7 @@ POST localhost:19005/api/v1/payments
 Content-Type: application/json
 
 {
-  "reservation_id": "fce53ef4-3325-4898-be7b-da487ab85a6a",
+  "reservation_id": "c5bdee0d-3db5-45a7-84ba-2a0d919b200d",
   "user_id": 12345,
   "amount": 10000,
   "method": "CARD",

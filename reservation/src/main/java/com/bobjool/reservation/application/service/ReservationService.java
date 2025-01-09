@@ -85,11 +85,28 @@ public class ReservationService {
     }
 
     /**
-     * 예약 실패 처리 후, reservation.failed 이벤트 발행
+     * 외부 PG사에 결제 실패에 의한 예약 실패 처리 및, reservation.failed 이벤트 발행
      * */
     @Transactional
     public void updateReservationFailed(PaymentFailedEvent event) {
         log.info("updateReservationFailed.PaymentFailedEvent = {}", event);
+
+        Reservation reservation = reservationRepository.findById(event.reservationId())
+                .orElseThrow(() -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND));
+
+        reservation.updateStatus(ReservationStatus.FAIL);
+
+        // reservation.failed 이벤트 발행
+        ReservationFailedEvent reservationFailedEvent = ReservationFailedEvent.from(reservation);
+        reservationProducer.publishReservationFailed(ReservationTopic.RESERVATION_FAILED.getTopic(), reservationFailedEvent);
+    }
+
+    /**
+     * 결제 시간 초과에 의한 예약 실패 처리 및, reservation.failed 이벤트 발행
+     * */
+    @Transactional
+    public void updateReservationFailed(PaymentTimeoutEvent event) {
+        log.info("updateReservationFailed.PaymentTimeoutEvent = {}", event);
 
         Reservation reservation = reservationRepository.findById(event.reservationId())
                 .orElseThrow(() -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND));

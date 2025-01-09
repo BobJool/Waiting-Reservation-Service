@@ -8,6 +8,7 @@ import com.bobjool.payment.application.dto.PaymentSearchDto;
 import com.bobjool.payment.application.dto.PaymentUpdateDto;
 import com.bobjool.payment.application.events.PaymentCompletedEvent;
 import com.bobjool.payment.application.events.PaymentFailedEvent;
+import com.bobjool.payment.application.events.ReservationCreatedEvent;
 import com.bobjool.payment.application.interfaces.PaymentProducer;
 import com.bobjool.payment.application.interfaces.PgClient;
 import com.bobjool.payment.domain.entity.Payment;
@@ -20,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,21 +35,35 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final PgClient pgClient;
     private final PaymentProducer paymentProducer;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @Transactional
     public PaymentResDto createPayment(PaymentCreateDto paymentCreateDto) {
         log.info("createPayment.PaymentCreateDto = {}", paymentCreateDto);
-        // todo 레디스 확인하여 10분 이내에 저장된 예약인지 확인
+        PaymentStatus status = PaymentStatus.COMPLETE;
+
+        // Redis에서 예약 정보 확인
+        String redisKey = String.format("reservation:autoCancel:%s", paymentCreateDto.reservationId());
+
+        ReservationCreatedEvent reservationEvent = (ReservationCreatedEvent) redisTemplate.opsForValue().get(redisKey);
+
+        if (reservationEvent == null) {
+            log.info("Reservation not found or expired in Redis for key: {}", redisKey);
+            throw new BobJoolException(ErrorCode.EXPIRED_RESERVATION);
+        }
+        // Redis에서 키 제거
+        redisTemplate.delete(redisKey);
+        log.info("Found reservation in Redis: {}", reservationEvent);
 
         Payment payment = Payment.create(
-                                paymentCreateDto.reservationId(),
-                                paymentCreateDto.userId(),
-                                paymentCreateDto.amount(),
-                                PaymentMethod.of(paymentCreateDto.method()),
-                                PgName.of(paymentCreateDto.PgName())
-                        );
+                paymentCreateDto.reservationId(),
+                paymentCreateDto.userId(),
+                paymentCreateDto.amount(),
+                PaymentMethod.of(paymentCreateDto.method()),
+                PgName.of(paymentCreateDto.PgName())
+        );
         // pg 사의 결제 요청
-        PaymentStatus status = PaymentStatus.COMPLETE;
+
         if (!pgClient.requestPayment(payment)) {
             status = PaymentStatus.FAIL;
         }

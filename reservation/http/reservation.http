@@ -4,10 +4,10 @@ Content-Type: application/json
 
 {
   "user_id": 12345,
-  "restaurant_id": "7e699975-7ef8-4aaf-9013-d816023e4ed6",
-  "restaurant_schedule_id": "0803caeb-0d2d-4661-89d5-d76c30d05c28",
+  "restaurant_id": "57de6c10-88b4-4713-b9f4-a547f144eadf",
+  "restaurant_schedule_id": "32f9d339-3297-4721-a5c6-bf23e3d4785a",
   "guest_count": 4,
-  "reservation_date": "2025-01-20",
+  "reservation_date": "2025-01-21",
   "reservation_time": "14:00"
 }
 
