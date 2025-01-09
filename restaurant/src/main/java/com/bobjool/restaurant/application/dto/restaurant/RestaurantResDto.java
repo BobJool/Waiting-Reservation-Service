@@ -9,7 +9,7 @@ import java.time.LocalTime;
 import java.util.UUID;
 
 public record RestaurantResDto(
-    UUID RestaurantId,
+    UUID restaurantId,
     Long userId,
     RestaurantCategory restaurantCategory,
     String restaurantPhone,
@@ -22,8 +22,6 @@ public record RestaurantResDto(
     boolean isQueue,
     LocalTime openTime,
     LocalTime closeTime
-//    LocalDateTime createdAt,
-//    LocalDateTime updatedAt
 
 ) {
 
@@ -42,8 +40,6 @@ public record RestaurantResDto(
         restaurant.isQueue(),
         restaurant.getOpenTime(),
         restaurant.getCloseTime()
-//        restaurant.getCreatedAt(),
-//        restaurant.getUpdatedAt()
     );
   }
 

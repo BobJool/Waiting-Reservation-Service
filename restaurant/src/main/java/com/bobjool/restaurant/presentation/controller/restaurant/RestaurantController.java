@@ -125,7 +125,7 @@ public class RestaurantController {
     log.info("getAllRestaurants");
 
     RestaurantResDto response = restaurantService.readRestaurantsForOwner(restaurantId);
-    return ApiResponse.success(SuccessCode.SUCCESS_UPDATE, response);
+    return ApiResponse.success(SuccessCode.SUCCESS, response);
   }
 
   //단일 음식점 정보 조회(for Customer)
@@ -136,7 +136,7 @@ public class RestaurantController {
     log.info("getAllRestaurants");
 
     RestaurantForCustomerResDto response = restaurantService.readRestaurantsForCustomer(restaurantId);
-    return ApiResponse.success(SuccessCode.SUCCESS_UPDATE, response);
+    return ApiResponse.success(SuccessCode.SUCCESS, response);
   }
 
   //단일 음식점 정보 조회(for Master)
@@ -147,7 +147,7 @@ public class RestaurantController {
     log.info("getAllRestaurants");
 
     RestaurantForMasterResDto response = restaurantService.readRestaurantsForMaster(restaurantId);
-    return ApiResponse.success(SuccessCode.SUCCESS_UPDATE, response);
+    return ApiResponse.success(SuccessCode.SUCCESS, response);
   }
 
   //Cotanct 기능(-> Notification)
