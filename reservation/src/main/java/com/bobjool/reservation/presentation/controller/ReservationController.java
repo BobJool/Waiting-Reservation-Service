@@ -30,8 +30,10 @@ public class ReservationController {
 
     @RequireRole(value = {"CUSTOMER"})
     @PostMapping
-    public ResponseEntity<ApiResponse<ReservationResDto>> createReservation(@Valid @RequestBody ReservationCreateReqDto reqDto) {
-        ReservationResDto response = reservationService.createReservation(reqDto.toServiceDto());
+    public ResponseEntity<ApiResponse<ReservationResDto>> createReservation(@Valid @RequestBody ReservationCreateReqDto reqDto,
+                                                                            @RequestHeader(value = "X-User-Id", required = true) String userId,
+                                                                            @RequestHeader(value = "X-Role", required = true) String role) {
+        ReservationResDto response = reservationService.createReservation(reqDto.toServiceDto(), Long.valueOf(userId), role);
         return ApiResponse.success(SuccessCode.SUCCESS_INSERT, response);
     }
 
@@ -77,6 +79,5 @@ public class ReservationController {
         return ApiResponse.success(SuccessCode.SUCCESS, response);
     }
 
-    // todo OWNER 용 search 메서드 필요
-//    @RequireRole(value = {"OWNER"})
+    // todo OWNER 용, CUSTOMER 용 search 메서드 필요,
 }

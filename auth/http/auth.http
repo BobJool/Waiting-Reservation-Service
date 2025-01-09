@@ -3,14 +3,14 @@ POST localhost:19005/api/v1/auths/sign-up
 Content-Type: application/json
 
 {
-  "username": "customer1234",
+  "username": "owner2345",
   "password": "1234",
-  "name": "customername",
-  "nickname": "customernick",
-  "slackEmail": "customer@slack.com",
-  "email": "customer@email.com",
-  "phoneNumber": "010-1234-5680",
-  "role": "CUSTOMER"
+  "name": "owner2name",
+  "nickname": "owner2nick",
+  "slackEmail": "owner2@slack.com",
+  "email": "owner2@email.com",
+  "phoneNumber": "010-1234-5681",
+  "role": "OWNER"
 }
 
 ### 로그인
@@ -18,6 +18,6 @@ POST localhost:19005/api/v1/auths/sign-in
 Content-Type: application/json
 
 {
-  "username": "customer1234",
+  "username": "owner1234",
   "password": 1234
 }

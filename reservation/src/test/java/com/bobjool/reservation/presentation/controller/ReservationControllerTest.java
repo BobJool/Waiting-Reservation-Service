@@ -53,7 +53,9 @@ class ReservationControllerTest {
         // when & then
         mockMvc.perform(post("/api/v1/reservations")
                         .content(objectMapper.writeValueAsString(requestDto))
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-User-Id", userId) // 헤더 추가
+                        .header("X-Role", "CUSTOMER")) // 헤더 추가)
                 .andDo(print())
                 .andExpect(status().isCreated());
     }

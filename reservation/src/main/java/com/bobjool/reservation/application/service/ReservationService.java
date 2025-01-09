@@ -2,8 +2,11 @@ package com.bobjool.reservation.application.service;
 
 import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
-import com.bobjool.reservation.application.client.RestaurantScheduleClient;
-import com.bobjool.reservation.application.client.RestaurantScheduleReserveReqDto;
+import com.bobjool.common.presentation.ApiResponse;
+import com.bobjool.reservation.application.client.restaurant.RestaurantClient;
+import com.bobjool.reservation.application.client.restaurant.RestaurantResDto;
+import com.bobjool.reservation.application.client.restaurantschedule.RestaurantScheduleClient;
+import com.bobjool.reservation.application.client.restaurantschedule.RestaurantScheduleReserveReqDto;
 import com.bobjool.reservation.application.dto.reservation.ReservationCreateDto;
 import com.bobjool.reservation.application.dto.reservation.ReservationResDto;
 import com.bobjool.reservation.application.dto.reservation.ReservationSearchDto;
@@ -31,13 +34,15 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationProducer reservationProducer;
     private final RestaurantScheduleClient restaurantScheduleClient;
+    private final RestaurantClient restaurantClient;
 
     @Transactional
-    public ReservationResDto createReservation(ReservationCreateDto reservationCreateDto) {
+    public ReservationResDto createReservation(ReservationCreateDto reservationCreateDto, Long userId, String role) {
         log.info("createReservation.ReservationCreateDto = {}", reservationCreateDto);
         // restaurantSchedule 예약 api 호출
         restaurantScheduleClient.reserveSchedule2(reservationCreateDto.restaurantScheduleId(),
-                new RestaurantScheduleReserveReqDto(reservationCreateDto.userId(), reservationCreateDto.guestCount()));
+                new RestaurantScheduleReserveReqDto(reservationCreateDto.userId(), reservationCreateDto.guestCount()),
+                String.valueOf(userId), role);
 
         // 1. DB 저장
         Reservation reservation = Reservation.create(
@@ -151,15 +156,13 @@ public class ReservationService {
             if (!reservation.getUserId().equals(userId)) {
                 throw new BobJoolException(ErrorCode.FORBIDDEN_ACCESS);
             }
+        } else if ("OWNER".equalsIgnoreCase(role)) {
+            ApiResponse<RestaurantResDto> restaurantsForOwner
+                    = restaurantClient.getRestaurantsForOwner(reservation.getRestaurantId(), String.valueOf(userId), role);
+            if (!restaurantsForOwner.data().userId().equals(reservation.getUserId())) {
+                throw new BobJoolException(ErrorCode.FORBIDDEN_ACCESS);
+            }
         }
-        // todo resetaurant-service에 호출해서 owner가 맞는지 검증
-//        else if ("OWNER".equalsIgnoreCase(role)) {
-//            // OWNER: 레스토랑 소유 여부 확인 (레스토랑 서비스 호출)
-//            boolean isOwner = restaurantService.isOwner(userId, reservation.getRestaurantId());
-//            if (!isOwner) {
-//                throw new BobJoolException(ErrorCode.UNAUTHORIZED_ACCESS);
-//            }
-//        }
 
         // MASTER: 모든 예약 접근 가능 (추가 검증 없음)
         return ReservationResDto.from(reservation);

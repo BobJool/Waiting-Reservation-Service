@@ -1,14 +1,14 @@
 ### 예약 요청
 POST localhost:19005/api/v1/reservations
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjdXN0b21lcjEyMzQiLCJ1c2VySWQiOiIzIiwicm9sZSI6IkNVU1RPTUVSIiwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaXNzIjoiYXV0aC1zZXJ2aWNlIiwiaWF0IjoxNzM2NDAxNzM0LCJleHAiOjE3MzY0MDIwOTR9.fAZLuMzp_bM79Nmv1hpOyX7dJ_15Tvdlp_t9DmkREkE
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjdXN0b21lcjEyMzQiLCJ1c2VySWQiOiIzIiwicm9sZSI6IkNVU1RPTUVSIiwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaXNzIjoiYXV0aC1zZXJ2aWNlIiwiaWF0IjoxNzM2NDIzNTYwLCJleHAiOjE3MzY0MjM5MjB9.WTUVmVlun0ZMGpZINjq7tESUouqeLomUf13zbD4MBpY
 
 {
-  "user_id": 12345,
-  "restaurant_id": "57de6c10-88b4-4713-b9f4-a547f144eadf",
-  "restaurant_schedule_id": "49e7fb9b-f1cf-4879-9f59-1484380507c7",
+  "user_id": 3,
+  "restaurant_id": "355b3d3a-2eee-4fa8-aab6-62f0f614d95f",
+  "restaurant_schedule_id": "09c6770d-0b14-4703-a614-83097bd0750e",
   "guest_count": 4,
-  "reservation_date": "2025-01-21",
+  "reservation_date": "2025-01-22",
   "reservation_time": "14:00"
 }
 
@@ -26,8 +26,9 @@ POST localhost:19005/api/v1/reservations/cancel/e47cf394-4a51-416c-a2d7-1b45dd17
 Content-Type: application/json
 
 ### 예약 상세 조회
-GET localhost:19005/api/v1/reservations/e47cf394-4a51-416c-a2d7-1b45dd17477b
+GET localhost:19005/api/v1/reservations/1762f55b-fe84-45bd-b122-9c64f05661d4
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJvd25lcjEyMzQiLCJ1c2VySWQiOiIyIiwicm9sZSI6Ik9XTkVSIiwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaXNzIjoiYXV0aC1zZXJ2aWNlIiwiaWF0IjoxNzM2NDIzNzI4LCJleHAiOjE3MzY0MjQwODh9.NbvlsKn_tA1tE9UU3tPXEhdiArngwTMvF1SC0xzU7fQ
 
 ### 예약 목록 검색
 GET localhost:19005/api/v1/reservations?page=0&size=5&sort=createdAt,DESC&status=PENDING
