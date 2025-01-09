@@ -66,21 +66,6 @@ public class UserController {
         );
     }
 
-    @RequireRole(value = {"MASTER"})
-    @PatchMapping("/{id}/approval")
-    public ResponseEntity<ApiResponse<UserResDto>> updateUserApproval(
-            @PathVariable Long id,
-            @RequestBody Boolean approved
-    ) {
-
-        UserResDto response = userService.updateUserApproval(id, approved);
-
-        return ApiResponse.success(
-                SuccessCode.SUCCESS_UPDATE,
-                response
-        );
-    }
-
     @RequireRole(value = {"CUSTOMER", "OWNER", "MASTER"})
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<String>> deleteUser(

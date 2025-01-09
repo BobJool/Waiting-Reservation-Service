@@ -3,6 +3,7 @@ package com.bobjool.application.service;
 import com.bobjool.application.client.NotificationClient;
 import com.bobjool.application.dto.SignInDto;
 import com.bobjool.application.dto.SignUpDto;
+import com.bobjool.application.dto.UserResDto;
 import com.bobjool.application.interfaces.JwtUtil;
 import com.bobjool.common.exception.*;
 import com.bobjool.domain.entity.User;
@@ -106,5 +107,24 @@ public class AuthService {
         boolean isAccessToken = "access".equals(tokenType);
 
         jwtBlacklistService.addToBlacklist(token, expiration, isAccessToken);
+    }
+
+    @Transactional
+    public UserResDto updateUserApproval(Long id, Boolean approved) {
+
+        User user = findUserById(id);
+
+        if (!user.isOwner()) {
+            throw new BobJoolException(ErrorCode.MISSING_OWNER_ROLE);
+        }
+
+        user.updateUserApproval(approved);
+
+        return UserResDto.from(user);
+    }
+
+    private User findUserById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new BobJoolException(ErrorCode.USER_NOT_FOUND));
     }
 }

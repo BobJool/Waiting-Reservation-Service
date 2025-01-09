@@ -81,33 +81,19 @@ public class UserService {
     }
 
     @Transactional
-    public UserResDto updateUserApproval(Long id, Boolean approved) {
-
-        User user = findUserById(id);
-
-        if (!user.isOwner()) {
-            throw new BobJoolException(ErrorCode.MISSING_OWNER_ROLE);
-        }
-
-        user.updateUserApproval(approved);
-
-        return UserResDto.from(user);
-    }
-
-    @Transactional
     public void deleteUser(Long id) {
         User user = findUserById(id);
         user.delete(id);
-    }
-
-    private User findUserById(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new BobJoolException(ErrorCode.USER_NOT_FOUND));
     }
 
     @Transactional(readOnly = true)
     public UserContactResDto getContact(Long id) {
         User user = findUserById(id);
         return UserContactResDto.from(user);
+    }
+
+    private User findUserById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new BobJoolException(ErrorCode.USER_NOT_FOUND));
     }
 }
