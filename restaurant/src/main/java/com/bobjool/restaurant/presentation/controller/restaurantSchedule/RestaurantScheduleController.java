@@ -39,7 +39,7 @@ public class RestaurantScheduleController {
   private final RestaurantScheduleService scheduleService;
 
   //음식점 스케쥴 생성 예정
-  @PostMapping("/{restaurantId}")
+  @PostMapping()
   public ResponseEntity<ApiResponse<RestaurantScheduleResDto>> createSchedule(
       @Valid @RequestBody RestaurantScheduleCreateReqDto scheduleCreateReqDto) {
     log.info("create.RestaurantScheduleCreateReqDto={}", scheduleCreateReqDto);

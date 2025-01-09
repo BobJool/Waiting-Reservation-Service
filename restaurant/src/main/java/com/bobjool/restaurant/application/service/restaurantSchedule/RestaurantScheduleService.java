@@ -33,10 +33,6 @@ public class RestaurantScheduleService {
   @Transactional
   public RestaurantScheduleResDto createSchedule(RestaurantScheduleCreateDto createDto) {
 
-    if(createDto.userId() == null){ // 추후 추가적인 유효성 검사를 덧붙일 예정이고, 임시구현 상태입니다.
-      throw new BobJoolException(ErrorCode.ENTITY_NOT_FOUND);
-    }
-
     RestaurantSchedule schedule = RestaurantSchedule.create(
         createDto.restaurantId(),
         createDto.tableNumber(),
