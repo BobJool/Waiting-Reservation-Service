@@ -124,23 +124,44 @@ public class ReservationService {
      * 인증 로직이 완료되면, 파라미터에 role을 추가해서 각각 분기처리
      * */
     @Transactional
-    public ReservationResDto cancelReservation(UUID reservationId) {
+    public ReservationResDto cancelReservation(UUID reservationId, String role) {
         log.info("cancelReservation.reservationId = {}", reservationId);
 
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND));
 
-        // todo CUSTOMER 의 경우 cancel() 호출, OWNER 의 경우 cancelForOwner() 호출
-        reservation.cancel();
+        // CUSTOMER 의 경우 cancel() 호출, OWNER 의 경우 cancelForOwner() 호출
+        if ("CUSTOMER".equals(role)) {
+            reservation.cancel();
+        } else {
+            reservation.cancelForOwner();
+        }
         return ReservationResDto.from(reservation);
     }
 
-    public ReservationResDto getReservation(UUID reservationId) {
+    public ReservationResDto getReservation(UUID reservationId, Long userId, String role) {
         log.info("getReservation.reservationId = {}", reservationId);
 
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND));
 
+        // 역할별 검증 로직
+        if ("CUSTOMER".equalsIgnoreCase(role)) {
+            // CUSTOMER: 자신의 예약인지 확인
+            if (!reservation.getUserId().equals(userId)) {
+                throw new BobJoolException(ErrorCode.FORBIDDEN_ACCESS);
+            }
+        }
+        // todo resetaurant-service에 호출해서 owner가 맞는지 검증
+//        else if ("OWNER".equalsIgnoreCase(role)) {
+//            // OWNER: 레스토랑 소유 여부 확인 (레스토랑 서비스 호출)
+//            boolean isOwner = restaurantService.isOwner(userId, reservation.getRestaurantId());
+//            if (!isOwner) {
+//                throw new BobJoolException(ErrorCode.UNAUTHORIZED_ACCESS);
+//            }
+//        }
+
+        // MASTER: 모든 예약 접근 가능 (추가 검증 없음)
         return ReservationResDto.from(reservation);
     }
 

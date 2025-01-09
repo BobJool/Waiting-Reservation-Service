@@ -1,11 +1,12 @@
 ### 예약 요청
 POST localhost:19005/api/v1/reservations
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjdXN0b21lcjEyMzQiLCJ1c2VySWQiOiIzIiwicm9sZSI6IkNVU1RPTUVSIiwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaXNzIjoiYXV0aC1zZXJ2aWNlIiwiaWF0IjoxNzM2NDAxNzM0LCJleHAiOjE3MzY0MDIwOTR9.fAZLuMzp_bM79Nmv1hpOyX7dJ_15Tvdlp_t9DmkREkE
 
 {
   "user_id": 12345,
   "restaurant_id": "57de6c10-88b4-4713-b9f4-a547f144eadf",
-  "restaurant_schedule_id": "32f9d339-3297-4721-a5c6-bf23e3d4785a",
+  "restaurant_schedule_id": "49e7fb9b-f1cf-4879-9f59-1484380507c7",
   "guest_count": 4,
   "reservation_date": "2025-01-21",
   "reservation_time": "14:00"

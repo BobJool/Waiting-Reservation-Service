@@ -195,10 +195,14 @@ class ReservationControllerTest {
     void cancelReservation_success() throws Exception {
         // given
         UUID reservationId = UUID.randomUUID();
+        String userId = "123"; // 테스트용 사용자 ID
+        String role = "CUSTOMER"; // 테스트용 역할
 
         // when & then
         mockMvc.perform(post("/api/v1/reservations/cancel/{reservationId}", reservationId)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-User-Id", userId) // 헤더 추가
+                        .header("X-Role", role)) // 헤더 추가
                 .andDo(print())
                 .andExpect(status().isOk());
     }
@@ -208,10 +212,14 @@ class ReservationControllerTest {
     void getReservation_success() throws Exception {
         // given - reservationId
         UUID reservationId = UUID.randomUUID();
+        String userId = "123"; // 테스트용 사용자 ID
+        String role = "CUSTOMER"; // 테스트용 역할
 
         // when & then - API 호출 및 검증
         mockMvc.perform(get("/api/v1/reservations/{reservationId}", reservationId)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-User-Id", userId) // 헤더 추가
+                        .header("X-Role", role)) // 헤더 추가
                 .andDo(print())
                 .andExpect(status().isOk());
     }

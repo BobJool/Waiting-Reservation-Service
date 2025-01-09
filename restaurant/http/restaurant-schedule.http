@@ -20,12 +20,13 @@ Content-Type: application/json
 ### 식당 스케줄 생성
 POST localhost:19005/api/v1/restaurants/schedule/57de6c10-88b4-4713-b9f4-a547f144eadf
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYXN0ZXIxMjM0IiwidXNlcklkIjoiMSIsInJvbGUiOiJNQVNURVIiLCJ0b2tlblR5cGUiOiJhY2Nlc3MiLCJpc3MiOiJhdXRoLXNlcnZpY2UiLCJpYXQiOjE3MzY0MDEyNDYsImV4cCI6MTczNjQwMTYwNn0.5vPaOmkHJ2RbiBeGpXlBKfkHiwc_0j5dB5DUdkMvcq4
 
 {
   "user_id": 123,
   "restaurant_id": "57de6c10-88b4-4713-b9f4-a547f144eadf",
   "table_number": 1,
-  "date": "2025-01-21",
+  "date": "2025-01-22",
   "time_slot": "14:00",
   "max_capacity": 8
 }
