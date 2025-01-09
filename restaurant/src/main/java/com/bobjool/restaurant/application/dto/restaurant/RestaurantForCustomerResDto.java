@@ -9,6 +9,7 @@ import java.time.LocalTime;
 import java.util.UUID;
 
 public record RestaurantForCustomerResDto(
+    UUID restaurantId,
     RestaurantCategory restaurantCategory,
     String restaurantPhone,
     String restaurantName,
@@ -22,6 +23,7 @@ public record RestaurantForCustomerResDto(
 
   public static RestaurantForCustomerResDto from(Restaurant restaurant){
     return new RestaurantForCustomerResDto(
+        restaurant.getId(),
         restaurant.getRestaurantCategory(),
         restaurant.getRestaurantPhone(),
         restaurant.getRestaurantName(),
