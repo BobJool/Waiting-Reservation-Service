@@ -87,7 +87,7 @@ public class RestaurantScheduleController {
   }
 
   //음식점 스케쥴 삭제
-  @RequireRole(value = "MASTER")
+  @RequireRole(value = {"MASTER", "OWNER"})
   @DeleteMapping("/owner/{scheduleId}")
   public ResponseEntity<ApiResponse<RestaurantScheduleResDto>> deleteSchedule(
       @Valid @PathVariable("scheduleId") UUID scheduleId) {
