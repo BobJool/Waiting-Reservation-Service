@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.UUID;
 
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record RestaurantForMasterResDto(
     UUID RestaurantId,
     Long userId,

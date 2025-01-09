@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.time.LocalTime;
 import java.util.UUID;
 
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record RestaurantForCustomerResDto(
     RestaurantCategory restaurantCategory,
     String restaurantPhone,
