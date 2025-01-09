@@ -25,6 +25,13 @@ public interface RestaurantRepository {
 
   Page<Restaurant> findAllByIsDeletedTrue(Pageable pageable);
 
+  Page<Restaurant> findByRestaurantDetail(
+      String name, String region, String addressDetail, String description, Pageable pageable
+  );
+
+  Page<Restaurant> findByRestaurantKeyword(
+      String keyword, Pageable pageable
+  );
   // todo 직접 만든 메서드는 테스트 해봐야 합니다.
 
 }
