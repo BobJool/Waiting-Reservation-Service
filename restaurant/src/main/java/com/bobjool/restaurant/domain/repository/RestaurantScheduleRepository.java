@@ -12,11 +12,6 @@ public interface RestaurantScheduleRepository {
 
   Optional<RestaurantSchedule> findById(UUID id);
 
-  Optional<RestaurantSchedule> findByDate(LocalDate date);
-
-  Optional<RestaurantSchedule> findByTableNumber(int tableNumber);
-
-
   RestaurantSchedule save(RestaurantSchedule restaurantSchedule);
 
   Page<RestaurantSchedule> findAllByIsDeletedFalse(Pageable pageable);
