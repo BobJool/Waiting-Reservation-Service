@@ -6,6 +6,7 @@ import com.bobjool.common.presentation.SuccessCode;
 import com.bobjool.restaurant.application.dto.restaurantSchedule.RestaurantScheduleForCustomerResDto;
 import com.bobjool.restaurant.application.dto.restaurantSchedule.RestaurantScheduleResDto;
 import com.bobjool.restaurant.application.service.restaurantSchedule.RestaurantScheduleService;
+import com.bobjool.restaurant.infrastructure.aspect.RequireRole;
 import com.bobjool.restaurant.presentation.dto.restaurantSchedule.RestaurantScheduleCreateReqDto;
 import com.bobjool.restaurant.presentation.dto.restaurantSchedule.RestaurantScheduleReserveReqDto;
 import com.bobjool.restaurant.presentation.dto.restaurantSchedule.RestaurantScheduleUpdateReqDto;
@@ -38,7 +39,8 @@ public class RestaurantScheduleController {
 
   private final RestaurantScheduleService scheduleService;
 
-  //음식점 스케쥴 생성 예정
+  //음식점 스케쥴 생성
+  @RequireRole(value = {"MASTER", "OWNER"})
   @PostMapping()
   public ResponseEntity<ApiResponse<RestaurantScheduleResDto>> createSchedule(
       @Valid @RequestBody RestaurantScheduleCreateReqDto scheduleCreateReqDto) {
@@ -49,6 +51,7 @@ public class RestaurantScheduleController {
   }
 
   //생성된 음식점 스케쥴을 Customer가 예약
+  @RequireRole(value = "CUSTOMER")
   @PatchMapping("/{scheduleId}")
   public ResponseEntity<ApiResponse<RestaurantScheduleResDto>> reserveSchedule(
       @Valid @RequestBody RestaurantScheduleReserveReqDto scheduleReserveReqDto,
@@ -60,6 +63,7 @@ public class RestaurantScheduleController {
   }
 
   // 해성: reserveSchedule을 post로
+  @RequireRole(value = "CUSTOMER")
   @PostMapping("/reserve/{scheduleId}")
   public ResponseEntity<ApiResponse<RestaurantScheduleResDto>> reserveSchedule2(
           @Valid @RequestBody RestaurantScheduleReserveReqDto scheduleReserveReqDto,
@@ -71,6 +75,7 @@ public class RestaurantScheduleController {
   }
 
   //음식점 스케쥴 Owner가 수정
+  @RequireRole(value = {"MASTER", "OWNER"})
   @PatchMapping("/owner/{scheduleId}")
   public ResponseEntity<ApiResponse<RestaurantScheduleResDto>> updateSchedule(
       @Valid @RequestBody RestaurantScheduleUpdateReqDto scheduleUpdateReqDto,
@@ -82,6 +87,7 @@ public class RestaurantScheduleController {
   }
 
   //음식점 스케쥴 삭제
+  @RequireRole(value = "MASTER")
   @DeleteMapping("/owner/{scheduleId}")
   public ResponseEntity<ApiResponse<RestaurantScheduleResDto>> deleteSchedule(
       @Valid @PathVariable("scheduleId") UUID scheduleId) {
@@ -91,7 +97,8 @@ public class RestaurantScheduleController {
     return ApiResponse.success(SuccessCode.SUCCESS_DELETE);
   }
 
-  //모든 생성된 음식점 스케쥴 전체 조회
+  //모든 음식점의 모든 음식점 스케쥴 전체 조회
+  @RequireRole(value = "MASTER")
   @GetMapping
   public ResponseEntity<ApiResponse<PageResponse<RestaurantScheduleResDto>>> readAllSchedule(
       @SortDefault(sort = "createdAt", direction = Direction.DESC)
@@ -134,6 +141,7 @@ public class RestaurantScheduleController {
 
   //음식점 다음주 스케쥴 슬롯 생성
   //음식점 스케쥴 생성 예정
+  @RequireRole(value = {"MASTER", "OWNER"})
   @PostMapping("/DailySchedule")
   public ResponseEntity<ApiResponse<PageResponse<RestaurantScheduleResDto>>> createDailySchedule(
       @Valid @RequestBody RestaurantScheduleCreateReqDto scheduleCreateReqDto
@@ -145,6 +153,7 @@ public class RestaurantScheduleController {
     return ApiResponse.success(SuccessCode.SUCCESS_INSERT, PageResponse.of(response));
   }
 
+  // 특정 유저가 예약한 스케쥴 조회
   @GetMapping("/user/{userId}")
   public ResponseEntity<ApiResponse<PageResponse<RestaurantScheduleForCustomerResDto>>> readUserReserve(
       @SortDefault(sort = "createdAt", direction = Direction.DESC)
