@@ -1,12 +1,15 @@
 package com.bobjool.application.service;
 
+import com.bobjool.application.client.NotificationClient;
 import com.bobjool.application.dto.SignInDto;
 import com.bobjool.application.dto.SignUpDto;
+import com.bobjool.application.dto.UserResDto;
 import com.bobjool.application.interfaces.JwtUtil;
 import com.bobjool.common.exception.*;
 import com.bobjool.domain.entity.User;
 import com.bobjool.domain.repository.UserRepository;
-import com.bobjool.presentation.dto.response.SignInResDto;
+import com.bobjool.application.dto.SignInResDto;
+import feign.FeignException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +31,7 @@ public class AuthService {
     private final JwtBlacklistService jwtBlacklistService;
     private final PasswordEncoder passwordEncoder;
     private final ValidationService validationService;
+    private final NotificationClient notificationClient;
 
     public SignInResDto signIn(SignInDto request) {
 
@@ -47,7 +51,7 @@ public class AuthService {
 
         String token = jwtUtil.createAccessToken(user);
 
-        return SignInResDto.of(token);
+        return SignInResDto.from(token);
     }
 
     @Transactional
@@ -59,13 +63,16 @@ public class AuthService {
         validationService.validateDuplicateEmail(request.email());
         validationService.validateDuplicatePhoneNumber(request.phoneNumber());
 
+        String slackEmail = request.slackEmail();
         String slackId = "";
 
-        if (request.slackEmail() != null && !request.slackEmail().isEmpty()) {
-            // TODO 슬랙 이메일로 슬랙 ID를 불러오는 API 호출 예정
-            slackId = "api로 호출한 slack_id";
+        if (slackEmail != null && !slackEmail.isEmpty()) {
+            try {
+                slackId = notificationClient.findSlackIdByEmail(slackEmail).data().get("slack_id");
+            } catch (FeignException e) {
+                throw new BobJoolException(ErrorCode.INVALID_SLACK_EMAIL);
+            }
         }
-
 
         User user = User.create(
                 request.username(),
@@ -100,5 +107,24 @@ public class AuthService {
         boolean isAccessToken = "access".equals(tokenType);
 
         jwtBlacklistService.addToBlacklist(token, expiration, isAccessToken);
+    }
+
+    @Transactional
+    public UserResDto updateUserApproval(Long id, Boolean approved) {
+
+        User user = findUserById(id);
+
+        if (!user.isOwner()) {
+            throw new BobJoolException(ErrorCode.MISSING_OWNER_ROLE);
+        }
+
+        user.updateUserApproval(approved);
+
+        return UserResDto.from(user);
+    }
+
+    private User findUserById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new BobJoolException(ErrorCode.USER_NOT_FOUND));
     }
 }

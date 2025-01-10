@@ -1,19 +1,18 @@
 package com.bobjool.presentation.controller;
 
+import com.bobjool.application.dto.UserResDto;
 import com.bobjool.application.service.AuthService;
+import com.bobjool.common.infra.aspect.RequireRole;
 import com.bobjool.common.presentation.ApiResponse;
 import com.bobjool.common.presentation.SuccessCode;
 import com.bobjool.presentation.dto.request.SignInReqDto;
 import com.bobjool.presentation.dto.request.SignUpReqDto;
-import com.bobjool.presentation.dto.response.SignInResDto;
+import com.bobjool.application.dto.SignInResDto;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -53,6 +52,21 @@ public class AuthController {
 
         return ApiResponse.success(
                 SuccessCode.SUCCESS
+        );
+    }
+
+    @RequireRole(value = {"MASTER"})
+    @PatchMapping("/{id}/approval")
+    public ResponseEntity<ApiResponse<UserResDto>> updateUserApproval(
+            @PathVariable Long id,
+            @RequestBody Boolean approved
+    ) {
+
+        UserResDto response = authService.updateUserApproval(id, approved);
+
+        return ApiResponse.success(
+                SuccessCode.SUCCESS_UPDATE,
+                response
         );
     }
 }

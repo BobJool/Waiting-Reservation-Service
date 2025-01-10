@@ -1,4 +1,4 @@
-package com.bobjool.presentation.dto.response;
+package com.bobjool.application.dto;
 
 import com.bobjool.domain.entity.User;
 import com.bobjool.domain.entity.UserRole;
@@ -18,7 +18,7 @@ public record UserResDto(
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {
-    public static UserResDto of(User user) {
+    public static UserResDto from(User user) {
         return new UserResDto(
                 user.getId(),
                 user.getUsername(),
