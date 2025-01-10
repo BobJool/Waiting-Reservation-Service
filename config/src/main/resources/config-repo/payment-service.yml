@@ -32,6 +32,11 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+  redis:
+    host: shared-redis
+    port: 6379
+
+
 
 eureka:
   client:

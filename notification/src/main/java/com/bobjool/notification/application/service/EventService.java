@@ -29,7 +29,14 @@ public class EventService {
     private final UserClient userClient;
     private final RestaurantClient restaurantClient;
 
-    // TODO. 리스너 클래스에서 표현 변환 후 메소드 호출
+    /**
+     * 알림 전송에 필요한 데이터를 수집하고 변환하여,
+     * 히스토리를 저장하고 알림 발송 요청을 보냅니다.
+     * Kafka Listener 가 호출합니다.
+     * @param channel 알림 채널
+     * @param templateId 알림 메시지 템플릿 ID
+     * @param data 템플릿 변수 바인딩 데이터
+     */
     @Transactional
     public void preProcess(NotificationChannel channel, UUID templateId, Map<String, String> data) {
         this.replaceRestaurantContact(data);
@@ -68,27 +75,28 @@ public class EventService {
     }
 
     private void replaceRestaurantContact(Map<String, String> data) {
-        if (!data.containsKey(RESTAURANT_ID.toSnakeCase())) {
+        if (!data.containsKey(RESTAURANT_ID.toCamelCase())) {
             return;
         }
         RestaurantContactDto restaurantContactDto = restaurantClient.getRestaurantContact(
-                UUID.fromString(data.get(RESTAURANT_ID.toSnakeCase()))
+                UUID.fromString(data.get(RESTAURANT_ID.toCamelCase()))
         ).data();
 
+        data.remove(RESTAURANT_ID.toCamelCase());
         data.put(RESTAURANT_NAME.toSnakeCase(), restaurantContactDto.name());
         data.put(RESTAURANT_ADDRESS.toSnakeCase(), restaurantContactDto.address());
         data.put(RESTAURANT_NUMBER.toSnakeCase(), restaurantContactDto.number());
-        data.remove(RESTAURANT_ID.toSnakeCase());
     }
 
     private void replaceUserContact(Map<String, String> data) {
-        if (!data.containsKey(USER_ID.toSnakeCase())) {
+        if (!data.containsKey(USER_ID.toCamelCase())) {
             return;
         }
         UserContactDto userContactDto = userClient.getUserContact(
-                Long.parseLong(data.get(USER_ID.toSnakeCase()))
+                Long.parseLong(data.get(USER_ID.toCamelCase()))
         ).data();
 
+        data.put(USER_ID.toSnakeCase(), data.remove(USER_ID.toCamelCase()));
         data.put(USER_NAME.toSnakeCase(), userContactDto.name());
         data.put(USER_SLACK.toSnakeCase(), userContactDto.slack());
         data.put(USER_EMAIL.toSnakeCase(), userContactDto.email());

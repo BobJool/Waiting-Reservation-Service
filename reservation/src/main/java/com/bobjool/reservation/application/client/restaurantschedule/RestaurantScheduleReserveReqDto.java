@@ -1,4 +1,4 @@
-package com.bobjool.reservation.application.client;
+package com.bobjool.reservation.application.client.restaurantschedule;
 
 
 public record RestaurantScheduleReserveReqDto(

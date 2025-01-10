@@ -22,6 +22,27 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
   jackson:
     property-naming-strategy: SNAKE_CASE
+  kafka:
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      group-id: ${spring.application.name}-group
+    bootstrap-servers: ${KAFKA_SERVER_URL}
+
+notification:
+  template-mapping:
+    queue:
+      registered: 857ba751-13ac-45aa-956e-048368c7f5b9
+      delayed: b2e9aebb-001d-462b-8012-854ee6aca1f5
+      remind: b2e9aebb-001d-462b-8012-854ee6aca1f5
+      alerted: b2e9aebb-001d-462b-8012-854ee6aca1f5
+      rush: b2e9aebb-001d-462b-8012-854ee6aca1f5
+      canceled: b2e9aebb-001d-462b-8012-854ee6aca1f5
+    reservation:
+      completed: 24397246-5bfe-4b62-a6ca-bfd2e42d4ee3
+      failed: b2e9aebb-001d-462b-8012-854ee6aca1f5
+      refund: b2e9aebb-001d-462b-8012-854ee6aca1f5
+      remind: b2e9aebb-001d-462b-8012-854ee6aca1f5
 
 eureka:
   client:

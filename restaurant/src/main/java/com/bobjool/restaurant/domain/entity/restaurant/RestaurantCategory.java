@@ -4,6 +4,11 @@ public enum RestaurantCategory {
 
   //임시 음식 카테고리
   KOREA,
-  JAPAN
+  JAPAN,
+  CHINA,
+  INDIAN,
+  MEXICAN,
+  ITALIAN,
+  FASTFOOD
 
 }

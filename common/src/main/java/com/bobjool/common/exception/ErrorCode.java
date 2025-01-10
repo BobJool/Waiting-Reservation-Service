@@ -40,8 +40,9 @@ public enum ErrorCode {
     // 레스토랑
     DUPLICATED_NAME(HttpStatus.BAD_REQUEST,"식당 이름이 이미 존재합니다."),
     DUPLICATED_PHONE(HttpStatus.BAD_REQUEST, "식당 연락처가 이미 존재합니다."),
-    DUPPLICATED_Address(HttpStatus.BAD_REQUEST,"식당 주소가 이미 존재합니다."),
-
+    DUPLICATED_ADDRESS(HttpStatus.BAD_REQUEST,"식당 주소가 이미 존재합니다."),
+    NO_SEARCH_RESULTS(HttpStatus.BAD_REQUEST, "검색 결과가 없습니다."),
+    DUPLICATE_UPDATE(HttpStatus.BAD_REQUEST, "동일한 값으로 업데이트할 수 없습니다."),
     // 레스토랑 스케쥴
     CAPACITY_OVERFLOW(HttpStatus.BAD_REQUEST,"요청한 인원수가 테이블 최대 인원수를 초과합니다."),
     ALREADEY_RESERVED(HttpStatus.CONFLICT,"해당 예약이 만료되어 예약이 불가능 합니다."),
@@ -81,6 +82,7 @@ public enum ErrorCode {
     INVALID_PAYMENT_AMOUNT(HttpStatus.BAD_REQUEST, "결제 금액은 양수여야 합니다."),
     PAYMENT_FAIL(HttpStatus.BAD_REQUEST, "대기 상태의 예약만 결제 가능합니다."),
     CANNOT_REFUND(HttpStatus.CONFLICT, "환불할 수 없는 상태입니다."),
+    EXPIRED_RESERVATION(HttpStatus.BAD_REQUEST, "만료된 예약은 결제할 수 없습니다."),
 
     // 알림
     INVALID_SLACK_EMAIL(HttpStatus.BAD_REQUEST, "Slack 이메일이 존재하지 않습니다."),
