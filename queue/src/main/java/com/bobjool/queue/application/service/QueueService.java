@@ -88,7 +88,7 @@ public class QueueService {
 	}
 
 	public void registerQueue(QueueRegisterDto dto) {
-		QueueRegisteredEvent event = redisQueueService.addUserToQueue(dto);
+		QueueRegisteredEvent event = redisQueueService.registerQueue(dto);
 		queueKafkaProducer.publishQueueRegistered(event);
 	}
 
@@ -103,7 +103,7 @@ public class QueueService {
 	}
 
 	public void delayUserRank(QueueDelayDto dto) {
-		QueueDelayedEvent event = redisQueueService.delayUserRank(dto.restaurantId(), dto.userId(), dto.targetUserId());
+		QueueDelayedEvent event = redisQueueService.delayUserRank(dto);
 		queueKafkaProducer.publishQueueDelayed(event);
 	}
 
