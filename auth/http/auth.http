@@ -1,0 +1,23 @@
+### 회원가입
+POST localhost:19005/api/v1/auths/sign-up
+Content-Type: application/json
+
+{
+  "username": "owner2345",
+  "password": "1234",
+  "name": "owner2name",
+  "nickname": "owner2nick",
+  "slackEmail": "owner2@slack.com",
+  "email": "owner2@email.com",
+  "phoneNumber": "010-1234-5681",
+  "role": "OWNER"
+}
+
+### 로그인
+POST localhost:19005/api/v1/auths/sign-in
+Content-Type: application/json
+
+{
+  "username": "owner1234",
+  "password": 1234
+}

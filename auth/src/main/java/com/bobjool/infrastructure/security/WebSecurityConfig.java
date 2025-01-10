@@ -44,6 +44,7 @@ public class WebSecurityConfig {
         http.authorizeHttpRequests((authorizeHttpRequests) ->
                 authorizeHttpRequests
                         .requestMatchers("/api/v1/auths/**").permitAll() // 인증 없이 접근 허용
+                        .requestMatchers("/actuator/**").permitAll() // Actuator 인증 없이 접근 허용
                         .anyRequest().authenticated()                  // 나머지 요청은 인증 필요
         );
 
