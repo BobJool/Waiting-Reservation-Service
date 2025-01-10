@@ -1,6 +1,9 @@
 package com.bobjool.queue.application.service;
 
 import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -17,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
+import com.bobjool.queue.application.dto.UserQueueData;
 import com.bobjool.queue.application.dto.kafka.QueueAlertedEvent;
 import com.bobjool.queue.application.dto.kafka.QueueCanceledEvent;
 import com.bobjool.queue.application.dto.kafka.QueueDelayedEvent;
@@ -25,8 +29,11 @@ import com.bobjool.queue.application.dto.kafka.QueueRemindEvent;
 import com.bobjool.queue.application.dto.redis.QueueAlertDto;
 import com.bobjool.queue.application.dto.redis.QueueCancelDto;
 import com.bobjool.queue.application.dto.redis.QueueCheckInDto;
+import com.bobjool.queue.application.dto.redis.QueueDelayDto;
 import com.bobjool.queue.application.dto.redis.QueueRegisterDto;
+import com.bobjool.queue.domain.enums.DiningOption;
 import com.bobjool.queue.domain.enums.QueueStatus;
+import com.bobjool.queue.domain.enums.QueueType;
 import com.bobjool.queue.domain.util.RedisKeyUtil;
 
 import lombok.RequiredArgsConstructor;
@@ -57,7 +64,7 @@ public class RedisQueueService {
 				} catch (Exception e) {
 					log.error("Error during processing: {}", e.getMessage(), e);
 					log.info("Rolling back changes...");
-					rollbackQueueOperations(dto);
+					rollbackResisterOperations(dto);
 
 					throw new BobJoolException(ErrorCode.TRANSACTION_FAILED);
 				} finally {
@@ -68,18 +75,180 @@ public class RedisQueueService {
 				}
 			} else {
 				log.warn("Failed to acquire lock for key: {}", lockKey);
-				throw new BobJoolException (ErrorCode.FAILED_ACQUIRE_LOCK);
+				throw new BobJoolException(ErrorCode.FAILED_ACQUIRE_LOCK);
 			}
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			log.error("Thread interrupted while trying to acquire lock for key: {}", lockKey, e);
-			throw new BobJoolException (ErrorCode.INTERRUPTED_WHILE_ACQUIRE_LOCK);
+			throw new BobJoolException(ErrorCode.INTERRUPTED_WHILE_ACQUIRE_LOCK);
 		}
+	}
+
+	public QueueDelayedEvent delayUserRank(QueueDelayDto dto) {
+		String lockKey = "delayLock:" + dto.restaurantId();
+		RLock lock = redissonClient.getLock(lockKey);
+		try {
+			if (lock.tryLock(5, 7, TimeUnit.SECONDS)) {
+				try {
+					updateUserScore(dto.restaurantId(), dto.userId(), dto.targetUserId());
+					updateQueueStatus(dto.restaurantId(), dto.userId(), QueueStatus.DELAYED);
+					updateDelayCount(dto.restaurantId(), dto.userId());
+					UserQueueData userQueueInfo = getUserQueueData(dto.restaurantId(), dto.userId());
+					Long originalPosition = userQueueInfo.position();
+					Integer member = userQueueInfo.member();
+					Long newRank = getUserIndexInQueue(dto.restaurantId(), dto.userId()) + 1;
+
+					log.info("Delayed user {} to queue {} with newRank {}", dto.restaurantId(), dto.userId(), newRank);
+
+					return QueueDelayedEvent.from(dto.userId(), dto.restaurantId(), newRank, originalPosition, member);
+
+				} catch (Exception e) {
+					log.error("Error during processing: {}", e.getMessage(), e);
+					log.info("Rolling back changes...");
+					//TODO 롤백로직 1. 스코어
+					// 2. state(원래 status값 넘어오는 거 없음) : delayed는 웨이팅 시만 가능하다는 규칙적용하면, delay하기 전에 status 검증도 해야됨
+					// 3. delaycount (원래 delaycount 넘어오는 거 없음) 현재값 조회해서 -1해서 넣어?
+					// rollbackDelayOperations(dto);
+
+					throw new BobJoolException(ErrorCode.TRANSACTION_FAILED);
+				} finally {
+					if (lock.isHeldByCurrentThread()) {
+						lock.unlock();
+						log.info("Lock released for key: {}", lockKey);
+					}
+				}
+			} else {
+				log.warn("Failed to acquire lock for key: {}", lockKey);
+				throw new BobJoolException(ErrorCode.FAILED_ACQUIRE_LOCK);
+			}
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			log.error("Thread interrupted while trying to acquire lock for key: {}", lockKey, e);
+			throw new BobJoolException(ErrorCode.INTERRUPTED_WHILE_ACQUIRE_LOCK);
+		}
+	}
+
+	public QueueCanceledEvent cancelWaiting(QueueCancelDto dto) {
+		String lockKey = "cancelLock:" + dto.restaurantId();
+		RLock lock = redissonClient.getLock(lockKey);
+		try {
+			if (lock.tryLock(5, 7, TimeUnit.SECONDS)) {
+				try {
+					removeUserIsWaitingKey(dto.userId());
+					removeUserFromQueue(dto.restaurantId(), dto.userId());
+					updateQueueStatus(dto.restaurantId(), dto.userId(), QueueStatus.CANCELED);
+					return QueueCanceledEvent.from(dto.restaurantId(), dto.userId(), dto.reason());
+				} catch (Exception e) {
+					log.error("Error during processing: {}", e.getMessage(), e);
+					log.info("Rolling back changes...");
+					//TODO 대기 취소 롤백로직
+					// 1. QueueData를 가져와서 isWaiting 으로 다시 만들고, waitingList에도 다시추가
+					// 문제는 원래 status(어떤 상태든 canceled로 만들수 있으니)와 원래 score를 알아야 한다는것
+					// rollbackCancelOperations(dto);
+
+					throw new BobJoolException(ErrorCode.TRANSACTION_FAILED);
+				} finally {
+					if (lock.isHeldByCurrentThread()) {
+						lock.unlock();
+						log.info("Lock released for key: {}", lockKey);
+					}
+				}
+			} else {
+				log.warn("Failed to acquire lock for key: {}", lockKey);
+				throw new BobJoolException(ErrorCode.FAILED_ACQUIRE_LOCK);
+			}
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			log.error("Thread interrupted while trying to acquire lock for key: {}", lockKey, e);
+			throw new BobJoolException(ErrorCode.INTERRUPTED_WHILE_ACQUIRE_LOCK);
+		}
+	}
+
+	public QueueAlertedEvent sendAlertNotification(QueueAlertDto dto) {
+		String lockKey = "alertLock:" + dto.restaurantId();
+		RLock lock = redissonClient.getLock(lockKey);
+		try {
+			if (lock.tryLock(5, 7, TimeUnit.SECONDS)) {
+				try {
+					updateQueueStatus(dto.restaurantId(), dto.userId(), QueueStatus.ALERTED);
+					Long originalPosition = getHashValue(dto.restaurantId(), dto.userId(), "position", Long.class);
+					return QueueAlertedEvent.from(dto.userId(), dto.restaurantId(), originalPosition);
+				} catch (Exception e) {
+					log.error("Error during processing: {}", e.getMessage(), e);
+					log.info("Rolling back changes...");
+					//TODO 입장알림 취소 롤백로직
+					// 1. 원래 status로 돌려주기..
+					// rollbackAlertOperations(dto);
+
+					throw new BobJoolException(ErrorCode.TRANSACTION_FAILED);
+				} finally {
+					if (lock.isHeldByCurrentThread()) {
+						lock.unlock();
+						log.info("Lock released for key: {}", lockKey);
+					}
+				}
+			} else {
+				log.warn("Failed to acquire lock for key: {}", lockKey);
+				throw new BobJoolException(ErrorCode.FAILED_ACQUIRE_LOCK);
+			}
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			log.error("Thread interrupted while trying to acquire lock for key: {}", lockKey, e);
+			throw new BobJoolException(ErrorCode.INTERRUPTED_WHILE_ACQUIRE_LOCK);
+		}
+	}
+
+	public QueueAlertedEvent sendRushAlertNotification(QueueAlertDto dto) {
+		String lockKey = "rushAlertLock:" + dto.restaurantId();
+		RLock lock = redissonClient.getLock(lockKey);
+		try {
+			if (lock.tryLock(5, 7, TimeUnit.SECONDS)) {
+				try {
+					updateQueueStatus(dto.restaurantId(), dto.userId(), QueueStatus.RUSH_SENT);
+					addUserToAutoCancelQueue(dto.restaurantId(), dto.userId());
+					Long originalPosition = getHashValue(dto.restaurantId(), dto.userId(), "position", Long.class);
+					return QueueAlertedEvent.from(dto.userId(), dto.restaurantId(), originalPosition);
+				} catch (Exception e) {
+					log.error("Error during processing: {}", e.getMessage(), e);
+					log.info("Rolling back changes...");
+					//TODO 입장알림 취소 롤백로직
+					// 1. 원래 status로 돌려주기..
+					// 2. 오토캔슬 큐에서 지우기
+					// rollbackRushOperations(dto);
+
+					throw new BobJoolException(ErrorCode.TRANSACTION_FAILED);
+				} finally {
+					if (lock.isHeldByCurrentThread()) {
+						lock.unlock();
+						log.info("Lock released for key: {}", lockKey);
+					}
+				}
+			} else {
+				log.warn("Failed to acquire lock for key: {}", lockKey);
+				throw new BobJoolException(ErrorCode.FAILED_ACQUIRE_LOCK);
+			}
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			log.error("Thread interrupted while trying to acquire lock for key: {}", lockKey, e);
+			throw new BobJoolException(ErrorCode.INTERRUPTED_WHILE_ACQUIRE_LOCK);
+		}
+	}
+
+	private void updateUserScore(UUID restaurantId, Long userId, Long targetUserId) {
+		String waitingListKey = RedisKeyUtil.getWaitingListKey(restaurantId);
+		Double targetScore = getUserScore(restaurantId, targetUserId);
+		Double userScore = getUserScore(restaurantId, userId);
+		if (userScore > targetScore) {
+			throw new BobJoolException(ErrorCode.ALREADY_BEHIND_TARGET);
+		}
+		Double nextScore = calculateNextScore(restaurantId, targetScore);
+		double newScore = (targetScore + nextScore) / 2.0;
+		redisTemplate.opsForZSet().add(waitingListKey, String.valueOf(userId), newScore);
 	}
 
 	private void addToWaitingQueue(QueueRegisterDto dto, long position) {
 		String waitingListKey = RedisKeyUtil.getWaitingListKey(dto.restaurantId());
-		double uniqueScore = (double) position;
+		double uniqueScore = (double)position;
 		boolean addedToQueue = Boolean.TRUE.equals(
 			redisTemplate.opsForZSet().add(waitingListKey, String.valueOf(dto.userId()), uniqueScore));
 		if (!addedToQueue) {
@@ -108,7 +277,7 @@ public class RedisQueueService {
 		}
 	}
 
-	private void rollbackQueueOperations(QueueRegisterDto dto) {
+	private void rollbackResisterOperations(QueueRegisterDto dto) {
 		String waitingListKey = RedisKeyUtil.getWaitingListKey(dto.restaurantId());
 		String userQueueDataKey = RedisKeyUtil.getUserQueueDataKey(dto.restaurantId(), dto.userId());
 		String userIsWaitingKey = RedisKeyUtil.getUserIsWaitingKey(dto.userId());
@@ -116,32 +285,6 @@ public class RedisQueueService {
 		redisTemplate.delete(userQueueDataKey);
 		redisTemplate.delete(userIsWaitingKey);
 	}
-	// @RedissonLock(prefix = "registerLock:", value = "#dto.restaurantId")
-	// public QueueRegisteredEvent addUserToQueue(QueueRegisterDto dto) {
-	// 	String waitingListKey = RedisKeyUtil.getWaitingListKey(dto.restaurantId());
-	// 	String userQueueDataKey = RedisKeyUtil.getUserQueueDataKey(dto.restaurantId(), dto.userId());
-	//
-	// 	long position = getNextQueuePosition(dto.restaurantId(),dto.userId());
-	// 	double uniqueScore = (double)position;
-	// 	redisTemplate.opsForZSet().add(waitingListKey, String.valueOf(dto.userId()), uniqueScore);
-	//
-	// 	Map<String, Object> userInfo = Map.of(
-	// 		"restaurant_id", dto.restaurantId(),
-	// 		"user_id", dto.userId(),
-	// 		"member", dto.member(),
-	// 		"type", dto.type(),
-	// 		"dining_option", dto.diningOption(),
-	// 		"position", position,
-	// 		"status", QueueStatus.WAITING,
-	// 		"delay_count", 0,
-	// 		"created_at", System.currentTimeMillis()
-	// 	);
-	// 	redisTemplate.opsForHash().putAll(userQueueDataKey, userInfo);
-	// 	log.info("Added user {} to queue {} with position {}", dto.userId(), waitingListKey, position);
-	// 	markUserAsWaiting(dto.userId(), dto.restaurantId());
-	// 	long rank = getUserIndexInQueue(dto.restaurantId(), dto.userId()) + 1;
-	// 	return QueueRegisteredEvent.from(dto.userId(), dto.restaurantId(), position, rank, dto.member());
-	// }
 
 	public boolean isUserWaiting(Long userId) {
 		String userIsWaitingKey = RedisKeyUtil.getUserIsWaitingKey(userId);
@@ -193,31 +336,6 @@ public class RedisQueueService {
 		return result;
 	}
 
-	public QueueDelayedEvent delayUserRank(UUID restaurantId, Long userId, Long targetUserId) {
-		String waitingListKey = RedisKeyUtil.getWaitingListKey(restaurantId);
-		String userQueueDataKey = RedisKeyUtil.getUserQueueDataKey(restaurantId, userId);
-
-		Double targetScore = getUserScore(waitingListKey, targetUserId);
-		Double userScore = getUserScore(waitingListKey, userId);
-		if (userScore > targetScore) {
-			throw new BobJoolException(ErrorCode.ALREADY_BEHIND_TARGET);
-		}
-
-		Double nextScore = calculateNextScore(waitingListKey, targetScore);
-		double newScore = (targetScore + nextScore) / 2.0;
-		redisTemplate.opsForZSet().add(waitingListKey, String.valueOf(userId), newScore);
-		updateDelayCount(userQueueDataKey);
-		updateQueueStatus(restaurantId, userId, QueueStatus.DELAYED);
-
-		Long originalPosition = getHashValue(restaurantId, userId, "position", Long.class);
-		Integer member = getHashValue(restaurantId, userId, "member", Integer.class);
-		Long newRank = getUserIndexInQueue(restaurantId, userId) + 1;
-
-		log.info("Delayed user {} to queue {} with newRank {}", userId, waitingListKey, newRank);
-
-		return QueueDelayedEvent.from(userId, restaurantId, newRank, originalPosition, member);
-	}
-
 	public Long getTotalUsersInQueue(UUID restaurantId) {
 		String waitingListKey = RedisKeyUtil.getWaitingListKey(restaurantId);
 		Long totalUsers = redisTemplate.opsForZSet().size(waitingListKey);
@@ -248,16 +366,18 @@ public class RedisQueueService {
 		}
 	}
 
-	private void updateDelayCount(String userHashKey) {
-		Integer delayCount = (Integer)redisTemplate.opsForHash().get(userHashKey, "delay_count");
+	private void updateDelayCount(UUID restaurantId, Long userId) {
+		String userQueueDataKey = RedisKeyUtil.getUserQueueDataKey(restaurantId, userId);
+		Integer delayCount = (Integer)redisTemplate.opsForHash().get(userQueueDataKey, "delay_count");
 		if (delayCount == null) {
 			delayCount = 0;
 		}
-		redisTemplate.opsForHash().put(userHashKey, "delay_count", delayCount + 1);
+		redisTemplate.opsForHash().put(userQueueDataKey, "delay_count", delayCount + 1);
 	}
 
-	private Double getUserScore(String redisKey, Long userId) {
-		Double score = redisTemplate.opsForZSet().score(redisKey, String.valueOf(userId));
+	private Double getUserScore(UUID restaurantId, Long userId) {
+		String waitingListKey = RedisKeyUtil.getWaitingListKey(restaurantId);
+		Double score = redisTemplate.opsForZSet().score(waitingListKey, String.valueOf(userId));
 		if (score == null) {
 			throw new BobJoolException(ErrorCode.USER_NOT_FOUND_IN_QUEUE);
 		}
@@ -282,7 +402,37 @@ public class RedisQueueService {
 		throw new IllegalArgumentException("Unsupported type: " + type.getName());
 	}
 
-	private Double calculateNextScore(String waitingListKey, Double targetScore) {
+	public UserQueueData getUserQueueData(UUID restaurantId, Long userId) {
+		String userQueueDataKey = RedisKeyUtil.getUserQueueDataKey(restaurantId, userId);
+		Map<Object, Object> userQueueDataMap = redisTemplate.opsForHash().entries(userQueueDataKey);
+
+		if (userQueueDataMap.isEmpty()) {
+			throw new BobJoolException(ErrorCode.QUEUE_DATA_NOT_FOUND);
+		}
+
+		try {
+			Long position = Long.valueOf(userQueueDataMap.getOrDefault("position", "0").toString());
+			Integer member = Integer.valueOf(userQueueDataMap.getOrDefault("member", "0").toString());
+			DiningOption diningOption = DiningOption.valueOf(
+				userQueueDataMap.getOrDefault("dining_option", "UNKNOWN").toString());
+			QueueType type = QueueType.valueOf(userQueueDataMap.getOrDefault("type", "UNKNOWN").toString());
+			QueueStatus status = QueueStatus.valueOf(userQueueDataMap.getOrDefault("status", "UNKNOWN").toString());
+			long createdAt = Long.parseLong(userQueueDataMap.getOrDefault("created_at", "0").toString());
+			LocalDateTime createdAtDateTime = null;
+			if (createdAt > 0) {
+				createdAtDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(createdAt), ZoneId.systemDefault());
+			}
+			Long delayCount = Long.valueOf(userQueueDataMap.getOrDefault("delay_count", "0").toString());
+
+			return new UserQueueData(userId, restaurantId, position, member, diningOption, type, status, delayCount,
+				createdAtDateTime);
+		} catch (NumberFormatException e) {
+			throw new BobJoolException(ErrorCode.INVALID_DATA_FORMAT);
+		}
+	}
+
+	private Double calculateNextScore(UUID restaurantId, Double targetScore) {
+		String waitingListKey = RedisKeyUtil.getWaitingListKey(restaurantId);
 		Set<Object> nextUsers = redisTemplate.opsForZSet()
 			.rangeByScore(waitingListKey, targetScore, Double.MAX_VALUE, 1, 1);
 
@@ -291,14 +441,7 @@ public class RedisQueueService {
 		}
 
 		Object nextUser = nextUsers.iterator().next();
-		return getUserScore(waitingListKey, Long.parseLong(nextUser.toString()));
-	}
-
-	public QueueCanceledEvent cancelWaiting(QueueCancelDto dto) {
-		removeUserIsWaitingKey(dto.userId());
-		removeUserFromQueue(dto.restaurantId(), dto.userId());
-		updateQueueStatus(dto.restaurantId(), dto.userId(), QueueStatus.CANCELED);
-		return QueueCanceledEvent.from(dto.restaurantId(), dto.userId(), dto.reason());
+		return getUserScore(restaurantId, Long.parseLong(nextUser.toString()));
 	}
 
 	private void removeUserFromQueue(UUID restaurantId, Long userId) {
@@ -334,19 +477,6 @@ public class RedisQueueService {
 		removeUserFromQueue(dto.restaurantId(), dto.userId());
 		updateQueueStatus(dto.restaurantId(), dto.userId(), QueueStatus.CHECK_IN);
 		return getThirdUserInfo(dto.restaurantId());
-	}
-
-	public QueueAlertedEvent sendAlertNotification(QueueAlertDto dto) {
-		updateQueueStatus(dto.restaurantId(), dto.userId(), QueueStatus.ALERTED);
-		Long originalPosition = getHashValue(dto.restaurantId(), dto.userId(), "position", Long.class);
-		return QueueAlertedEvent.from(dto.userId(), dto.restaurantId(), originalPosition);
-	}
-
-	public QueueAlertedEvent sendRushAlertNotification(QueueAlertDto dto) {
-		updateQueueStatus(dto.restaurantId(), dto.userId(), QueueStatus.RUSH_SENT);
-		addUserToAutoCancelQueue(dto.restaurantId(), dto.userId());
-		Long originalPosition = getHashValue(dto.restaurantId(), dto.userId(), "position", Long.class);
-		return QueueAlertedEvent.from(dto.userId(), dto.restaurantId(), originalPosition);
 	}
 
 	public void checkUserStatus(UUID restaurantId, Long userId, String process) {

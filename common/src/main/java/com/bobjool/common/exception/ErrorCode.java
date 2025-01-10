@@ -67,6 +67,7 @@ public enum ErrorCode {
     INVALID_USER_ID_FORMAT(HttpStatus.BAD_REQUEST, "유효한 사용자 ID 형식이 아닙니다."),
     FAILED_SAVE(HttpStatus.INTERNAL_SERVER_ERROR, "사용자의 대기정보를 저장하는데 실패했습니다."),
     FAILED_ADD_TO_QUEUE(HttpStatus.INTERNAL_SERVER_ERROR, "해당 식당의 대기열에 등록하는데 실패했습니다."),
+    INVALID_DATA_FORMAT(HttpStatus.INTERNAL_SERVER_ERROR, "사용자 정보를 변환할 수 없습니다."),
 
     // 예약
     INVALID_GUEST_COUNT(HttpStatus.BAD_REQUEST, "예약 인원수는 양수여야 합니다."),
