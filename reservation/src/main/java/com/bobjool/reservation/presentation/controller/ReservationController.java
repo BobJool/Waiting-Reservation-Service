@@ -79,5 +79,4 @@ public class ReservationController {
         return ApiResponse.success(SuccessCode.SUCCESS, response);
     }
 
-    // todo OWNER 용, CUSTOMER 용 search 메서드 필요,
 }

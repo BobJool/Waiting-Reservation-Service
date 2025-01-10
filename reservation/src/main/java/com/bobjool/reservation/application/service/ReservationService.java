@@ -156,13 +156,14 @@ public class ReservationService {
             if (!reservation.getUserId().equals(userId)) {
                 throw new BobJoolException(ErrorCode.FORBIDDEN_ACCESS);
             }
-        } else if ("OWNER".equalsIgnoreCase(role)) {
-            ApiResponse<RestaurantResDto> restaurantsForOwner
-                    = restaurantClient.getRestaurantsForOwner(reservation.getRestaurantId(), String.valueOf(userId), role);
-            if (!restaurantsForOwner.data().userId().equals(reservation.getUserId())) {
-                throw new BobJoolException(ErrorCode.FORBIDDEN_ACCESS);
-            }
         }
+//        else if ("OWNER".equalsIgnoreCase(role)) {
+//            ApiResponse<RestaurantResDto> restaurantsForOwner
+//                    = restaurantClient.getRestaurantsForOwner(reservation.getRestaurantId(), String.valueOf(userId), role);
+//            if (!restaurantsForOwner.data().userId().equals(reservation.getUserId())) {
+//                throw new BobJoolException(ErrorCode.FORBIDDEN_ACCESS);
+//            }
+//        }
 
         // MASTER: 모든 예약 접근 가능 (추가 검증 없음)
         return ReservationResDto.from(reservation);
