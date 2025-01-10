@@ -1,15 +1,16 @@
 ### 음식점 생성
 POST localhost:19005/api/v1/restaurants
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJvd25lcjIzNDUiLCJ1c2VySWQiOiI0Iiwicm9sZSI6Ik9XTkVSIiwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaXNzIjoiYXV0aC1zZXJ2aWNlIiwiaWF0IjoxNzM2NDIzNDAwLCJleHAiOjE3MzY0MjM3NjB9.962LvkRBVw0Am7AUgunNHM4z0Jp1ZfcbNIZkucPH1Fw
 
 {
-  "user_id": 123,
+  "user_id": 4,
   "restaurant_category": "KOREA",
-  "restaurant_phone": "010-2436-5678",
-  "restaurant_name": "식당 이름1",
+  "restaurant_phone": "010-2436-4325",
+  "restaurant_name": "다른 오너 식당 이름",
   "restaurant_region": "SEOUL",
-  "restaurant_address_detail": "서울시 마산구 부산동",
-  "restaurant_description": "식당 이름1의 상세 설명",
+  "restaurant_address_detail": "서울시 마산구 부산동3",
+  "restaurant_description": "다른 오너 식당 이름의 상세 설명",
   "restaurant_volume": 100,
   "is_reservation": "true",
   "is_queue": "true",
@@ -18,14 +19,15 @@ Content-Type: application/json
 }
 
 ### 식당 스케줄 생성
-POST localhost:19005/api/v1/restaurants/schedule/57de6c10-88b4-4713-b9f4-a547f144eadf
+POST localhost:19005/api/v1/restaurants/schedule/355b3d3a-2eee-4fa8-aab6-62f0f614d95f
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJvd25lcjIzNDUiLCJ1c2VySWQiOiI0Iiwicm9sZSI6Ik9XTkVSIiwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaXNzIjoiYXV0aC1zZXJ2aWNlIiwiaWF0IjoxNzM2NDIzNDAwLCJleHAiOjE3MzY0MjM3NjB9.962LvkRBVw0Am7AUgunNHM4z0Jp1ZfcbNIZkucPH1Fw
 
 {
-  "user_id": 123,
-  "restaurant_id": "57de6c10-88b4-4713-b9f4-a547f144eadf",
+  "user_id": 4,
+  "restaurant_id": "355b3d3a-2eee-4fa8-aab6-62f0f614d95f",
   "table_number": 1,
-  "date": "2025-01-21",
+  "date": "2025-01-24",
   "time_slot": "14:00",
   "max_capacity": 8
 }

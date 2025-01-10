@@ -2,7 +2,7 @@ package com.bobjool.reservation.application.service;
 
 import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
-import com.bobjool.reservation.application.client.RestaurantScheduleClient;
+import com.bobjool.reservation.application.client.restaurantschedule.RestaurantScheduleClient;
 import com.bobjool.reservation.application.dto.reservation.ReservationCreateDto;
 import com.bobjool.reservation.application.dto.reservation.ReservationResDto;
 import com.bobjool.reservation.application.dto.reservation.ReservationSearchDto;
@@ -77,10 +77,10 @@ class ReservationServiceTest {
         willDoNothing().given(reservationProducer).publishReservationCreated(anyString(), any());
 
         // RestaurantScheduleClient 의 reserveSchedule 메서드가 호출되더라도 아무 작업도 하지 않도록 설정
-        doReturn(null).when(restaurantScheduleClient).reserveSchedule2(any(), any());
+        doReturn(null).when(restaurantScheduleClient).reserveSchedule2(any(), any(), any(), any());
 
         // when - reservationService.createReservation() 호출
-        ReservationResDto response = reservationService.createReservation(reservationCreateDto);
+        ReservationResDto response = reservationService.createReservation(reservationCreateDto, userId, "CUSTOMER");
 
         // then - 응답이 올바르게 반환된다.
         assertThat(response.reservationId()).isNotNull();
@@ -115,9 +115,9 @@ class ReservationServiceTest {
                 reservationDate, reservationTime);
 
         // RestaurantScheduleClient 의 reserveSchedule 메서드가 호출되더라도 아무 작업도 하지 않도록 설정
-        doReturn(null).when(restaurantScheduleClient).reserveSchedule2(any(), any());
+        doReturn(null).when(restaurantScheduleClient).reserveSchedule2(any(), any(), any(), any());
             // when & then - 예외 발생 검증
-        assertThatThrownBy(() -> reservationService.createReservation(reservationCreateDto))
+        assertThatThrownBy(() -> reservationService.createReservation(reservationCreateDto, userId, "CUSTOMER"))
                 .isInstanceOf(BobJoolException.class)
                 .hasMessage(ErrorCode.INVALID_GUEST_COUNT.getMessage());
     }
@@ -204,7 +204,7 @@ class ReservationServiceTest {
         reservationRepository.save(reservation);
 
         // when - cancelReservation 호출
-        var response = reservationService.cancelReservation(reservation.getId());
+        var response = reservationService.cancelReservation(reservation.getId(), "MASTER");
 
         // then - 상태가 CANCEL 로 변경되었는지 확인
         assertThat(response.status()).isEqualTo("CANCEL");
@@ -221,7 +221,7 @@ class ReservationServiceTest {
         UUID nonExistentReservationId = UUID.randomUUID();
 
         // when & then - 예외 발생 확인
-        assertThatThrownBy(() -> reservationService.cancelReservation(nonExistentReservationId))
+        assertThatThrownBy(() -> reservationService.cancelReservation(nonExistentReservationId, "MASTER"))
                 .isInstanceOf(BobJoolException.class)
                 .hasMessage(ErrorCode.ENTITY_NOT_FOUND.getMessage());
     }
@@ -244,7 +244,7 @@ class ReservationServiceTest {
         reservationRepository.save(reservation);
 
         // when & then - 예외 발생 확인
-        assertThatThrownBy(() -> reservationService.cancelReservation(reservation.getId()))
+        assertThatThrownBy(() -> reservationService.cancelReservation(reservation.getId(), "CUSTOMER"))
                 .isInstanceOf(BobJoolException.class)
                 .hasMessage(ErrorCode.CANNOT_CANCEL.getMessage());
     }
@@ -264,7 +264,7 @@ class ReservationServiceTest {
         reservationRepository.save(reservation);
 
         // when - getReservation 호출
-        ReservationResDto response = reservationService.getReservation(reservation.getId());
+        ReservationResDto response = reservationService.getReservation(reservation.getId(), 12345L, "MASTER");
 
         // then - 반환된 예약 정보가 올바른지 확인
         assertThat(response.reservationId()).isEqualTo(reservation.getId());
@@ -282,7 +282,7 @@ class ReservationServiceTest {
         UUID nonExistentReservationId = UUID.randomUUID();
 
         // when & then - 예외 발생 확인
-        assertThatThrownBy(() -> reservationService.getReservation(nonExistentReservationId))
+        assertThatThrownBy(() -> reservationService.getReservation(nonExistentReservationId, 12345L, "MASTER"))
                 .isInstanceOf(BobJoolException.class)
                 .hasMessage(ErrorCode.ENTITY_NOT_FOUND.getMessage());
     }

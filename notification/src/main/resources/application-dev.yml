@@ -32,14 +32,14 @@ spring:
 notification:
   template-mapping:
     queue:
-      registered: e1abddb1-c899-404d-8b15-5d32a6463139
+      registered: 857ba751-13ac-45aa-956e-048368c7f5b9
       delayed: b2e9aebb-001d-462b-8012-854ee6aca1f5
       remind: b2e9aebb-001d-462b-8012-854ee6aca1f5
       alerted: b2e9aebb-001d-462b-8012-854ee6aca1f5
       rush: b2e9aebb-001d-462b-8012-854ee6aca1f5
       canceled: b2e9aebb-001d-462b-8012-854ee6aca1f5
     reservation:
-      completed: b2e9aebb-001d-462b-8012-854ee6aca1f5
+      completed: 24397246-5bfe-4b62-a6ca-bfd2e42d4ee3
       failed: b2e9aebb-001d-462b-8012-854ee6aca1f5
       refund: b2e9aebb-001d-462b-8012-854ee6aca1f5
       remind: b2e9aebb-001d-462b-8012-854ee6aca1f5

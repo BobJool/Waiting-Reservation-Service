@@ -1,5 +1,6 @@
 package com.bobjool.reservation.presentation.controller;
 
+import com.bobjool.common.infra.aspect.RequireRole;
 import com.bobjool.common.presentation.ApiResponse;
 import com.bobjool.common.presentation.PageResponse;
 import com.bobjool.common.presentation.SuccessCode;
@@ -27,35 +28,42 @@ import java.util.UUID;
 public class ReservationController {
     private final ReservationService reservationService;
 
+    @RequireRole(value = {"CUSTOMER"})
     @PostMapping
-    public ResponseEntity<ApiResponse<ReservationResDto>> createReservation(@Valid @RequestBody ReservationCreateReqDto reqDto) {
-        log.info("createReservation.reservationCreateReqDto: {}", reqDto);
-        ReservationResDto response = reservationService.createReservation(reqDto.toServiceDto());
+    public ResponseEntity<ApiResponse<ReservationResDto>> createReservation(@Valid @RequestBody ReservationCreateReqDto reqDto,
+                                                                            @RequestHeader(value = "X-User-Id", required = true) String userId,
+                                                                            @RequestHeader(value = "X-Role", required = true) String role) {
+        ReservationResDto response = reservationService.createReservation(reqDto.toServiceDto(), Long.valueOf(userId), role);
         return ApiResponse.success(SuccessCode.SUCCESS_INSERT, response);
     }
 
+    @RequireRole(value = {"MASTER"})
     @PatchMapping("/status/{reservationId}")
     public ResponseEntity<ApiResponse<ReservationResDto>> updateReservationStatus(@Valid @RequestBody ReservationUpdateReqDto reqDto,
                                                                                   @PathVariable("reservationId") UUID reservationId) {
-        log.info("updateReservationStatus.reservationUpdateReqDto: {}", reqDto);
         ReservationResDto response = reservationService.updateReservationStatus(reqDto.toServiceDto(), reservationId);
         return ApiResponse.success(SuccessCode.SUCCESS_UPDATE, response);
     }
 
+    @RequireRole(value = {"OWNER", "CUSTOMER"})
     @PostMapping("/cancel/{reservationId}")
-    public ResponseEntity<ApiResponse<ReservationResDto>> cancelReservation(@PathVariable("reservationId") UUID reservationId) {
-        log.info("cancelReservation.reservationCancelReqDto: {}", reservationId);
-        ReservationResDto response = reservationService.cancelReservation(reservationId);
+    public ResponseEntity<ApiResponse<ReservationResDto>> cancelReservation(@PathVariable("reservationId") UUID reservationId,
+                                                                            @RequestHeader(value = "X-User-Id", required = true) String userId,
+                                                                            @RequestHeader(value = "X-Role", required = true) String role) {
+        ReservationResDto response = reservationService.cancelReservation(reservationId, role);
         return ApiResponse.success(SuccessCode.SUCCESS, response);
     }
 
+    @RequireRole(value = {"CUSTOMER", "OWNER", "MASTER"})
     @GetMapping("/{reservationId}")
-    public ResponseEntity<ApiResponse<ReservationResDto>> getReservation(@PathVariable("reservationId") UUID reservationId) {
-        log.info("getReservation.reservationGetReqDto: {}", reservationId);
-        ReservationResDto response = reservationService.getReservation(reservationId);
+    public ResponseEntity<ApiResponse<ReservationResDto>> getReservation(@PathVariable("reservationId") UUID reservationId,
+                                                                         @RequestHeader(value = "X-User-Id", required = true) String userId,
+                                                                         @RequestHeader(value = "X-Role", required = true) String role) {
+        ReservationResDto response = reservationService.getReservation(reservationId, Long.valueOf(userId), role);
         return ApiResponse.success(SuccessCode.SUCCESS, response);
     }
 
+    @RequireRole(value = {"MASTER"})
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<ReservationResDto>>> search(@RequestParam(value = "userId", required = false) Long userId,
                                                                           @RequestParam(value = "restaurantId", required = false) UUID restaurantId,
@@ -70,4 +78,5 @@ public class ReservationController {
         PageResponse<ReservationResDto> response = PageResponse.of(result);
         return ApiResponse.success(SuccessCode.SUCCESS, response);
     }
+
 }
