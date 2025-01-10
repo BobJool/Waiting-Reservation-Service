@@ -1,5 +1,6 @@
 package com.bobjool.restaurant.presentation.controller.restaurant;
 
+import com.bobjool.restaurant.infrastructure.aspect.RequireRole;
 import com.bobjool.common.presentation.ApiResponse;
 import com.bobjool.common.presentation.PageResponse;
 import com.bobjool.common.presentation.SuccessCode;
@@ -39,6 +40,7 @@ public class RestaurantController {
 
   private final RestaurantService restaurantService;
 
+  @RequireRole(value = "MASTER")
   @PostMapping
   public ResponseEntity<ApiResponse<RestaurantResDto>> createRestaurant(
       @Valid @RequestBody RestaurantCreateReqDto restaurantCreateReqDto) {
@@ -48,6 +50,7 @@ public class RestaurantController {
     return ApiResponse.success(SuccessCode.SUCCESS_INSERT, response);
   }
 
+  @RequireRole(value = {"MASTER", "OWNER"})
   @PutMapping("/{restaurantId}")
   public ResponseEntity<ApiResponse<RestaurantResDto>> updateRestaurant(
       @Valid @RequestBody RestaurantUpdateReqDto restaurantUpdateReqDto,
@@ -58,6 +61,7 @@ public class RestaurantController {
     return ApiResponse.success(SuccessCode.SUCCESS_UPDATE, response);
   }
 
+  @RequireRole(value = {"MASTER", "OWNER"})
   @PutMapping("/is-reservation/{restaurantId}")
   public ResponseEntity<ApiResponse<RestaurantResDto>> restaurantReservationChange(
       @Valid @RequestParam boolean isReservation,
@@ -67,6 +71,7 @@ public class RestaurantController {
     return ApiResponse.success(SuccessCode.SUCCESS_UPDATE, response);
   }
 
+  @RequireRole(value = {"MASTER", "OWNER"})
   @PutMapping("/is-queue/{restaurantId}")
   public ResponseEntity<ApiResponse<RestaurantResDto>> restaurantQueueChange(
       @Valid @RequestParam boolean isQueue,
@@ -76,6 +81,7 @@ public class RestaurantController {
     return ApiResponse.success(SuccessCode.SUCCESS_UPDATE, response);
   }
 
+  @RequireRole(value = "MASTER")
   @DeleteMapping("/{restaurantId}")
   public ResponseEntity<ApiResponse<RestaurantResDto>> updateRestaurant(
       @Valid @PathVariable("restaurantId") UUID restaurantId) {
@@ -85,6 +91,7 @@ public class RestaurantController {
     return ApiResponse.success(SuccessCode.SUCCESS_DELETE);
   }
 
+  @RequireRole(value = "MASTER")
   //모든 음식점 정보 전체 조회
   @GetMapping
   public ResponseEntity<ApiResponse<PageResponse<RestaurantResDto>>> getAllRestaurants(
@@ -98,6 +105,7 @@ public class RestaurantController {
   }
 
   //삭제된 음식점 정보 전체 조회
+  @RequireRole(value = "MASTER")
   @GetMapping("/deleted")
   public ResponseEntity<ApiResponse<PageResponse<RestaurantResDto>>> getDeletedRestaurants(
       @SortDefault(sort = "createdAt", direction = Direction.DESC)
@@ -109,38 +117,40 @@ public class RestaurantController {
     return ApiResponse.success(SuccessCode.SUCCESS, PageResponse.of(resPage));
   }
 
-  //음식점 정보 검색
-
   //단일 음식점 정보 조회(for Owner)
-  @GetMapping("/{restaurantId}")
+  @RequireRole(value = "OWNER")
+  @GetMapping("/owner/{restaurantId}")
   public ResponseEntity<ApiResponse<RestaurantResDto>> getRestaurantsForOwner(
       @Valid @PathVariable("restaurantId") UUID restaurantId) {
     log.info("getAllRestaurants");
 
     RestaurantResDto response = restaurantService.readRestaurantsForOwner(restaurantId);
-    return ApiResponse.success(SuccessCode.SUCCESS_UPDATE, response);
+    return ApiResponse.success(SuccessCode.SUCCESS, response);
   }
 
-  //단일 음식점 정보 조회(for Owner)
+  //단일 음식점 정보 조회(for Customer)
+  @RequireRole(value = "CUSTOMER")
   @GetMapping("/customer/{restaurantId}")
   public ResponseEntity<ApiResponse<RestaurantForCustomerResDto>> getRestaurantsForCustomer(
       @Valid @PathVariable("restaurantId") UUID restaurantId) {
     log.info("getAllRestaurants");
 
     RestaurantForCustomerResDto response = restaurantService.readRestaurantsForCustomer(restaurantId);
-    return ApiResponse.success(SuccessCode.SUCCESS_UPDATE, response);
+    return ApiResponse.success(SuccessCode.SUCCESS, response);
   }
+
   //단일 음식점 정보 조회(for Master)
+  @RequireRole(value = "MASTER")
   @GetMapping("/master/{restaurantId}")
   public ResponseEntity<ApiResponse<RestaurantForMasterResDto>> getRestaurantsForMaster(
       @Valid @PathVariable("restaurantId") UUID restaurantId) {
     log.info("getAllRestaurants");
 
     RestaurantForMasterResDto response = restaurantService.readRestaurantsForMaster(restaurantId);
-    return ApiResponse.success(SuccessCode.SUCCESS_UPDATE, response);
+    return ApiResponse.success(SuccessCode.SUCCESS, response);
   }
 
-  //단일 음식점 정보 조회(for Owner)
+  //Cotanct 기능(-> Notification)
   @GetMapping("/{restaurantId}/contact")
   public ResponseEntity<ApiResponse<RestaurantContactResDto>> getRestaurantContact(
       @Valid @PathVariable("restaurantId") UUID restaurantId) {
@@ -171,6 +181,7 @@ public class RestaurantController {
       @SortDefault(sort = "createdAt", direction = Direction.DESC)
       Pageable pageable)
   {
+    log.info("keyword = {}", keyword);
     Page<RestaurantForCustomerResDto> resPage = restaurantService.searchByKeyWord(keyword, pageable);
     return ApiResponse.success(SuccessCode.SUCCESS_ACCEPTED, PageResponse.of(resPage));
   }

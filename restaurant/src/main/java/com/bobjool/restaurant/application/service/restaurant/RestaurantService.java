@@ -10,7 +10,6 @@ import com.bobjool.restaurant.application.dto.restaurant.RestaurantResDto;
 import com.bobjool.restaurant.application.dto.restaurant.RestaurantUpdateDto;
 import com.bobjool.restaurant.domain.entity.restaurant.Restaurant;
 import com.bobjool.restaurant.domain.repository.RestaurantRepository;
-import com.bobjool.restaurant.infrastructure.repository.restaurant.RestaurantRepositoryCustom;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class RestaurantService {
 
   private final RestaurantRepository restaurantRepository;
-  private final RestaurantRepositoryCustom restaurantRepositoryCustomImpl;
 
   @Transactional
   public RestaurantResDto createRestaurant(RestaurantCreateDto restaurantCreateDto) {
@@ -169,7 +167,7 @@ public class RestaurantService {
   public Page<RestaurantForCustomerResDto> searchByDetail(
       String name, String region, String AddressDetail,
       String Description, Pageable pageable) {
-    Page<Restaurant> restaurantPageForCustomer = restaurantRepositoryCustomImpl.findByRestaurantDetail(
+    Page<Restaurant> restaurantPageForCustomer = restaurantRepository.findByRestaurantDetail(
         name, region, AddressDetail, Description, pageable
     );
     if (restaurantPageForCustomer.isEmpty()) {
@@ -182,7 +180,12 @@ public class RestaurantService {
   @Transactional(readOnly = true)
   public Page<RestaurantForCustomerResDto> searchByKeyWord(
       String keyword, Pageable pageable) {
-    Page<Restaurant> restaurantPageForCustomer = restaurantRepositoryCustomImpl.findByRestaurantKeyword(
+
+    if (keyword == null || keyword.isBlank()) {
+      throw new BobJoolException(ErrorCode.NOT_KEYWORD);
+    }
+
+    Page<Restaurant> restaurantPageForCustomer = restaurantRepository.findByRestaurantKeyword(
         keyword, pageable
     );
     if (restaurantPageForCustomer.isEmpty()) {

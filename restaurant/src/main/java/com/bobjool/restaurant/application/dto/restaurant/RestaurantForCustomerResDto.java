@@ -3,13 +3,11 @@ package com.bobjool.restaurant.application.dto.restaurant;
 import com.bobjool.restaurant.domain.entity.restaurant.Restaurant;
 import com.bobjool.restaurant.domain.entity.restaurant.RestaurantCategory;
 import com.bobjool.restaurant.domain.entity.restaurant.RestaurantRegion;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.time.LocalTime;
 import java.util.UUID;
 
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record RestaurantForCustomerResDto(
+    UUID restaurantId,
     RestaurantCategory restaurantCategory,
     String restaurantPhone,
     String restaurantName,
@@ -23,6 +21,7 @@ public record RestaurantForCustomerResDto(
 
   public static RestaurantForCustomerResDto from(Restaurant restaurant){
     return new RestaurantForCustomerResDto(
+        restaurant.getId(),
         restaurant.getRestaurantCategory(),
         restaurant.getRestaurantPhone(),
         restaurant.getRestaurantName(),

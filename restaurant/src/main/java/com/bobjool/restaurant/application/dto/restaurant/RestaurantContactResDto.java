@@ -4,11 +4,10 @@ import com.bobjool.restaurant.domain.entity.restaurant.Restaurant;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record RestaurantContactResDto(
-    String restaurantName,
-    String restaurantAddressDetail,
-    String restaurantPhone
+    String name,
+    String address,
+    String phone
 ) {
   public static RestaurantContactResDto from(Restaurant restaurant) {
     return new RestaurantContactResDto(

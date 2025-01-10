@@ -8,7 +8,6 @@ import java.util.UUID;
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record RestaurantScheduleCreateDto(
-    Long userId,
     UUID restaurantId,
     int tableNumber,
     LocalDate date,

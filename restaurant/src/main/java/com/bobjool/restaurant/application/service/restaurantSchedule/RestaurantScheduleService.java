@@ -33,9 +33,24 @@ public class RestaurantScheduleService {
   @Transactional
   public RestaurantScheduleResDto createSchedule(RestaurantScheduleCreateDto createDto) {
 
-    if(createDto.userId() == null){ // 추후 추가적인 유효성 검사를 덧붙일 예정이고, 임시구현 상태입니다.
-      throw new BobJoolException(ErrorCode.ENTITY_NOT_FOUND);
+    restaurantRepository.findById(createDto.restaurantId())
+        .orElseThrow(() -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND));
+
+    if(createDto.date().isBefore(LocalDate.now())){
+      throw new BobJoolException(ErrorCode.INVALID_DATE);
     }
+
+    boolean isDuplicate = scheduleRepository.existsByRestaurantIdAndTableNumberAndDateAndTimeSlot(
+    createDto.restaurantId(),
+    createDto.tableNumber(),
+    createDto.date(),
+    createDto.timeSlot()
+  );
+
+    if (isDuplicate) {
+      throw new BobJoolException(ErrorCode.DUPLICATE_SCHEDULE);
+    }
+
 
     RestaurantSchedule schedule = RestaurantSchedule.create(
         createDto.restaurantId(),
@@ -79,22 +94,22 @@ public class RestaurantScheduleService {
   //for owner
   @Transactional
   public RestaurantScheduleResDto updateSchedule(UUID scheduleId,
-      RestaurantScheduleUpdateDto scheduleUpdateDto) {
-    log.info("updateSchedule.ScheduleUpdateDto = {}", scheduleUpdateDto);
+      RestaurantScheduleUpdateDto updateDto) {
+    log.info("updateSchedule.ScheduleUpdateDto = {}", updateDto);
 
     RestaurantSchedule restaurantSchedule = scheduleRepository.findById(scheduleId)
         .orElseThrow(() -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND));
 
-    if(scheduleUpdateDto.userId() == null){ // 추후 추가적인 유효성 검사를 덧붙일 예정이고, 임시구현 상태입니다.
-      throw new BobJoolException(ErrorCode.ENTITY_NOT_FOUND);
+    if(updateDto.date().isBefore(LocalDate.now())){
+      throw new BobJoolException(ErrorCode.INVALID_DATE);
     }
 
     restaurantSchedule.update(
-        scheduleUpdateDto.date(),
-        scheduleUpdateDto.timeSlot(),
-        scheduleUpdateDto.maxCapacity(),
-        scheduleUpdateDto.currentCapacity(),
-        scheduleUpdateDto.available()
+        updateDto.date(),
+        updateDto.timeSlot(),
+        updateDto.maxCapacity(),
+        updateDto.currentCapacity(),
+        updateDto.available()
     );
 
     return RestaurantScheduleResDto.from(restaurantSchedule);
@@ -145,6 +160,10 @@ public class RestaurantScheduleService {
 
     Restaurant restaurant = restaurantRepository.findById(createDto.restaurantId())
         .orElseThrow(() -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND));
+
+    if(date.isBefore(LocalDate.now())){
+      throw new BobJoolException(ErrorCode.INVALID_DATE);
+    }
 
     int reserveTime = createDto.reserveTime();
     log.info("reserveTime={}", reserveTime);
