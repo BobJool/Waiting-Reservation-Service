@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Map;
 
-@FeignClient(name = "notification-service", path = "/api/v1/slack", dismiss404 = true)
+@FeignClient(name = "notification-service", path = "/api/v1/slack")
 public interface NotificationClientImpl extends NotificationClient {
 
     @GetMapping("/users")
