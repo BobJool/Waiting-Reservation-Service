@@ -33,14 +33,18 @@ public class EventService {
      * 알림 전송에 필요한 데이터를 수집하고 변환하여,
      * 히스토리를 저장하고 알림 발송 요청을 보냅니다.
      * Kafka Listener 가 호출합니다.
-     * @param channel 알림 채널
+     *
+     * @param channel    알림 채널
      * @param templateId 알림 메시지 템플릿 ID
-     * @param data 템플릿 변수 바인딩 데이터
+     * @param data       템플릿 변수 바인딩 데이터
      */
     @Transactional
     public void preProcess(NotificationChannel channel, UUID templateId, Map<String, String> data) {
-        this.replaceRestaurantContact(data);
-        this.replaceUserContact(data);
+        this.replaceRestaurantDummyContact(data);
+        this.replaceUserDummyContact(data);
+//        TODO. 사용자, 가게 서버와 통신이 가능할때 Dummy 메소드 호출과 주석을 지워주세요.
+//        this.replaceRestaurantContact(data);
+//        this.replaceUserContact(data);
         log.info("Contact information replace completed.");
 
         Long userId = Long.valueOf(data.get(USER_ID.toSnakeCase()));
@@ -69,9 +73,15 @@ public class EventService {
 
         notificationService.saveNotification(template.id(), userId, templateData, messageTitle.concat(messageContent), userContact);
         log.info("Notification history saved complete");
+//        TODO. SlackID를 유저 서비스에서 받아올 수 있을때 주석을 지워주세요.
+//        notificationService.postNotification(dto);
+//        log.info("Notification posted successfully");
+    }
 
-        notificationService.postNotification(dto);
-        log.info("Notification posted successfully");
+    private void replaceRestaurantDummyContact(Map<String, String> data) {
+        data.put(RESTAURANT_NAME.toSnakeCase(), "스파르타 식당");
+        data.put(RESTAURANT_ADDRESS.toSnakeCase(), "서울특별시 강남구 테헤란로44길 8 12층");
+        data.put(RESTAURANT_NUMBER.toSnakeCase(), "02-123-1234");
     }
 
     private void replaceRestaurantContact(Map<String, String> data) {
@@ -86,6 +96,13 @@ public class EventService {
         data.put(RESTAURANT_NAME.toSnakeCase(), restaurantContactDto.name());
         data.put(RESTAURANT_ADDRESS.toSnakeCase(), restaurantContactDto.address());
         data.put(RESTAURANT_NUMBER.toSnakeCase(), restaurantContactDto.number());
+    }
+
+    private void replaceUserDummyContact(Map<String, String> data) {
+        data.put(USER_ID.toSnakeCase(), "-1");
+        data.put(USER_NAME.toSnakeCase(), "홍길동");
+        data.put(USER_SLACK.toSnakeCase(), "U0Q1W2E3R4");
+        data.put(USER_EMAIL.toSnakeCase(), "rtan2@sparta.com");
     }
 
     private void replaceUserContact(Map<String, String> data) {
