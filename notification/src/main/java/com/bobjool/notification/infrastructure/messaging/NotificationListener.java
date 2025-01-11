@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -30,13 +31,14 @@ public class NotificationListener {
             "queue.alerted",
             "queue.rush"
     })
-    public void handleQueueEvent(Map<String, String> data,
+    public void handleQueueEvent(Map<String, Object> data,
                                  @Header("kafka_receivedTopic") String topic) {
+        Map<String, String> map = this.toStringMap(data);
         NotificationChannel channel = NotificationChannel.SLACK;
         UUID templateId = this.getTemplateId(BobjoolServiceType.QUEUE, topic);
         log.info("Received kafka message. topic: {}, templateId: {}", topic, templateId);
 
-        eventService.preProcess(channel, templateId, data);
+        eventService.preProcess(channel, templateId, map);
     }
 
     @KafkaListener(topics = {
@@ -45,16 +47,26 @@ public class NotificationListener {
             "reservation.refund",
             "reservation.remind"
     })
-    public void handleReservationEvent(Map<String, String> data,
+    public void handleReservationEvent(Map<String, Object> data,
                                        @Header("kafka_receivedTopic") String topic) {
+        Map<String, String> map = this.toStringMap(data);
         NotificationChannel channel = NotificationChannel.SLACK;
         UUID templateId = this.getTemplateId(BobjoolServiceType.RESERVATION, topic);
 
-        this.setTimeFormat(data);
-        this.setDateFormat(data);
+        this.setTimeFormat(map);
+        this.setDateFormat(map);
         log.info("Received kafka message. topic: {}, templateId: {}", topic, templateId);
 
-        eventService.preProcess(channel, templateId, data);
+        eventService.preProcess(channel, templateId, map);
+    }
+
+    private Map<String, String> toStringMap(Map<String, Object> data) {
+        return data.entrySet()
+                .stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> entry.getValue() != null ? entry.getValue().toString() : ""
+                ));
     }
 
     private UUID getTemplateId(BobjoolServiceType category, String topic) {
