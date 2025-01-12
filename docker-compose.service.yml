@@ -1,0 +1,64 @@
+version: '3.7'
+
+services:
+  eureka:
+    image: griotold/waiting-reservation-eureka:1.0
+    container_name: eureka
+    ports:
+      - "19000:19000"
+
+  config:
+    image: griotold/waiting-reservation-config:1.0
+    container_name: config
+    ports:
+      - "19002:19002"
+    depends_on:
+      - eureka
+
+  gateway:
+    image: griotold/waiting-reservation-gateway:1.0
+    container_name: gateway
+    ports:
+      - "19005:19005"
+    depends_on:
+      - eureka
+
+  auth:
+    image: griotold/waiting-reservation-auth:1.0
+    container_name: auth
+    ports:
+      - "19010:19010"
+    depends_on:
+      - config
+
+  restaurant:
+    image: griotold/waiting-reservation-restaurant:1.0
+    container_name: restaurant
+    ports:
+      - "19020:19020"
+    depends_on:
+      - auth
+
+  queue:
+    image: griotold/waiting-reservation-queue:1.0
+    container_name: queue
+    ports:
+      - "19030:19030"
+    depends_on:
+      - restaurant
+
+  reservation:
+    image: griotold/waiting-reservation-reservation:1.0
+    container_name: reservation
+    ports:
+      - "19040:19040"
+    depends_on:
+      - queue
+
+  payment:
+    image: griotold/waiting-reservation-payment:1.0
+    container_name: payment
+    ports:
+      - "19060:19060"
+    depends_on:
+      - restaurant
