@@ -28,10 +28,10 @@ public class Notification extends BaseEntity {
     @Column(name = "contact")
     private String contact;
 
-    @Column(name = "json_data")
+    @Column(name = "json_data", length = 1024)
     private String jsonData;
 
-    @Column(name = "message", nullable = false)
+    @Column(name = "message", nullable = false, length = 1024)
     private String message;
 
     @Column(name = "status", nullable = false)

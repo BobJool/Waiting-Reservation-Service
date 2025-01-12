@@ -40,14 +40,16 @@ public class EventService {
      */
     @Transactional
     public void preProcess(NotificationChannel channel, UUID templateId, Map<String, String> data) {
-        this.replaceRestaurantDummyContact(data);
-        this.replaceUserDummyContact(data);
-//        TODO. 사용자, 가게 서버와 통신이 가능할때 Dummy 메소드 호출과 주석을 지워주세요.
-//        this.replaceRestaurantContact(data);
-//        this.replaceUserContact(data);
+//        TODO.사용자와 레스토랑 서버가 통신이 불가능할 경우 Dummy 메소드로 호출해 테스트 해주세요.
+//          this.replaceRestaurantDummyContact(data);
+//          this.replaceUserDummyContact(data);
+        this.replaceRestaurantContact(data);
+        this.replaceUserContact(data);
         log.info("Contact information replace completed.");
 
         Long userId = Long.valueOf(data.get(USER_ID.toSnakeCase()));
+//      TODO. SlackID를 직접 입력하여 테스트하는 경우 직접 초기화해주세요.
+//            String userSlack = "U0Q1W2E3R4";
         String userSlack = data.get(USER_SLACK.toSnakeCase());
         String userEmail = data.get(USER_EMAIL.toSnakeCase());
         String userContact = channel.equals(NotificationChannel.SLACK) ? userSlack : userEmail;
@@ -59,6 +61,7 @@ public class EventService {
         String messageTitle = templateConvertService.templateBinding(template.title(), data);
         messageTitle = templateConvertService.setTitleBold(messageTitle);
         log.info("Message setting complete with Template: {}", templateData);
+
 
         NotificationDto dto = new NotificationDto(
                 userId,
@@ -73,9 +76,10 @@ public class EventService {
 
         notificationService.saveNotification(template.id(), userId, templateData, messageTitle.concat(messageContent), userContact);
         log.info("Notification history saved complete");
-//        TODO. SlackID를 유저 서비스에서 받아올 수 있을때 주석을 지워주세요.
-//        notificationService.postNotification(dto);
-//        log.info("Notification posted successfully");
+
+        // TODO. Slack ID를 가져올 수 없을 경우 주석처리하고 테스트 해주세요.
+        notificationService.postNotification(dto);
+        log.info("Notification posted successfully");
     }
 
     private void replaceRestaurantDummyContact(Map<String, String> data) {

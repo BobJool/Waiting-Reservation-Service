@@ -31,7 +31,7 @@ public class NotificationListener {
             "queue.alerted",
             "queue.rush"
     })
-    public void handleQueueEvent(Map<String, Object> data,
+    public void handleQueueEvent(String data,
                                  @Header("kafka_receivedTopic") String topic) {
         Map<String, String> map = this.toStringMap(data);
         NotificationChannel channel = NotificationChannel.SLACK;
@@ -47,7 +47,7 @@ public class NotificationListener {
             "reservation.refund",
             "reservation.remind"
     })
-    public void handleReservationEvent(Map<String, Object> data,
+    public void handleReservationEvent(String data,
                                        @Header("kafka_receivedTopic") String topic) {
         Map<String, String> map = this.toStringMap(data);
         NotificationChannel channel = NotificationChannel.SLACK;
@@ -60,8 +60,14 @@ public class NotificationListener {
         eventService.preProcess(channel, templateId, map);
     }
 
-    private Map<String, String> toStringMap(Map<String, Object> data) {
-        return data.entrySet()
+    private Map<String, String> toStringMap(String data) {
+        log.info("received data: {}", data);
+        data = data.replace("\\", "");
+
+        Map<String, Object> map = EventSerializer.deserialize(data, Map.class);
+        log.info("deserialize data: {}", map);
+
+        return map.entrySet()
                 .stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
