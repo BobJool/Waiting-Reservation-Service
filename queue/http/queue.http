@@ -1,0 +1,43 @@
+### 대기열 등록(userId 증가시켜서 10명정도 등록해야 순번미루기를 해볼 수 있음)
+POST localhost:19030/api/v1/queues
+Content-Type: application/json
+#Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjdXN0b21lcjEiLCJ1c2VySWQiOiIxIiwicm9sZSI6IkNVU1RPTUVSIiwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaXNzIjoiYXV0aC1zZXJ2aWNlIiwiaWF0IjoxNzM2NjYzMTcxLCJleHAiOjE3MzY2NjM1MzF9.clzcfxYJT8E_vxgvNBcwrB0gLZwl1iQPWGA7Jlgv7Bo
+
+{
+  "user_id": 1,
+  "restaurant_id" : "eaee5a47-50fb-4cf3-9e38-802f492b1630",
+  "member": 4,
+  "type": "ONLINE",
+  "dining_option": "IN_STORE"
+}
+
+### 대기열조회(내순번+뒤로10명)
+GET localhost:19030/api/v1/queues/eaee5a47-50fb-4cf3-9e38-802f492b1630/1
+Content-Type: application/json
+#Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJvd25lcjIzNDUiLCJ1c2VySWQiOiI0Iiwicm9sZSI6Ik9XTkVSIiwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaXNzIjoiYXV0aC1zZXJ2aWNlIiwiaWF0IjoxNzM2NDIzNDAwLCJleHAiOjE3MzY0MjM3NjB9.962LvkRBVw0Am7AUgunNHM4z0Jp1ZfcbNIZkucPH1Fw
+
+### 순번미루기
+POST localhost:19030/api/v1/queues/eaee5a47-50fb-4cf3-9e38-802f492b1630/1?targetUserId=8
+Content-Type: application/json
+#Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjdXN0b21lcjEiLCJ1c2VySWQiOiIxIiwicm9sZSI6IkNVU1RPTUVSIiwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaXNzIjoiYXV0aC1zZXJ2aWNlIiwiaWF0IjoxNzM2NjYzMTcxLCJleHAiOjE3MzY2NjM1MzF9.clzcfxYJT8E_vxgvNBcwrB0gLZwl1iQPWGA7Jlgv7Bo
+
+### 식당체크인
+POST localhost:19030/api/v1/queues/eaee5a47-50fb-4cf3-9e38-802f492b1630/2/check-in
+Content-Type: application/json
+#Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjdXN0b21lcjEiLCJ1c2VySWQiOiIxIiwicm9sZSI6IkNVU1RPTUVSIiwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaXNzIjoiYXV0aC1zZXJ2aWNlIiwiaWF0IjoxNzM2NjYzMTcxLCJleHAiOjE3MzY2NjM1MzF9.clzcfxYJT8E_vxgvNBcwrB0gLZwl1iQPWGA7Jlgv7Bo
+
+### 줄서기 취소
+DELETE localhost:19030/api/v1/queues/eaee5a47-50fb-4cf3-9e38-802f492b1630/1
+Content-Type: application/json
+#Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjdXN0b21lcjEiLCJ1c2VySWQiOiIxIiwicm9sZSI6IkNVU1RPTUVSIiwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaXNzIjoiYXV0aC1zZXJ2aWNlIiwiaWF0IjoxNzM2NjYzMTcxLCJleHAiOjE3MzY2NjM1MzF9.clzcfxYJT8E_vxgvNBcwrB0gLZwl1iQPWGA7Jlgv7Bo
+
+### 식당 입장 알림
+POST localhost:19030/api/v1/queues/eaee5a47-50fb-4cf3-9e38-802f492b1630/3/alert
+Content-Type: application/json
+#Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjdXN0b21lcjEiLCJ1c2VySWQiOiIxIiwicm9sZSI6IkNVU1RPTUVSIiwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaXNzIjoiYXV0aC1zZXJ2aWNlIiwiaWF0IjoxNzM2NjYzMTcxLCJleHAiOjE3MzY2NjM1MzF9.clzcfxYJT8E_vxgvNBcwrB0gLZwl1iQPWGA7Jlgv7Bo
+
+### 식당 입장 호출(재촉) 알림
+POST localhost:19030/api/v1/queues/eaee5a47-50fb-4cf3-9e38-802f492b1630/3/rush
+Content-Type: application/json
+#Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjdXN0b21lcjEiLCJ1c2VySWQiOiIxIiwicm9sZSI6IkNVU1RPTUVSIiwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaXNzIjoiYXV0aC1zZXJ2aWNlIiwiaWF0IjoxNzM2NjYzMTcxLCJleHAiOjE3MzY2NjM1MzF9.clzcfxYJT8E_vxgvNBcwrB0gLZwl1iQPWGA7Jlgv7Bo
+

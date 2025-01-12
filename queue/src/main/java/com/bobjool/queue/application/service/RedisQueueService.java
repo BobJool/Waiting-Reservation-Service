@@ -375,7 +375,7 @@ public class RedisQueueService {
 		redisTemplate.opsForHash().put(userQueueDataKey, "delay_count", delayCount + 1);
 	}
 
-	private Double getUserScore(UUID restaurantId, Long userId) {
+	public Double getUserScore(UUID restaurantId, Long userId) {
 		String waitingListKey = RedisKeyUtil.getWaitingListKey(restaurantId);
 		Double score = redisTemplate.opsForZSet().score(waitingListKey, String.valueOf(userId));
 		if (score == null) {

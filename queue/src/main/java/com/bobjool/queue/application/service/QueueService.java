@@ -88,8 +88,10 @@ public class QueueService {
 	}
 
 	public void registerQueue(QueueRegisterDto dto) {
+	// public QueueRegisteredEvent registerQueue(QueueRegisterDto dto) {
 		QueueRegisteredEvent event = redisQueueService.registerQueue(dto);
 		queueKafkaProducer.publishQueueRegistered(event);
+		// return event;
 	}
 
 	public QueueStatusResDto getNextTenUsersWithOrder(UUID restaurantId, Long userId) {

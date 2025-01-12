@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.bobjool.common.presentation.ApiResponse;
 import com.bobjool.common.presentation.SuccessCode;
 import com.bobjool.queue.application.dto.QueueStatusResDto;
+import com.bobjool.queue.application.dto.kafka.QueueRegisteredEvent;
 import com.bobjool.queue.application.dto.redis.QueueAlertDto;
 import com.bobjool.queue.application.dto.redis.QueueCancelDto;
 import com.bobjool.queue.application.dto.redis.QueueCheckInDto;
@@ -39,6 +40,12 @@ public class QueueController {
 		return ApiResponse.success(SuccessCode.SUCCESS_ACCEPTED,
 			queueService.handleQueue(request.restaurantId(), request.userId(), request.toServiceDto(), "register"));
 	}
+	// @PostMapping("/queues")
+	// public ResponseEntity<ApiResponse<QueueRegisteredEvent>> registerQueue(
+	// 	@Valid @RequestBody QueueRegisterReqDto request) {
+	// 	return ApiResponse.success(SuccessCode.SUCCESS_ACCEPTED,
+	// 		queueService.registerQueue(request.toServiceDto()));
+	// }
 
 	@GetMapping("/queues/{restaurantId}/{userId}")
 	public ResponseEntity<ApiResponse<QueueStatusResDto>> getNextTenUsersWithOrder(
