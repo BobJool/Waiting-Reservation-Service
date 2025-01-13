@@ -1,4 +1,4 @@
-### 템플릿 생성(웨이팅 등록 알림)
+### 템플릿 생성
 POST localhost:19050/api/v1/notifications/templates
 Content-Type: application/json
 
@@ -9,19 +9,6 @@ Content-Type: application/json
   "title": "밥줄에 웨이팅이 등록됐습니다!",
   "template" : "${user_name}님, ${restaurant_name} 웨이팅이 등록되었습니다!\n\n웨이팅 정보\n인원: ${member}명\n순서: ${rank}번째\n번호: ${position}"
 }
-
-### 템플릿 생성(예약 완료 알림)
-POST localhost:19050/api/v1/notifications/templates
-Content-Type: application/json
-
-{
-  "service_type": "QUEUE",
-  "channel": "SLACK",
-  "type": "REGISTERED",
-  "title": "{restaurant_name} 예약이 완료됐습니다!",
-  "template" : "${user_name}님! {restaurant_name} 예약 내역을 확인해주세요.\n\n날짜: ${date}\n시간: ${time}\n인원: ${count}명\n전화번호: ${restaurant_number}\n\n* 예약해주셔서 감사합니다.\n* 예약시간 준수 부탁드리며, 예약시간 10분전까지 입장 완료 부탁드립니다."
-}
-
 
 ### 템플릿 조회
 GET localhost:19050/api/v1/notifications/templates
