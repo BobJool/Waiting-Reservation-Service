@@ -62,6 +62,7 @@ public class NotificationListener {
 
     private Map<String, String> toStringMap(String data) {
         log.info("received data: {}", data);
+        data = data.substring(1, data.length() - 1);
         data = data.replace("\\", "");
 
         Map<String, Object> map = EventSerializer.deserialize(data, Map.class);
@@ -71,7 +72,7 @@ public class NotificationListener {
                 .stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
-                        entry -> entry.getValue() != null ? entry.getValue().toString() : ""
+                        entry -> String.valueOf(entry.getValue())
                 ));
     }
 
