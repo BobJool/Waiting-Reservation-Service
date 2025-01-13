@@ -5,8 +5,8 @@ import com.bobjool.domain.entity.User;
 public record UserContactResDto(
         String name,
         String email,
-        String slackId,
-        String phoneNumber
+        String slack,
+        String number
 ) {
     public static UserContactResDto from(User user) {
         return new UserContactResDto(

@@ -93,3 +93,24 @@ Content-Type: application/json
 Authorization: {{access_token}} //master 권한
 
 true
+
+### 사용자 연락처 조회
+GET localhost:19005/api/v1/users/{{first_user_id}}/contact
+Content-Type: application/json
+Authorization: {{access_token}}
+
+### 로그아웃
+POST localhost:19005/api/v1/auths/sign-out
+Content-Type: application/json
+Authorization: {{access_token}}
+
+### 로그아웃 후 권한이 필요한 사용자 상세 정보 조회 api 호출
+GET localhost:19005/api/v1/users/{{first_user_id}}
+Content-Type: application/json
+Authorization: {{access_token}}
+
+> {%
+    client.test("로그아웃 후 권한이 필요한 API는 403이어야 함.", function() {
+        client.assert(response.status === 403, "Expected status code 403 but got " + response.status);
+    });
+%}
