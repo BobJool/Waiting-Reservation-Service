@@ -5,7 +5,6 @@ import com.bobjool.common.exception.ErrorCode;
 import com.bobjool.restaurant.application.dto.restaurant.*;
 import com.bobjool.restaurant.domain.entity.restaurant.Restaurant;
 import com.bobjool.restaurant.domain.repository.RestaurantRepository;
-import com.bobjool.restaurant.presentation.dto.restaurant.RestaurantCheckValidReqDto;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -239,10 +238,7 @@ public class RestaurantService {
   public boolean restaurant_owner_check(RestaurantCheckOwnerDto restaurantCheckOwnerDto) {
       Restaurant restaurant = restaurantRepository.findById(restaurantCheckOwnerDto.restaurantId())
               .orElseThrow(() -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND));
-      if(!restaurant.getUserId().equals(restaurantCheckOwnerDto.userId())) {
-        return false;
-      }
-      return true;
+      return restaurant.getUserId().equals(restaurantCheckOwnerDto.userId());
   }
 
   //Feign 받아온 RestaurantId의 isQueue, isDeleted 확인

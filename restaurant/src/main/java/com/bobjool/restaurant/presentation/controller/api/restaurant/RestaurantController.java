@@ -1,7 +1,5 @@
-package com.bobjool.restaurant.presentation.controller.restaurant;
+package com.bobjool.restaurant.presentation.controller.api.restaurant;
 
-import com.bobjool.common.exception.BobJoolException;
-import com.bobjool.common.exception.ErrorCode;
 import com.bobjool.restaurant.application.dto.restaurant.*;
 import com.bobjool.restaurant.infrastructure.aspect.RequireRole;
 import com.bobjool.common.presentation.ApiResponse;
@@ -171,7 +169,7 @@ public class RestaurantController {
       @SortDefault(sort = "createdAt", direction = Direction.DESC)
       Pageable pageable)
   {
-    Page<RestaurantForCustomerResDto> resPage = restaurantService.searchByDetail( name, region, addressDetail, description, pageable);
+    Page<RestaurantForCustomerResDto> resPage = restaurantService.searchByDetail(name, region, addressDetail, description, pageable);
     return ApiResponse.success(SuccessCode.SUCCESS_ACCEPTED, PageResponse.of(resPage));
   }
 

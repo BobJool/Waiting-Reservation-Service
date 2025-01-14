@@ -1,6 +1,5 @@
 package com.bobjool.restaurant.presentation.dto.restaurant;
 
-import com.bobjool.restaurant.application.dto.restaurant.RestaurantCheckOwnerDto;
 import com.bobjool.restaurant.application.dto.restaurant.RestaurantCheckValidDto;
 import jakarta.validation.constraints.NotNull;
 
