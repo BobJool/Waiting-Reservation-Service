@@ -2,16 +2,14 @@ package com.bobjool.restaurant.presentation.controller.restaurant;
 
 import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
+import com.bobjool.restaurant.application.dto.restaurant.*;
 import com.bobjool.restaurant.infrastructure.aspect.RequireRole;
 import com.bobjool.common.presentation.ApiResponse;
 import com.bobjool.common.presentation.PageResponse;
 import com.bobjool.common.presentation.SuccessCode;
-import com.bobjool.restaurant.application.dto.restaurant.RestaurantContactResDto;
-import com.bobjool.restaurant.application.dto.restaurant.RestaurantForCustomerResDto;
-import com.bobjool.restaurant.application.dto.restaurant.RestaurantForMasterResDto;
-import com.bobjool.restaurant.application.dto.restaurant.RestaurantResDto;
 import com.bobjool.restaurant.application.service.restaurant.RestaurantService;
 import com.bobjool.restaurant.presentation.dto.restaurant.RestaurantCheckOwnerReqDto;
+import com.bobjool.restaurant.presentation.dto.restaurant.RestaurantCheckValidReqDto;
 import com.bobjool.restaurant.presentation.dto.restaurant.RestaurantCreateReqDto;
 import com.bobjool.restaurant.presentation.dto.restaurant.RestaurantUpdateReqDto;
 import jakarta.validation.Valid;
@@ -190,13 +188,21 @@ public class RestaurantController {
   }
 
   // feign -> QueueService 레스토랑 ID, 오너 ID를 받아 boolean 값 반환
-  @PostMapping("/queue/check")
+  @PostMapping("/queue/owner")
   public boolean restaurant_owner_check(
           @Valid @RequestBody RestaurantCheckOwnerReqDto restaurantCheckOwnerReqDto) {
     log.info("Feign.RestaurantCheckOwnerReqDto={}", restaurantCheckOwnerReqDto);
-    boolean response = restaurantService.restaurant_owner_check(restaurantCheckOwnerReqDto.toServiceDto());
+    return restaurantService.restaurant_owner_check(restaurantCheckOwnerReqDto.toServiceDto());
+  }
 
-    return response;
+  // feign -> QueueService 레스토랑 ID를 받아   isQueue/ isDeleted 반환
+  @PostMapping("/queue/valid")
+  public ResponseEntity<ApiResponse<RestaurantValidResDto>> restaurant_valid_check(
+          @Valid @RequestBody RestaurantCheckValidReqDto restaurantCheckValidReqDto) {
+    log.info("Feign.RestaurantId={}", restaurantCheckValidReqDto);
+    RestaurantValidResDto response = restaurantService.restaurant_valid_check(restaurantCheckValidReqDto.toServiceDto());
+
+    return ApiResponse.success(SuccessCode.SUCCESS_ACCEPTED, response);
   }
 
 

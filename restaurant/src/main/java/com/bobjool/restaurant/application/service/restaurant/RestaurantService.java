@@ -5,6 +5,7 @@ import com.bobjool.common.exception.ErrorCode;
 import com.bobjool.restaurant.application.dto.restaurant.*;
 import com.bobjool.restaurant.domain.entity.restaurant.Restaurant;
 import com.bobjool.restaurant.domain.repository.RestaurantRepository;
+import com.bobjool.restaurant.presentation.dto.restaurant.RestaurantCheckValidReqDto;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -242,5 +243,14 @@ public class RestaurantService {
         return false;
       }
       return true;
+  }
+
+  //Feign 받아온 RestaurantId의 isQueue, isDeleted 확인
+  public RestaurantValidResDto restaurant_valid_check(RestaurantCheckValidDto restaurantCheckValidDto) {
+
+      Restaurant restaurant = restaurantRepository.findById(restaurantCheckValidDto.restaurantId())
+              .orElseThrow(() -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND));
+
+    return RestaurantValidResDto.from(restaurant);
   }
 }
