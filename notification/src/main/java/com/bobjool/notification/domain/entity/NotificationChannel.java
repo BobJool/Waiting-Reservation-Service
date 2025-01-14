@@ -18,7 +18,7 @@ public enum NotificationChannel {
         return switch (request.toUpperCase()){
             case "SLACK" -> SLACK;
             case "EMAIL" -> EMAIL;
-            default -> throw new BobJoolException(ErrorCode.UNSUPPORTED_CHANNEL_TYPE);
+            default -> throw new BobJoolException(ErrorCode.UNSUPPORTED_CHANNEL);
         };
     }
 }

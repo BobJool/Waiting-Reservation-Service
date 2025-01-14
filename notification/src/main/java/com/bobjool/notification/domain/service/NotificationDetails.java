@@ -1,5 +1,7 @@
 package com.bobjool.notification.domain.service;
 
+import com.bobjool.common.exception.BobJoolException;
+import com.bobjool.common.exception.ErrorCode;
 import com.bobjool.notification.domain.entity.BobjoolServiceType;
 import com.bobjool.notification.domain.entity.NotificationChannel;
 import com.bobjool.notification.domain.entity.NotificationType;
@@ -46,10 +48,7 @@ public class NotificationDetails {
             case EMAIL -> {
                 return getUserEmail();
             }
-            default -> {
-                // TODO. 예외처리 - 지원하지 않는 알림 채널입니다.
-                throw new IllegalArgumentException("Unsupported channel: " + messageChannel);
-            }
+            default -> throw new BobJoolException(ErrorCode.UNSUPPORTED_NOTIFICATION);
         }
     }
 
@@ -63,16 +62,14 @@ public class NotificationDetails {
 
     public Long getUserId() {
         if (!metaData.containsKey(USER_ID.toCamelCase())) {
-            // TODO. 예외처리 -- USER_ID 미포함
-            return null;
+            throw new BobJoolException(ErrorCode.MISSING_USER_ID_IN_KAFKA_MESSAGE);
         }
         return Long.valueOf(metaData.get(USER_ID.toCamelCase()));
     }
 
     public UUID getRestaurantId() {
         if (!metaData.containsKey(RESTAURANT_ID.toCamelCase())) {
-            // TODO. 예외처리 - 레스토랑 ID 미포함
-            return null;
+            throw new BobJoolException(ErrorCode.MISSING_RESTAURANT_ID_IN_KAFKA_MESSAGE);
         }
         return UUID.fromString(metaData.get(RESTAURANT_ID.toCamelCase()));
     }
@@ -100,8 +97,7 @@ public class NotificationDetails {
     public void applyDateFormat() {
         final String STRING_DATE = "date";
         if (!metaData.containsKey(STRING_DATE)) {
-            // TODO. 예외처리 - DATE 미포함
-            log.error("date is not saved.");
+            throw new BobJoolException(ErrorCode.MISSING_DATE_IN_KAFKA_MESSAGE);
         }
 
         LocalDate localDate = LocalDate.parse(metaData.get(STRING_DATE));
@@ -115,8 +111,7 @@ public class NotificationDetails {
         final String STRING_TIME = "time";
 
         if (!metaData.containsKey(STRING_TIME)) {
-            // TODO. 예외처리 TIME 미포함 - 메시지 데이터에서 TIME 정보를 찾을 수 없습니다.
-            log.error("time is not saved.");
+            throw new BobJoolException(ErrorCode.MISSING_TIME_IN_KAFKA_MESSAGE);
         }
 
         LocalTime localTime = LocalTime.parse(metaData.get(STRING_TIME));

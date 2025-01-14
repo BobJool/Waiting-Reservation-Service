@@ -1,5 +1,7 @@
 package com.bobjool.notification.application.factory;
 
+import com.bobjool.common.exception.BobJoolException;
+import com.bobjool.common.exception.ErrorCode;
 import com.bobjool.notification.domain.service.NotificationDetails;
 import com.bobjool.notification.domain.entity.BobjoolServiceType;
 import com.bobjool.notification.domain.entity.NotificationChannel;
@@ -36,9 +38,8 @@ public class NotificationDetailsFactory {
             case RESERVATION -> templateMappingConfig.getReservation().get(action.name().toLowerCase());
         };
         if (templateId == null || templateId.isEmpty()) {
-            // TODO. 에러처리 - 템플릿 ID 비어있다.
-            throw new IllegalArgumentException("Template ID is missing for serviceType: " + serviceType + ", action: " + action);
-        }
+            throw new BobJoolException(ErrorCode.TEMPLATE_ID_NOT_FOUND);
+       }
         return UUID.fromString(templateId);
     }
 
