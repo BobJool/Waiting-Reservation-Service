@@ -1,5 +1,7 @@
 package com.bobjool.notification.application.service;
 
+import com.bobjool.common.exception.BobJoolException;
+import com.bobjool.common.exception.ErrorCode;
 import com.bobjool.notification.application.client.RestaurantClient;
 import com.bobjool.notification.application.client.UserClient;
 import com.bobjool.notification.application.dto.NotificationDto;
@@ -34,41 +36,43 @@ public class EventService {
     }
 
     private void loadContacts(NotificationDetails details) {
-        try {
-            loadRestaurantContact(details);
-            loadUserContact(details);
-        } catch (FeignException e) {
-            // TODO. 예외처리 - Feign 통신 실패 - 연락처 못 불러옴
-            log.error("Failed to load contacts from details", e);
-        }
+        loadRestaurantContact(details);
+        loadUserContact(details);
 
         log.info("Contact information replace completed.");
     }
 
     private void loadRestaurantContact(NotificationDetails details) {
-        RestaurantContactDto restaurantContactDto = restaurantClient.getRestaurantContact(
-                details.getRestaurantId()
-        ).data();
-        log.info("Restaurant contact load completed.");
-        details.updateRestaurantContact(
-                restaurantContactDto.name(),
-                restaurantContactDto.address(),
-                restaurantContactDto.number()
-        );
-
+        try {
+            RestaurantContactDto restaurantContactDto = restaurantClient.getRestaurantContact(
+                    details.getRestaurantId()
+            ).data();
+            log.info("Restaurant contact load completed.");
+            details.updateRestaurantContact(
+                    restaurantContactDto.name(),
+                    restaurantContactDto.address(),
+                    restaurantContactDto.number()
+            );
+        } catch (FeignException e) {
+            throw new BobJoolException(ErrorCode.FAILED_TO_LOAD_RESTAURANT_CONTACT);
+        }
     }
 
     private void loadUserContact(NotificationDetails details) {
-        UserContactDto userContactDto = userClient.getUserContact(
-                details.getUserId()
-        ).data();
-        log.info("User contact load completed.");
+        try {
+            UserContactDto userContactDto = userClient.getUserContact(
+                    details.getUserId()
+            ).data();
+            log.info("User contact load completed.");
 
-        details.updateUserContact(
-                userContactDto.name(),
-                userContactDto.slack(),
-                userContactDto.email()
-        );
+            details.updateUserContact(
+                    userContactDto.name(),
+                    userContactDto.slack(),
+                    userContactDto.email()
+            );
+        } catch (FeignException e) {
+            throw new BobJoolException(ErrorCode.FAILED_TO_LOAD_USER_CONTACT);
+        }
     }
 
     @Transactional(readOnly = true)

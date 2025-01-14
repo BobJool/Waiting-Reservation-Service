@@ -98,7 +98,7 @@ public enum ErrorCode {
     INVALID_NOTIFICATION_STATE(HttpStatus.BAD_REQUEST, "유효하지 않은 알림 상태입니다."),
     UNSUPPORTED_TEMPLATE_VARIABLE(HttpStatus.BAD_REQUEST, "지원하지 않는 템플릿 변수입니다."),
     TEMPLATE_ID_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "템플릿 ID를 불러올 수 없습니다."),
-    FAILED_TO_LOAD_CUSTOMER_CONTACT(HttpStatus.SERVICE_UNAVAILABLE, "고객의 연락처를 불러오지 못했습니다."),
+    FAILED_TO_LOAD_USER_CONTACT(HttpStatus.SERVICE_UNAVAILABLE, "유저의 연락처를 불러오지 못했습니다."),
     FAILED_TO_LOAD_RESTAURANT_CONTACT(HttpStatus.SERVICE_UNAVAILABLE, "레스토랑의 연락처를 불러오지 못했습니다."),
     MISSING_USER_ID_IN_KAFKA_MESSAGE(HttpStatus.BAD_REQUEST, "Kafka 메시지 데이터에 유저 ID가 누락되었습니다."),
     MISSING_RESTAURANT_ID_IN_KAFKA_MESSAGE(HttpStatus.BAD_REQUEST, "Kafka 메시지 데이터에 레스토랑 ID가 누락되었습니다."),
