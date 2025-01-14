@@ -1,4 +1,4 @@
-package com.bobjool.restaurant.presentation.controller.restaurantSchedule;
+package com.bobjool.restaurant.presentation.controller.api.restaurantSchedule;
 
 import com.bobjool.common.presentation.ApiResponse;
 import com.bobjool.common.presentation.PageResponse;
@@ -165,5 +165,6 @@ public class RestaurantScheduleController {
         = scheduleService.readForUserReserve(userId, pageable);
     return ApiResponse.success(SuccessCode.SUCCESS, PageResponse.of(resPage));
   }
+
 
 }

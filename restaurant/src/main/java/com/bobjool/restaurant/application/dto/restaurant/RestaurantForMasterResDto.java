@@ -3,14 +3,12 @@ package com.bobjool.restaurant.application.dto.restaurant;
 import com.bobjool.restaurant.domain.entity.restaurant.Restaurant;
 import com.bobjool.restaurant.domain.entity.restaurant.RestaurantCategory;
 import com.bobjool.restaurant.domain.entity.restaurant.RestaurantRegion;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.UUID;
 
 public record RestaurantForMasterResDto(
-    UUID RestaurantId,
+    UUID restaurantId,
     Long userId,
     RestaurantCategory restaurantCategory,
     String restaurantPhone,

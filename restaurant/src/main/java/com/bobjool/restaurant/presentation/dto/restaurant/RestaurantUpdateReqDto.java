@@ -3,11 +3,8 @@ package com.bobjool.restaurant.presentation.dto.restaurant;
 import com.bobjool.restaurant.application.dto.restaurant.RestaurantUpdateDto;
 import com.bobjool.restaurant.domain.entity.restaurant.RestaurantCategory;
 import com.bobjool.restaurant.domain.entity.restaurant.RestaurantRegion;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.time.LocalTime;
 
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record RestaurantUpdateReqDto(
 
   RestaurantCategory restaurantCategory,

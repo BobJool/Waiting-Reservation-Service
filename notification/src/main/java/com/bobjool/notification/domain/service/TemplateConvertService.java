@@ -45,8 +45,12 @@ public class TemplateConvertService {
     }
 
     public String templateBinding(String template, Map<String, String> variables) {
+        if (variables == null || variables.isEmpty()) {
+            log.warn("variables is null or empty");
+            return template;
+        }
         for (Map.Entry<String, String> variable : variables.entrySet()) {
-            template = template.replace("${"+variable.getKey()+"}", variable.getValue());
+            template = template.replace("${"+variable.getKey()+"}", variable.getValue() == null ? "" : variable.getValue());
         }
         return template;
     }
