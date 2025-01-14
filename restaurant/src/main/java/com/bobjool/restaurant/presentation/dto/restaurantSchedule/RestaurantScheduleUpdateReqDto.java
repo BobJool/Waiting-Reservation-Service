@@ -7,8 +7,6 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-
 public record RestaurantScheduleUpdateReqDto(
 
   @NotNull(message = "예약 날짜는 필수값 입니다.")

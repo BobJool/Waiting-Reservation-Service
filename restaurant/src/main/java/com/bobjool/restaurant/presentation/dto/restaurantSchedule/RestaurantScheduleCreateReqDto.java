@@ -9,7 +9,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.UUID;
 
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record RestaurantScheduleCreateReqDto(
     @NotNull(message = "레스트랑 ID는 필수값 입니다.")
     UUID restaurantId,

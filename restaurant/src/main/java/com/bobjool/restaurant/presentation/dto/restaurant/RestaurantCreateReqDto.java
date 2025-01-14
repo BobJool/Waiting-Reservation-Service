@@ -9,8 +9,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import java.time.LocalTime;
 
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-
 public record RestaurantCreateReqDto (
 
       @NotNull(message = "유저 ID 는 필수 입력값입니다.")

@@ -6,7 +6,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.UUID;
 
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record RestaurantScheduleCreateDto(
     UUID restaurantId,
     int tableNumber,
