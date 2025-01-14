@@ -1,5 +1,7 @@
 package com.bobjool.restaurant.presentation.controller.restaurant;
 
+import com.bobjool.common.exception.BobJoolException;
+import com.bobjool.common.exception.ErrorCode;
 import com.bobjool.restaurant.infrastructure.aspect.RequireRole;
 import com.bobjool.common.presentation.ApiResponse;
 import com.bobjool.common.presentation.PageResponse;
@@ -9,6 +11,7 @@ import com.bobjool.restaurant.application.dto.restaurant.RestaurantForCustomerRe
 import com.bobjool.restaurant.application.dto.restaurant.RestaurantForMasterResDto;
 import com.bobjool.restaurant.application.dto.restaurant.RestaurantResDto;
 import com.bobjool.restaurant.application.service.restaurant.RestaurantService;
+import com.bobjool.restaurant.presentation.dto.restaurant.RestaurantCheckOwnerReqDto;
 import com.bobjool.restaurant.presentation.dto.restaurant.RestaurantCreateReqDto;
 import com.bobjool.restaurant.presentation.dto.restaurant.RestaurantUpdateReqDto;
 import jakarta.validation.Valid;
@@ -185,6 +188,18 @@ public class RestaurantController {
     Page<RestaurantForCustomerResDto> resPage = restaurantService.searchByKeyWord(keyword, pageable);
     return ApiResponse.success(SuccessCode.SUCCESS_ACCEPTED, PageResponse.of(resPage));
   }
+
+  // feign -> QueueService 레스토랑 ID, 오너 ID를 받아 boolean 값 반환
+  @PostMapping("/queue/check")
+  public boolean restaurant_owner_check(
+          @Valid @RequestBody RestaurantCheckOwnerReqDto restaurantCheckOwnerReqDto) {
+    log.info("Feign.RestaurantCheckOwnerReqDto={}", restaurantCheckOwnerReqDto);
+    boolean response = restaurantService.restaurant_owner_check(restaurantCheckOwnerReqDto.toServiceDto());
+
+    return response;
+  }
+
+
 
 
 }
