@@ -3,80 +3,26 @@ package com.bobjool.notification.domain.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Slf4j
 @Service
 public class TemplateConvertService {
-    /**
-     * 문자열 날짜의 포맷을 변경합니다.
-     * @param date 2025-01-03
-     * @return 2025년 1월 3일
-     */
-    public String formatLocalDate(String date) {
-        LocalDate localDate = LocalDate.parse(date);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일", Locale.KOREAN);
-        return localDate.format(formatter);
-    }
-
-    /**
-     * 문자열 시간의 포맷을 변경합니다.
-     * @param time 20:45
-     * @return 오후 8시 45분
-     */
-    public String formatLocalTime(String time) {
-        LocalTime localTime = LocalTime.parse(time);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("a hh시 mm분", Locale.KOREAN);
-        return localTime.format(formatter);
-    }
-
-    /**
-     * 천원 단위에 쉼표를 추가합니다.
-     * @param money 40000
-     * @return 40,000
-     */
-    public String formatMoney(Integer money){
-        return String.format("$%, d", money);
-    }
-
     public String templateBinding(String template, Map<String, String> variables) {
         if (variables == null || variables.isEmpty()) {
             log.warn("variables is null or empty");
             return template;
         }
         for (Map.Entry<String, String> variable : variables.entrySet()) {
-            template = template.replace("${"+variable.getKey()+"}", variable.getValue() == null ? "" : variable.getValue());
+            template = template.replace("${" + variable.getKey() + "}", variable.getValue() == null ? "" : variable.getValue());
         }
         return template;
     }
-    public String setTitleBold(String title) {
-        return new StringBuilder()
-                .append("*")
-                .append(title)
-                .append("*")
-                .append("\n")
-                .toString();
-    }
 
-    public String getMapToJsonString(Map<String, String> map) {
-        StringBuilder jsonBuilder = new StringBuilder();
-        jsonBuilder.append("{");
-        for (Map.Entry<String, String> entry : map.entrySet()) {
-            jsonBuilder.append("\"");
-            jsonBuilder.append(entry.getKey());
-            jsonBuilder.append("\": \"");
-            jsonBuilder.append(entry.getValue());
-            jsonBuilder.append("\",");
-        }
-        jsonBuilder.deleteCharAt(jsonBuilder.length() - 1);
-        jsonBuilder.append("}");
-        return jsonBuilder.toString();
-    }
     public String getVariablesToJson(String serializeTemplate) {
         String variables = this.toJsonString(
                 this.extractVariables(
