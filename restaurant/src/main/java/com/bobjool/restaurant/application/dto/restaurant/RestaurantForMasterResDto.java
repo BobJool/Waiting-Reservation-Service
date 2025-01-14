@@ -10,7 +10,7 @@ import java.time.LocalTime;
 import java.util.UUID;
 
 public record RestaurantForMasterResDto(
-    UUID RestaurantId,
+    UUID restaurantId,
     Long userId,
     RestaurantCategory restaurantCategory,
     String restaurantPhone,

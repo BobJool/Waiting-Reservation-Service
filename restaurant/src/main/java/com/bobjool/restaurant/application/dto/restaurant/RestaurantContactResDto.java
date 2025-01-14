@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 public record RestaurantContactResDto(
     String name,
     String address,
-    String phone
+    String number // Feign -> Noti Service
 ) {
   public static RestaurantContactResDto from(Restaurant restaurant) {
     return new RestaurantContactResDto(

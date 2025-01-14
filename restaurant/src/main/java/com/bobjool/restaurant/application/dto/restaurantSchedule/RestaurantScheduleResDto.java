@@ -9,7 +9,7 @@ import java.util.UUID;
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record RestaurantScheduleResDto(
-    UUID RestaurantScheduleId,
+    UUID restaurantScheduleId,
     Long userId,
     UUID restaurantId,
     int tableNumber,
