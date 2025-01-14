@@ -18,9 +18,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class EventService {
-    private final NotificationService notificationService;
+    private final HistoryService historyService;
     private final TemplateService templateService;
     private final TemplateConvertService templateConvertService;
+    private final MessagingService messagingService;
 
     private final UserClient userClient;
     private final RestaurantClient restaurantClient;
@@ -82,13 +83,13 @@ public class EventService {
 
     private void pushNotification(NotificationDetails details) {
         NotificationDto dto = NotificationDto.from(details);
-        notificationService.postNotification(dto);
+        messagingService.postNotification(dto);
         log.info("Notification posted successfully");
     }
 
     @Transactional
     protected void saveHistory(NotificationDetails details) {
-        notificationService.saveNotification(
+        historyService.saveNotification(
                 details.getTemplateId(),
                 details.getUserId(),
                 details.getJsonMetaData(),
