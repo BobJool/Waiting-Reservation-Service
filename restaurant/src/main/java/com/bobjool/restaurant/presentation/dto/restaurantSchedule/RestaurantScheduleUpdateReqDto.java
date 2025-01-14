@@ -1,13 +1,9 @@
 package com.bobjool.restaurant.presentation.dto.restaurantSchedule;
 
 import com.bobjool.restaurant.application.dto.restaurantSchedule.RestaurantScheduleUpdateDto;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalTime;
-
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 
 public record RestaurantScheduleUpdateReqDto(
 

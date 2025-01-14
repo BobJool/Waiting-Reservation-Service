@@ -2,12 +2,7 @@ package com.bobjool.restaurant.application.service.restaurant;
 
 import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
-import com.bobjool.restaurant.application.dto.restaurant.RestaurantContactResDto;
-import com.bobjool.restaurant.application.dto.restaurant.RestaurantCreateDto;
-import com.bobjool.restaurant.application.dto.restaurant.RestaurantForCustomerResDto;
-import com.bobjool.restaurant.application.dto.restaurant.RestaurantForMasterResDto;
-import com.bobjool.restaurant.application.dto.restaurant.RestaurantResDto;
-import com.bobjool.restaurant.application.dto.restaurant.RestaurantUpdateDto;
+import com.bobjool.restaurant.application.dto.restaurant.*;
 import com.bobjool.restaurant.domain.entity.restaurant.Restaurant;
 import com.bobjool.restaurant.domain.repository.RestaurantRepository;
 import jakarta.validation.Valid;
@@ -239,6 +234,19 @@ public class RestaurantService {
     }
   }
 
+  //Feign 받아온 Onwer의 UserId가 restaurant을 소유했는지 확인
+  public boolean restaurant_owner_check(RestaurantCheckOwnerDto restaurantCheckOwnerDto) {
+      Restaurant restaurant = restaurantRepository.findById(restaurantCheckOwnerDto.restaurantId())
+              .orElseThrow(() -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND));
+      return restaurant.getUserId().equals(restaurantCheckOwnerDto.userId());
+  }
 
+  //Feign 받아온 RestaurantId의 isQueue, isDeleted 확인
+  public RestaurantValidResDto restaurant_valid_check(RestaurantCheckValidDto restaurantCheckValidDto) {
 
+      Restaurant restaurant = restaurantRepository.findById(restaurantCheckValidDto.restaurantId())
+              .orElseThrow(() -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND));
+
+    return RestaurantValidResDto.from(restaurant);
+  }
 }

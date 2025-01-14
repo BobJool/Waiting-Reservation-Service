@@ -44,6 +44,7 @@ public enum ErrorCode {
     NO_SEARCH_RESULTS(HttpStatus.BAD_REQUEST, "검색 결과가 없습니다."),
     DUPLICATE_UPDATE(HttpStatus.BAD_REQUEST, "동일한 값으로 업데이트할 수 없습니다."),
     NOT_KEYWORD(HttpStatus.BAD_REQUEST, "keyword를 입력되지 않았습니다."),
+    NOT_OWNER(HttpStatus.FOUND, "레스토랑 소유자가 이닙니다."),
 
     // 레스토랑 스케쥴
     CAPACITY_OVERFLOW(HttpStatus.BAD_REQUEST,"요청한 인원수가 테이블 최대 인원수를 초과합니다."),
