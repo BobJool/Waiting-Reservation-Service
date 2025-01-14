@@ -1,0 +1,62 @@
+server:
+  port: 19050
+
+spring:
+  application:
+    name: notification-service
+  config:
+      import: classpath:config-repo/application-key.yml
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/restaurant_db
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      format-sql: true
+      use_sql_comments: true
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+  kafka:
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      group-id: ${spring.application.name}-group
+    bootstrap-servers: ${KAFKA_SERVER_URL}
+
+notification:
+  template-mapping:
+    queue:
+      registered: b9f8fa53-9833-4dc4-bc0b-751b6076f22e
+      delayed: 2fb22bef-d05d-499b-b9d0-45f0959091fd
+      remind: d6052953-f248-4965-abf8-187e123dd987
+      alerted: d6356373-8b0a-4458-9544-1cf9d44050ab
+      rush: e3710977-ac20-45d2-bbc7-0b8465b810d5
+      canceled: 70ed9d56-ad2c-4d6b-9f45-3864a860f6e4
+    reservation:
+      completed: f20d1e25-1a17-40e9-a175-de2a7366df16
+      failed: 532db509-2a99-4b24-9f85-9784b91fbee0
+      refund: 96663891-8bcd-4d63-a784-3863cfe549ba
+      remind: aa3c8656-80e1-4c47-9a80-4da8e5a6f04f
+
+token:
+  slack:
+    oauth: ${SLACK_OAUTH_TOKEN}
+
+management:
+  zipkin:
+    tracing:
+      endpoint: "http://localhost:9411/api/v2/spans"
+  tracing:
+    sampling:
+      probability: 1.0
+  endpoints:
+    web:
+      exposure:
+        include: "*"

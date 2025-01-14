@@ -29,6 +29,10 @@ subprojects {
 	}
 
 	dependencies {
+		//config server 사용
+		implementation 'org.springframework.cloud:spring-cloud-starter-config'
+		implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
 		implementation 'org.springframework.boot:spring-boot-starter-web'
 		testImplementation 'org.springframework.boot:spring-boot-starter-test'
 		compileOnly 'org.projectlombok:lombok'
