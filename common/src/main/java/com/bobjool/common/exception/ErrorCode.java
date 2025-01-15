@@ -92,6 +92,7 @@ public enum ErrorCode {
     // 알림
     INVALID_SLACK_EMAIL(HttpStatus.BAD_REQUEST, "유효하지 않은 Slack 이메일입니다."),
     SLACK_MESSAGE_SEND_FAILED(HttpStatus.SERVICE_UNAVAILABLE, "Slack 알림 메시지를 전송하지 못했습니다."),
+    MAIL_MESSAGE_SEND_FAILED(HttpStatus.SERVICE_UNAVAILABLE, "메일 알림 메시지를 전송하지 못했습니다."),
     UNSUPPORTED_SERVICE(HttpStatus.BAD_REQUEST, "지원하지 않는 서비스입니다."),
     UNSUPPORTED_CHANNEL(HttpStatus.BAD_REQUEST, "지원하지 않는 채널입니다."),
     UNSUPPORTED_NOTIFICATION(HttpStatus.BAD_REQUEST, "지원하지 않는 알림 종류입니다."),
