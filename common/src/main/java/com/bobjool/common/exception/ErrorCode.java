@@ -90,13 +90,20 @@ public enum ErrorCode {
     EXPIRED_RESERVATION(HttpStatus.BAD_REQUEST, "만료된 예약은 결제할 수 없습니다."),
 
     // 알림
-    INVALID_SLACK_EMAIL(HttpStatus.BAD_REQUEST, "Slack 이메일이 존재하지 않습니다."),
-    SLACK_MESSAGE_FAIL(HttpStatus.SERVICE_UNAVAILABLE, "Slack 알림 메시지 전송에 실패했습니다."),
-    UNSUPPORTED_SERVICE_TYPE(HttpStatus.BAD_REQUEST, "지원하지 않는 서비스 입니다."),
-    UNSUPPORTED_CHANNEL_TYPE(HttpStatus.BAD_REQUEST, "지원하지 않는 채널 입니다."),
-    UNSUPPORTED_NOTIFICATION_TYPE(HttpStatus.BAD_REQUEST, "지원하지 않는 알림 종류 입니다."),
-    INVALID_NOTIFICATION_STATUS(HttpStatus.BAD_REQUEST, "유효하지 않은 알림 상태 입니다."),
-    UNSUPPORTED_NOTIFICATION_FIELD(HttpStatus.BAD_REQUEST, "지원하지 않는 템플릿 변수 입니다."),
+    INVALID_SLACK_EMAIL(HttpStatus.BAD_REQUEST, "유효하지 않은 Slack 이메일입니다."),
+    SLACK_MESSAGE_SEND_FAILED(HttpStatus.SERVICE_UNAVAILABLE, "Slack 알림 메시지를 전송하지 못했습니다."),
+    UNSUPPORTED_SERVICE(HttpStatus.BAD_REQUEST, "지원하지 않는 서비스입니다."),
+    UNSUPPORTED_CHANNEL(HttpStatus.BAD_REQUEST, "지원하지 않는 채널입니다."),
+    UNSUPPORTED_NOTIFICATION(HttpStatus.BAD_REQUEST, "지원하지 않는 알림 종류입니다."),
+    INVALID_NOTIFICATION_STATE(HttpStatus.BAD_REQUEST, "유효하지 않은 알림 상태입니다."),
+    UNSUPPORTED_TEMPLATE_VARIABLE(HttpStatus.BAD_REQUEST, "지원하지 않는 템플릿 변수입니다."),
+    TEMPLATE_ID_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "템플릿 ID를 불러올 수 없습니다."),
+    FAILED_TO_LOAD_USER_CONTACT(HttpStatus.SERVICE_UNAVAILABLE, "유저의 연락처를 불러오지 못했습니다."),
+    FAILED_TO_LOAD_RESTAURANT_CONTACT(HttpStatus.SERVICE_UNAVAILABLE, "레스토랑의 연락처를 불러오지 못했습니다."),
+    MISSING_USER_ID_IN_KAFKA_MESSAGE(HttpStatus.BAD_REQUEST, "Kafka 메시지 데이터에 유저 ID가 누락되었습니다."),
+    MISSING_RESTAURANT_ID_IN_KAFKA_MESSAGE(HttpStatus.BAD_REQUEST, "Kafka 메시지 데이터에 레스토랑 ID가 누락되었습니다."),
+    MISSING_DATE_IN_KAFKA_MESSAGE(HttpStatus.BAD_REQUEST, "Kafka 메시지 데이터에 날짜 정보가 누락되었습니다."),
+    MISSING_TIME_IN_KAFKA_MESSAGE(HttpStatus.BAD_REQUEST, "Kafka 메시지 데이터에 시간 정보가 누락되었습니다.")
 
     // AI
 

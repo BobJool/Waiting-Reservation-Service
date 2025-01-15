@@ -1,27 +1,23 @@
 package com.bobjool.notification.infrastructure.messaging;
 
+import com.bobjool.notification.domain.service.NotificationDetails;
+import com.bobjool.notification.application.factory.NotificationDetailsFactory;
 import com.bobjool.notification.application.service.EventService;
 import com.bobjool.notification.domain.entity.BobjoolServiceType;
 import com.bobjool.notification.domain.entity.NotificationChannel;
-import com.bobjool.notification.domain.service.TemplateConvertService;
-import com.bobjool.notification.infrastructure.config.template.TemplateMappingConfig;
+import com.bobjool.notification.domain.entity.NotificationType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-@Slf4j
+@Slf4j(topic = "NotificationListener")
 @Component
 @RequiredArgsConstructor
 public class NotificationListener {
-    private final TemplateConvertService templateConvertService;
     private final EventService eventService;
-    private final TemplateMappingConfig templateMappingConfig;
+    private final NotificationDetailsFactory notificationDetailsFactory;
 
     @KafkaListener(topics = {
             "queue.registered",
@@ -31,14 +27,12 @@ public class NotificationListener {
             "queue.alerted",
             "queue.rush"
     })
-    public void handleQueueEvent(String data,
+    public void handleQueueEvent(String message,
                                  @Header("kafka_receivedTopic") String topic) {
-        Map<String, String> map = this.toStringMap(data);
-        NotificationChannel channel = NotificationChannel.SLACK;
-        UUID templateId = this.getTemplateId(BobjoolServiceType.QUEUE, topic);
-        log.info("Received kafka message. topic: {}, templateId: {}", topic, templateId);
-
-        eventService.preProcess(channel, templateId, map);
+        NotificationDetails details = getNotificationDetails(
+                NotificationChannel.SLACK, message, topic
+        );
+        eventService.processNotification(details);
     }
 
     @KafkaListener(topics = {
@@ -47,69 +41,40 @@ public class NotificationListener {
             "reservation.refund",
             "reservation.remind"
     })
-    public void handleReservationEvent(String data,
-                                       @Header("kafka_receivedTopic") String topic) {
-        Map<String, String> map = this.toStringMap(data);
-        NotificationChannel channel = NotificationChannel.SLACK;
-        UUID templateId = this.getTemplateId(BobjoolServiceType.RESERVATION, topic);
+    public void handleReservationEvent(
+            String message,
+            @Header("kafka_receivedTopic") String topic
+    ) {
+        NotificationDetails details = getNotificationDetails(
+                NotificationChannel.SLACK, message, topic
+        );
+        details.applyDateFormat();
+        details.applyTimeFormat();
 
-        this.setTimeFormat(map);
-        this.setDateFormat(map);
-        log.info("Received kafka message. topic: {}, templateId: {}", topic, templateId);
-
-        eventService.preProcess(channel, templateId, map);
+        eventService.processNotification(details);
     }
 
-    private Map<String, String> toStringMap(String data) {
-        log.info("received data: {}", data);
-        data = data.substring(1, data.length() - 1);
-        data = data.replace("\\", "");
+    private NotificationDetails getNotificationDetails(NotificationChannel channel, String message, String topic) {
+        log.debug("Get kafka message. topic: {}, message: {}", topic, message);
 
-        Map<String, Object> map = EventSerializer.deserialize(data, Map.class);
-        log.info("deserialize data: {}", map);
-
-        return map.entrySet()
-                .stream()
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        entry -> String.valueOf(entry.getValue())
-                ));
+        NotificationDetails details = notificationDetailsFactory.builder()
+                .channel(channel)
+                .serviceType(getNotificationServiceType(topic))
+                .action(getNotificationAction(topic))
+                .kafkaReceivedMessage(message)
+                .build();
+        log.info("NotificationDetails build success. service: {}, action: {}, message: {}", details.getMessageChannel(), details.getTemplateType(), details.getMetaData());
+        return details;
     }
 
-    private UUID getTemplateId(BobjoolServiceType category, String topic) {
+    private BobjoolServiceType getNotificationServiceType(String topic) {
         String[] depth = topic.split("\\.");
-
-        String action = depth[1];
-        String templateId = switch (category) {
-            case QUEUE -> templateMappingConfig.getQueue().get(action);
-            case RESERVATION -> templateMappingConfig.getReservation().get(action);
-        };
-
-        return UUID.fromString(templateId);
+        return BobjoolServiceType.of(depth[0]);
     }
 
-    /**
-     * 시간 포맷을 적용합니다.
-     * 20:45 -> 오후 8시 45분
-     */
-    private void setTimeFormat(Map<String, String> data) {
-        data.put("time",
-                templateConvertService.formatLocalTime(
-                        data.get("time")
-                )
-        );
-    }
-
-    /**
-     * 날짜 포맷을 적용합니다.
-     * 2025-01-03 -> 2025년 1월 3일
-     */
-    private void setDateFormat(Map<String, String> data) {
-        data.put("date",
-                templateConvertService.formatLocalDate(
-                        data.get("date")
-                )
-        );
+    private NotificationType getNotificationAction(String topic) {
+        String[] depth = topic.split("\\.");
+        return NotificationType.of(depth[1]);
     }
 
 }

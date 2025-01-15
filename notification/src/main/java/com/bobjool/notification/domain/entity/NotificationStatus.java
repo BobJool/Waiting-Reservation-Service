@@ -20,7 +20,7 @@ public enum NotificationStatus {
             case "PENDING" -> PENDING;
             case "SENT" -> SENT;
             case "FAILED" -> FAILED;
-            default -> throw new BobJoolException(ErrorCode.INVALID_NOTIFICATION_STATUS);
+            default -> throw new BobJoolException(ErrorCode.INVALID_NOTIFICATION_STATE);
         };
     }
 }

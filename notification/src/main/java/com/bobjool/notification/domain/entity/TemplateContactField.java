@@ -31,7 +31,7 @@ public enum TemplateContactField {
             case "RESTAURANT_NAME" -> RESTAURANT_NAME;
             case "RESTAURANT_ADDRESS" -> RESTAURANT_ADDRESS;
             case "RESTAURANT_NUMBER" -> RESTAURANT_NUMBER;
-            default -> throw new BobJoolException(ErrorCode.UNSUPPORTED_NOTIFICATION_FIELD);
+            default -> throw new BobJoolException(ErrorCode.UNSUPPORTED_TEMPLATE_VARIABLE);
         };
 
     }

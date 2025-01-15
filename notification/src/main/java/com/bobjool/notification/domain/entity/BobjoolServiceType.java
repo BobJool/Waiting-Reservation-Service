@@ -18,7 +18,7 @@ public enum BobjoolServiceType {
         return switch (request.toUpperCase()){
             case "QUEUE" -> QUEUE;
             case "RESERVATION" -> RESERVATION;
-            default -> throw new BobJoolException(ErrorCode.UNSUPPORTED_SERVICE_TYPE);
+            default -> throw new BobJoolException(ErrorCode.UNSUPPORTED_SERVICE);
         };
     }
 }
