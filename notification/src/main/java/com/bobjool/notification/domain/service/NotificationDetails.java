@@ -73,9 +73,19 @@ public class NotificationDetails {
         }
         return UUID.fromString(metaData.get(RESTAURANT_ID.toCamelCase()));
     }
+
+    public void updateSlackChannel(){
+        this.messageChannel = NotificationChannel.SLACK;
+    }
+
+    public void updateEmailChannel(){
+        this.messageChannel = NotificationChannel.EMAIL;
+    }
+
     public void updateTemplateData(String templateData) {
         this.templateData = templateData;
     }
+
     public void updateUserContact(String name, String slack, String email) {
         metaData.put(USER_NAME.toSnakeCase(), name);
         metaData.put(USER_SLACK.toSnakeCase(), slack);
@@ -130,8 +140,26 @@ public class NotificationDetails {
         return "*".concat(text).concat("*");
     }
 
+    private String removeBoldStyle(String text) {
+        return text.replace("*","");
+    }
+
     private String addLineBreak(String text) {
         return text.concat("\n");
+    }
+
+    private String removeLineBreak(String text) {
+        return text.replace("\n","");
+    }
+
+    public void applyMessageTypeMail(){
+        messageTitle = removeBoldStyle(messageTitle);
+        messageTitle = removeLineBreak(messageTitle);
+        messageContent = changeLineBreakHTML(this.messageContent);
+    }
+
+    private String changeLineBreakHTML(String text) {
+        return text.replace("\n", "<br/>");
     }
 
     public String getJsonMetaData(){

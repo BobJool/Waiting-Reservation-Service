@@ -25,7 +25,7 @@ public class MailService {
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
             mimeMessageHelper.setTo(email);
             mimeMessageHelper.setSubject(title);
-            mimeMessageHelper.setText(content);
+            mimeMessageHelper.setText(content,true);
             javaMailSender.send(mimeMessage);
 
             log.info("Succeeded to send Email");

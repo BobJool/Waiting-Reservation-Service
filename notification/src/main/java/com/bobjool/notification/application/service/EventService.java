@@ -89,6 +89,12 @@ public class EventService {
         NotificationDto dto = NotificationDto.from(details);
         messagingService.postNotification(dto);
         log.info("Notification posted successfully");
+
+//        details.updateEmailChannel();
+//        details.applyMessageTypeMail();
+//        NotificationDto dto = NotificationDto.from(details);
+//        messagingService.postNotification(dto);
+
     }
 
     @Transactional
