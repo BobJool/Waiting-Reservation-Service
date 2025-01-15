@@ -8,7 +8,7 @@ spring:
       import: classpath:config-repo/application-key.yml
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: ${DB_URL}
+    url: ${DB_URL}/notification_db
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
   jpa:
