@@ -79,7 +79,6 @@ public class UserController {
         );
     }
 
-    @RequireRole(value = {"OWNER", "MASTER"})
     @GetMapping("/{id}/contact")
     public ResponseEntity<ApiResponse<UserContactResDto>> getContact(
             @PathVariable Long id
