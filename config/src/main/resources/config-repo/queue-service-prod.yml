@@ -1,23 +1,25 @@
 server:
-  port: 19060
+  port: ${QUEUE_SERVICE_PORT:19030}
 
 spring:
   application:
-    name: payment-service
-  config:
-    import: classpath:config-repo/application-key.yml
+    name: queue-service
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: ${DB_URL}/payment_db
+    url: ${DB_URL}/queue_db
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${QUEUE_REDIS_PORT:6380}
   jpa:
     hibernate:
-      ddl-auto: update
-    show-sql: true
+      ddl-auto: validate
+    show-sql: false
     properties:
-      format-sql: true
-      use_sql_comments: true
+      format-sql: false
+      use_sql_comments: false
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
   jackson:
@@ -34,27 +36,20 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-  data:
-    redis:
-      host: ${SHARED_REDIS_HOSTNAME}
-      port: ${SHARED_REDIS_PORT}
-
-
 
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://localhost:19000/eureka/
-
+      defaultZone: http://${EUREKA_HOSTNAME}:${EUREKA_PORT:19000}/eureka/
 
 
 management:
-  zipkin:
-    tracing:
-      endpoint: "http://localhost:9411/api/v2/spans"
-  tracing:
-    sampling:
-      probability: 1.0
+#  zipkin:
+#    tracing:
+#      endpoint: "http://localhost:9411/api/v2/spans"
+#  tracing:
+#    sampling:
+#      probability: 1.0
   endpoints:
     web:
       exposure:

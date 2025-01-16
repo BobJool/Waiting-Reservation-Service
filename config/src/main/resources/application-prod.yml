@@ -1,0 +1,18 @@
+server:
+  port: ${CONFIG_PORT:19002}
+
+spring:
+  application:
+    name: config-service
+  cloud:
+    config:
+      server:
+        native:
+          search-locations: classpath:/config-repo  # 리소스 폴더의 디렉토리 경로
+  profiles:
+    active: native # 깃 저장소가 아니라 config-repo 에서 가져온다는 의미
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://${EUREKA_HOSTNAME}:${EUREKA_PORT:19000}/eureka/
