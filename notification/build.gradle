@@ -29,6 +29,11 @@ dependencies {
 
     // Mail
     implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+    //config server
+    implementation 'org.springframework.cloud:spring-cloud-starter-config'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
 }
 
 def querydslSrcDir = 'src/main/generated'
