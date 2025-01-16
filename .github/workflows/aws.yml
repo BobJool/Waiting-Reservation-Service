@@ -42,8 +42,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build with Gradle
-        working-directory: eureka-server # eureka-server 디렉토리로 이동
-        run: ./gradlew clean build
+        run: ./gradlew clean build -p eureka-server # eureka-server 서브프로젝트 빌드
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v3
