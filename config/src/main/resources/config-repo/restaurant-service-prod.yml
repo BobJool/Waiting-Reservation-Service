@@ -25,7 +25,7 @@ spring:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://${EUREKA_HOSTNAME}:${EUREKA_PORT:19000}/eureka/
+      defaultZone: http://eureka-server:19000/eureka/
 
 
 
