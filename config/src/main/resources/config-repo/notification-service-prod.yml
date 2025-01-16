@@ -1,0 +1,71 @@
+server:
+  port: ${NOTIFICATION_SERVICE_PORT:19050}
+
+spring:
+  application:
+    name: notification-service
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: ${DB_URL}/notification_db
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      format-sql: false
+      use_sql_comments: false
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+  kafka:
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      group-id: ${spring.application.name}-group
+    bootstrap-servers: ${KAFKA_SERVER_URL}
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${SENDER_ACCOUNT}
+    password: ${SENDER_PASSWORD}
+    properties:
+      mail.smtp.debug: true
+      mail.smtp.connectiontimeout: 1000 #1초
+      mail.starttls.enable: true
+      mail.smtp.auth: true
+
+
+notification:
+  template-mapping:
+    queue:
+      registered: 9d5b1a23-eb4c-44b8-8f20-d7f19254b364
+      delayed: 0a6aab9f-7656-45d8-97c3-63b9cc9eac35
+      remind: b64b7920-68ea-470f-adba-2c4a0a5af031
+      alerted: 33c5002a-8041-496f-80af-b4953b987c90
+      rush: 0297236f-4b16-4ffa-8614-ce60a073a857
+      canceled: 35733f44-8e0b-4c0a-bff8-03390fb0c39f
+    reservation:
+      completed: d2fae87a-60eb-4684-9fb6-c6a53a78f8e7
+      failed: fb348681-f0ae-42ec-970d-c9b5d4bb6ff0
+      refund: 237c2474-2509-4dfa-aeb2-4eb9f421ef9d
+      remind: 14e786a6-7757-4809-87fb-d7665e79d141
+
+token:
+  slack:
+    oauth: ${SLACK_OAUTH_TOKEN}
+
+management:
+#  zipkin:
+#    tracing:
+#      endpoint: "http://localhost:9411/api/v2/spans"
+#  tracing:
+#    sampling:
+#      probability: 1.0
+  endpoints:
+    web:
+      exposure:
+        include: "*"
