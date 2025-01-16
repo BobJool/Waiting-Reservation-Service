@@ -1,0 +1,116 @@
+### 회원가입(MASTER)
+POST localhost:19005/api/v1/auths/sign-up
+Content-Type: application/json
+
+{
+  "username": "master1",
+  "password": "1234",
+  "name": "name_master1",
+  "nickname": "nick_master1",
+  "email": "master1@ex.com",
+  "slack_email": null,
+  "phone_number": "010-1111-1111",
+  "role": "MASTER"
+}
+
+### 회원가입(OWNER)
+POST localhost:19005/api/v1/auths/sign-up
+Content-Type: application/json
+
+{
+  "username": "owner1",
+  "password": "1234",
+  "name": "name_owner1",
+  "nickname": "nick_owner1",
+  "email": "owner1@ex.com",
+  "slack_email": null,
+  "phone_number": "010-2222-2222",
+  "role": "OWNER"
+}
+
+### 로그인
+POST localhost:19005/api/v1/auths/sign-in
+Content-Type: application/json
+
+{
+  "username": "master1",
+  "password": 1234
+}
+
+> {%
+    client.test("Validate", function() { // Validate라는 이름의 테스트를 수행
+        client.assert(response.status === 200, "Response status is not 200"); // 응답값이 200이면 통과
+        client.assert(response.contentType.mimeType === "application/json", "Expected 'application/json'"); // 응답값이 application/json이면 통과
+
+        // data 객체와 access_token 확인
+        const accessToken = response.body.data && response.body.data.access_token;
+        client.assert(accessToken && accessToken.trim().length > 0, "Access token is missing or invalid"); // 토큰 길이가 0보다 크면 통과
+
+        client.log(accessToken); // 토큰 값 로깅, body에는 응답받은 json이 객체 형식으로 저장된다. 즉 { accessToken:"value" }가 응답이라면, 여기선 value라 로깅된다.
+        client.global.set("access_token", accessToken) // 토큰 값을 global 변수에 set
+    });
+%}
+
+### 사용자 전체 정보 조회
+GET localhost:19005/api/v1/users
+Content-Type: application/json
+Authorization: {{access_token}}
+
+> {%
+    client.test("Extract First User ID", function() {
+        // 응답 상태 및 Content-Type 확인
+        client.assert(response.status === 200, "Response status is not 200");
+        client.assert(response.contentType.mimeType === "application/json", "Expected 'application/json'");
+
+        // 응답 데이터에서 첫 번째 유저 추출
+        const users = response.body.data && response.body.data.content;
+        client.assert(users && users.length > 0, "User list is empty or invalid");
+
+        // 첫 번째 유저의 ID 추출(MASTER 의도)
+        const firstUserId = users[0].id;
+        client.assert(firstUserId, "First user ID is missing or invalid");
+
+        // 두 번째 유저의 ID 추출(OWNER 의도)
+        const secondUserId = users[1].id;
+        client.assert(secondUserId, "Second user ID is missing or invalid");
+
+        // ID를 로깅 및 전역 변수에 저장
+        client.log("First User ID: " + firstUserId);
+        client.log("Second User ID: " + secondUserId);
+        client.global.set("first_user_id", firstUserId);
+        client.global.set("second_user_id", secondUserId);
+    });
+%}
+
+### 사용자 상세 정보 조회
+GET localhost:19005/api/v1/users/{{first_user_id}}
+Content-Type: application/json
+Authorization: {{access_token}}
+
+### ONWER 신청 승인
+PATCH localhost:19005/api/v1/auths/{{second_user_id}}/approval
+Content-Type: application/json
+Authorization: {{access_token}} //master 권한
+
+true
+
+### 사용자 연락처 조회
+GET localhost:19005/api/v1/users/{{first_user_id}}/contact
+Content-Type: application/json
+Authorization: {{access_token}}
+
+### 로그아웃
+POST localhost:19005/api/v1/auths/sign-out
+Content-Type: application/json
+Authorization: {{access_token}}
+
+### 로그아웃 후 권한이 필요한 사용자 상세 정보 조회 api 호출
+GET localhost:19005/api/v1/users/{{first_user_id}}
+Content-Type: application/json
+Authorization: {{access_token}}
+
+> {%
+    client.test("로그아웃 후 권한이 필요한 API는 403이어야 함.", function() {
+        client.assert(response.status === 403, "Expected status code 403 but got " + response.status);
+    });
+%}

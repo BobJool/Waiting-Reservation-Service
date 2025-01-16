@@ -5,6 +5,11 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
+notification/src/main/resources/application-key.yml
+
+# application-key.yml 파일 무시
+**/application-key.yml
+
 ### STS ###
 .apt_generated
 .classpath

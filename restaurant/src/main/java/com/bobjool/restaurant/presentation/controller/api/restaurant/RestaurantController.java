@@ -1,0 +1,209 @@
+package com.bobjool.restaurant.presentation.controller.api.restaurant;
+
+import com.bobjool.restaurant.application.dto.restaurant.*;
+import com.bobjool.restaurant.infrastructure.aspect.RequireRole;
+import com.bobjool.common.presentation.ApiResponse;
+import com.bobjool.common.presentation.PageResponse;
+import com.bobjool.common.presentation.SuccessCode;
+import com.bobjool.restaurant.application.service.restaurant.RestaurantService;
+import com.bobjool.restaurant.presentation.dto.restaurant.RestaurantCheckOwnerReqDto;
+import com.bobjool.restaurant.presentation.dto.restaurant.RestaurantCheckValidReqDto;
+import com.bobjool.restaurant.presentation.dto.restaurant.RestaurantCreateReqDto;
+import com.bobjool.restaurant.presentation.dto.restaurant.RestaurantUpdateReqDto;
+import jakarta.validation.Valid;
+import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.SortDefault;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+@RefreshScope
+@Slf4j
+@RestController
+@RequestMapping("/api/v1/restaurants")
+@RequiredArgsConstructor
+public class RestaurantController {
+
+  private final RestaurantService restaurantService;
+
+  @RequireRole(value = "MASTER")
+  @PostMapping
+  public ResponseEntity<ApiResponse<RestaurantResDto>> createRestaurant(
+      @Valid @RequestBody RestaurantCreateReqDto restaurantCreateReqDto) {
+    log.info("create.RestaurantCreateDto={}", restaurantCreateReqDto);
+    RestaurantResDto response = restaurantService.createRestaurant(
+        restaurantCreateReqDto.toServiceDto());
+    return ApiResponse.success(SuccessCode.SUCCESS_INSERT, response);
+  }
+
+  @RequireRole(value = {"MASTER", "OWNER"})
+  @PutMapping("/{restaurantId}")
+  public ResponseEntity<ApiResponse<RestaurantResDto>> updateRestaurant(
+      @Valid @RequestBody RestaurantUpdateReqDto restaurantUpdateReqDto,
+      @PathVariable("restaurantId") UUID restaurantId) {
+    log.info("update.RestaurantUpdateReqDto={}", restaurantUpdateReqDto);
+    RestaurantResDto response = restaurantService.updateRestaurant(restaurantId,
+        restaurantUpdateReqDto.toServiceDto());
+    return ApiResponse.success(SuccessCode.SUCCESS_UPDATE, response);
+  }
+
+  @RequireRole(value = {"MASTER", "OWNER"})
+  @PutMapping("/is-reservation/{restaurantId}")
+  public ResponseEntity<ApiResponse<RestaurantResDto>> restaurantReservationChange(
+      @Valid @RequestParam boolean isReservation,
+      @PathVariable("restaurantId") UUID restaurantId) {
+    log.info("isReservation={}", isReservation);
+    RestaurantResDto response = restaurantService.isReservation(restaurantId, isReservation);
+    return ApiResponse.success(SuccessCode.SUCCESS_UPDATE, response);
+  }
+
+  @RequireRole(value = {"MASTER", "OWNER"})
+  @PutMapping("/is-queue/{restaurantId}")
+  public ResponseEntity<ApiResponse<RestaurantResDto>> restaurantQueueChange(
+      @Valid @RequestParam boolean isQueue,
+      @PathVariable("restaurantId") UUID restaurantId) {
+    log.info("isQueue={}", isQueue);
+    RestaurantResDto response = restaurantService.isQueue(restaurantId, isQueue);
+    return ApiResponse.success(SuccessCode.SUCCESS_UPDATE, response);
+  }
+
+  @RequireRole(value = "MASTER")
+  @DeleteMapping("/{restaurantId}")
+  public ResponseEntity<ApiResponse<RestaurantResDto>> updateRestaurant(
+      @Valid @PathVariable("restaurantId") UUID restaurantId) {
+
+    log.info("RestaurantDelete");
+    restaurantService.deleteRestaurant(restaurantId);
+    return ApiResponse.success(SuccessCode.SUCCESS_DELETE);
+  }
+
+  @RequireRole(value = "MASTER")
+  //모든 음식점 정보 전체 조회
+  @GetMapping
+  public ResponseEntity<ApiResponse<PageResponse<RestaurantResDto>>> getAllRestaurants(
+      @SortDefault(sort = "createdAt", direction = Direction.DESC)
+      Pageable pageable) {
+    log.info("getAllRestaurants");
+
+    Page<RestaurantResDto> resPage
+        = restaurantService.readRestaurants(pageable);
+    return ApiResponse.success(SuccessCode.SUCCESS, PageResponse.of(resPage));
+  }
+
+  //삭제된 음식점 정보 전체 조회
+  @RequireRole(value = "MASTER")
+  @GetMapping("/deleted")
+  public ResponseEntity<ApiResponse<PageResponse<RestaurantResDto>>> getDeletedRestaurants(
+      @SortDefault(sort = "createdAt", direction = Direction.DESC)
+      Pageable pageable) {
+    log.info("getDeletedRestaurants");
+
+    Page<RestaurantResDto> resPage
+        = restaurantService.deletedRestaurants(pageable);
+    return ApiResponse.success(SuccessCode.SUCCESS, PageResponse.of(resPage));
+  }
+
+  //단일 음식점 정보 조회(for Owner)
+  @RequireRole(value = "OWNER")
+  @GetMapping("/owner/{restaurantId}")
+  public ResponseEntity<ApiResponse<RestaurantResDto>> getRestaurantsForOwner(
+      @Valid @PathVariable("restaurantId") UUID restaurantId) {
+    log.info("getAllRestaurants");
+
+    RestaurantResDto response = restaurantService.readRestaurantsForOwner(restaurantId);
+    return ApiResponse.success(SuccessCode.SUCCESS, response);
+  }
+
+  //단일 음식점 정보 조회(for Customer)
+  @RequireRole(value = "CUSTOMER")
+  @GetMapping("/customer/{restaurantId}")
+  public ResponseEntity<ApiResponse<RestaurantForCustomerResDto>> getRestaurantsForCustomer(
+      @Valid @PathVariable("restaurantId") UUID restaurantId) {
+    log.info("getAllRestaurants");
+
+    RestaurantForCustomerResDto response = restaurantService.readRestaurantsForCustomer(restaurantId);
+    return ApiResponse.success(SuccessCode.SUCCESS, response);
+  }
+
+  //단일 음식점 정보 조회(for Master)
+  @RequireRole(value = "MASTER")
+  @GetMapping("/master/{restaurantId}")
+  public ResponseEntity<ApiResponse<RestaurantForMasterResDto>> getRestaurantsForMaster(
+      @Valid @PathVariable("restaurantId") UUID restaurantId) {
+    log.info("getAllRestaurants");
+
+    RestaurantForMasterResDto response = restaurantService.readRestaurantsForMaster(restaurantId);
+    return ApiResponse.success(SuccessCode.SUCCESS, response);
+  }
+
+  //Cotanct 기능(-> Notification)
+  @GetMapping("/{restaurantId}/contact")
+  public ResponseEntity<ApiResponse<RestaurantContactResDto>> getRestaurantContact(
+      @Valid @PathVariable("restaurantId") UUID restaurantId) {
+    log.info("getRestaurantContact");
+
+    RestaurantContactResDto response = restaurantService.ReadRestaurantContact(restaurantId);
+    return ApiResponse.success(SuccessCode.SUCCESS_ACCEPTED, response);
+  }
+
+  //상세 검색
+  @GetMapping("/detail")
+  public ResponseEntity<ApiResponse<PageResponse<RestaurantForCustomerResDto>>> searchByDetail(
+      @RequestParam(required = false) String name,
+      @RequestParam(required = false) String region,
+      @RequestParam(required = false) String addressDetail,
+      @RequestParam(required = false) String description,
+      @SortDefault(sort = "createdAt", direction = Direction.DESC)
+      Pageable pageable)
+  {
+    Page<RestaurantForCustomerResDto> resPage = restaurantService.searchByDetail(name, region, addressDetail, description, pageable);
+    return ApiResponse.success(SuccessCode.SUCCESS_ACCEPTED, PageResponse.of(resPage));
+  }
+
+  //전체 검색
+  @GetMapping("/keyword")
+  public ResponseEntity<ApiResponse<PageResponse<RestaurantForCustomerResDto>>> searchByDetail(
+      @RequestParam(required = false) String keyword,
+      @SortDefault(sort = "createdAt", direction = Direction.DESC)
+      Pageable pageable)
+  {
+    log.info("keyword = {}", keyword);
+    Page<RestaurantForCustomerResDto> resPage = restaurantService.searchByKeyWord(keyword, pageable);
+    return ApiResponse.success(SuccessCode.SUCCESS_ACCEPTED, PageResponse.of(resPage));
+  }
+
+  // feign -> QueueService 레스토랑 ID, 오너 ID를 받아 boolean 값 반환
+  @PostMapping("/queue/owner")
+  public boolean restaurant_owner_check(
+          @Valid @RequestBody RestaurantCheckOwnerReqDto restaurantCheckOwnerReqDto) {
+    log.info("Feign.RestaurantCheckOwnerReqDto={}", restaurantCheckOwnerReqDto);
+    return restaurantService.restaurant_owner_check(restaurantCheckOwnerReqDto.toServiceDto());
+  }
+
+  // feign -> QueueService 레스토랑 ID를 받아   isQueue/ isDeleted 반환
+  @PostMapping("/queue/valid")
+  public ResponseEntity<ApiResponse<RestaurantValidResDto>> restaurant_valid_check(
+          @Valid @RequestBody RestaurantCheckValidReqDto restaurantCheckValidReqDto) {
+    log.info("Feign.RestaurantId={}", restaurantCheckValidReqDto);
+    RestaurantValidResDto response = restaurantService.restaurant_valid_check(restaurantCheckValidReqDto.toServiceDto());
+
+    return ApiResponse.success(SuccessCode.SUCCESS_ACCEPTED, response);
+  }
+
+
+
+
+}

@@ -3,7 +3,7 @@ spring:
     activate:
       on-profile: test
   application:
-    name: payment-service
+    name: reservation-service
 
   datasource:
     driver-class-name: org.h2.Driver
@@ -22,6 +22,9 @@ spring:
         use_sql_comments: true
     show-sql: true
     defer-datasource-initialization: true
+  cloud:
+    config:
+      enabled: false
 
 sql:
   init:

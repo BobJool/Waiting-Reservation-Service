@@ -1,0 +1,122 @@
+### 템플릿 생성(리마인드 알림)
+POST localhost:19050/api/v1/notifications/templates
+Content-Type: application/json
+
+{
+  "service_type": "RESERVATION",
+  "channel": "SLACK",
+  "type": "REMIND",
+  "title": "${restaurant_name} 예약 잊지 않으셨죠?",
+  "template" : "${restaurant_name}에서 ${user_name}님을 맞이할 날을 준비하고 있습니다.\n고객님 덕분에 레스토랑 예약 문화가 더 건강해집니다.\n\n날짜: ${date}\n시간: ${time}\n인원: ${count}명\n전화번호: ${restaurant_number}\n\n* 불가피하게 예약을 취소해야 한다면, 앱에서 금일 자정까지 취소해 주셔야 선결제하신 예약금이 전액 환불됩니다."
+}
+
+### 템플릿 생성(예약 완료 알림)
+POST localhost:19050/api/v1/notifications/templates
+Content-Type: application/json
+
+{
+  "service_type": "RESERVATION",
+  "channel": "SLACK",
+  "type": "COMPLETED",
+  "title": "{restaurant_name} 예약이 완료됐습니다!",
+  "template" : "${user_name}님! ${restaurant_name} 예약 내역을 확인해주세요.\n\n날짜: ${date}\n시간: ${time}\n인원: ${count}명\n전화번호: ${restaurant_number}\n\n* 예약해주셔서 감사합니다.\n* 예약시간 준수 부탁드리며, 예약시간 10분전까지 입장 완료 부탁드립니다."
+}
+
+### 템플릿 생성(예약 실패 알림)
+POST localhost:19050/api/v1/notifications/templates
+Content-Type: application/json
+
+{
+  "service_type": "RESERVATION",
+  "channel": "SLACK",
+  "type": "FAILED",
+  "title": "{restaurant_name} 예약에 실패했습니다.",
+  "template": "날짜: ${date}\n시간: ${time}\n인원: ${count}명\n전화번호: ${restaurant_number}\n\n* 예약에 불편을 드려 죄송합니다.\n* 다른 날짜나 시간으로 다시 예약해주세요."
+}
+
+### 템플릿 생성(환불 안내 알림)
+POST localhost:19050/api/v1/notifications/templates
+Content-Type: application/json
+
+{
+  "service_type": "RESERVATION",
+  "channel": "SLACK",
+  "type": "REFUND",
+  "title": "${restaurant_name} 에서 예약금이 환불되었습니다.",
+  "template": "날짜: ${date}\n시간: ${time}\n인원: ${count}명\n전화번호: ${restaurant_number}\n\n* 예약금 환불 내역에 문제가 있을 경우 매장으로 연락해주세요.\n* 취소 및 환불까지 영업일 기준 평균 3~10일이 소요됩니다."
+}
+
+### 템플릿 생성(웨이팅 등록 알림)
+POST localhost:19050/api/v1/notifications/templates
+Content-Type: application/json
+
+{
+  "service_type": "QUEUE",
+  "channel": "SLACK",
+  "type": "REGISTERED",
+  "title": "밥줄에 웨이팅이 등록됐습니다!",
+  "template": "${user_name}님, ${restaurant_name} 웨이팅이 등록되었습니다!\n\n웨이팅 정보\n인원: ${member}명\n순서: ${rank}번째\n번호: ${position}"
+}
+
+### 템플릿 생성(웨이팅 리마인드 알림)
+POST localhost:19050/api/v1/notifications/templates
+Content-Type: application/json
+
+{
+  "service_type": "QUEUE",
+  "channel": "SLACK",
+  "type": "REMIND",
+  "title": "밥줄에서 알려드립니다!",
+  "template": "${restaurant_name}의 순서가 ${rank}번째로 가까워졌습니다.\n매장 근처로 오셔서 순서를 기다려주세요.\n\n순서: ${rank}번째\n번호: ${position}\n\n* 매장 상황에 따라 입장 순서는 달라질 수 있습니다."
+}
+
+### 템플릿 생성(웨이팅 취소 알림)
+POST localhost:19050/api/v1/notifications/templates
+Content-Type: application/json
+
+{
+  "service_type": "QUEUE",
+  "channel": "SLACK",
+  "type": "CANCELED",
+  "title": "${restaurant_name} 웨이팅이 취소되었습니다.",
+  "template": "${reason} ${user_name}님의 웨이팅이 취소되었어요.\n다음에 방문해주세요!"
+}
+
+
+### 템플릿 생성(웨이팅 입장 알림)
+POST localhost:19050/api/v1/notifications/templates
+Content-Type: application/json
+
+{
+  "service_type": "QUEUE",
+  "channel": "SLACK",
+  "type": "ALERTED",
+  "title": "${position}번 고객님 입장할 순서예요! 지금 매장으로 와주세요",
+  "template": "${user_name} 고객님, 기다리느라 고생하셨어요!\n지금 ${restaurant_name}에 입장해주세요.\n\n직원에게 해당 알림을 보여주시면\n웨이팅 번호 순서대로 자리를 안내해드릴게요.\n\n방문이 취소될 수 있으니 꼭 시간을 확인해주세요."
+}
+
+
+### 템플릿 생성(웨이팅 미루기 알림)
+POST localhost:19050/api/v1/notifications/templates
+Content-Type: application/json
+
+{
+  "service_type": "QUEUE",
+  "channel": "SLACK",
+  "type": "DELAYED",
+  "title": "밥줄 웨이팅 순서를 미뤘어요!",
+  "template": "요청하신대로 ${restaurant_name}의 웨이팅 순서를 뒤로 미뤘어요.\n변경된 웨이팅 순서를 확인해주세요.\n\n새로운 웨이팅 순서\n순서: ${rank}번째\n번호: ${position}\n인원: ${member}명\n\n* 한 매장 당 순서를 2번 미룰 수 있어요.\n* 다음에 방문하실 예정이라면 원활한 매장 운영을 위해 웨이팅을 취소해주세요."
+}
+
+
+### 템플릿 생성(웨이팅 호출 알림)
+POST localhost:19050/api/v1/notifications/templates
+Content-Type: application/json
+
+{
+  "service_type": "QUEUE",
+  "channel": "SLACK",
+  "type": "RUSH",
+  "title": "입장 호출 안내!",
+  "template": "${restaurant_name}에 지금 바로 입장해주세요.\n\n${position}번 고객님을 위한 자리가 준비되었습니다.\n순서대로 자리 안내를 도와드리고 있으니,\n직원에게 안내 메시지를 보여주세요.\n\n10분 동안 입장하지 않을 경우,\n웨이팅이 자동 취소되니 입장시간을 확인해주세요."
+}

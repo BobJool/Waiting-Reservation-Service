@@ -1,0 +1,14 @@
+server:
+  port: ${EUREKA_PORT:19000}
+
+spring:
+  application:
+    name: eureka-server
+
+eureka:
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+  instance:
+    hostname: ${EUREKA_HOSTNAME}
+    prefer-ip-address: true

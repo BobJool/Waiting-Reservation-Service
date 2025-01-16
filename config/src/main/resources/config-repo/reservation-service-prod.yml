@@ -1,0 +1,51 @@
+server:
+  port: ${RESERVATION_SERVICE_PORT:19040}
+
+spring:
+  application:
+    name: reservation-service
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: ${DB_URL}/reservation_db
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      format-sql: false
+      use_sql_comments: false
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+  kafka:
+    bootstrap-servers: ${KAFKA_SERVER_URL}
+    consumer: # TODO kafka consumer, producer에 대한 설정값 수정은 여기에서
+      group-id: ${spring.application.name}-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: '*'
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://eureka-server:19000/eureka/
+
+management:
+#  zipkin:
+#    tracing:
+#      endpoint: "http://localhost:9411/api/v2/spans"
+#  tracing:
+#    sampling:
+#      probability: 1.0
+  endpoints:
+    web:
+      exposure:
+        include: refresh

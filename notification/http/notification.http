@@ -1,0 +1,41 @@
+### 히스토리 검색(조건 없음)
+GET localhost:19050/api/v1/notifications
+
+### 히스토리 검색(한개의 필드)
+GET localhost:19050/api/v1/notifications?action=REGISTERED
+
+### 히스토리 검색(여러개 필드)
+GET localhost:19050/api/v1/notifications?category=QUEUE&channel=SLACK
+
+### 히스토리 검색(해당 날짜만)
+GET localhost:19050/api/v1/notifications?date=2025-01-07
+
+### 히스토리 검색(메시지 내용 부분 검색)
+GET localhost:19050/api/v1/notifications?message=인원
+
+### 히스토리 검색(전체 필드)
+GET localhost:19050/api/v1/notifications?
+    userId=-2&
+    category=QUEUE&
+    action=REGISTERED&
+    channel=SLACK&
+    message=철수님&
+    date=2025-01-09
+
+### 히스토리 검색(페이징)
+GET localhost:19050/api/v1/notifications?
+    page=0&
+    size=1&
+    sort=createdAt,desc
+
+### 히스토리 검색(전체 조건)
+GET localhost:19050/api/v1/notifications?
+    userId=-2&
+    category=QUEUE&
+    action=REGISTERED&
+    channel=SLACK&
+    message=철수님&
+    date=2025-01-09&
+    page=0&
+    size=1&
+    sort=createdAt,desc

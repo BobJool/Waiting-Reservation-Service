@@ -1,0 +1,130 @@
+package com.bobjool.application.service;
+
+import com.bobjool.application.client.NotificationClient;
+import com.bobjool.application.dto.SignInDto;
+import com.bobjool.application.dto.SignUpDto;
+import com.bobjool.application.dto.UserResDto;
+import com.bobjool.application.interfaces.JwtUtil;
+import com.bobjool.common.exception.*;
+import com.bobjool.domain.entity.User;
+import com.bobjool.domain.repository.UserRepository;
+import com.bobjool.application.dto.SignInResDto;
+import feign.FeignException;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Slf4j
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+@Service
+public class AuthService {
+
+    private final UserRepository userRepository;
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtil jwtUtil;
+    private final JwtBlacklistService jwtBlacklistService;
+    private final PasswordEncoder passwordEncoder;
+    private final ValidationService validationService;
+    private final NotificationClient notificationClient;
+
+    public SignInResDto signIn(SignInDto request) {
+
+        String username = request.username();
+
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(username, request.password())
+        );
+
+        User user = userRepository.findByUsernameAndIsDeletedFalse(username)
+                .filter(userInfo -> passwordEncoder.matches(request.password(), userInfo.getPassword()))
+                .orElseThrow(() -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND));
+
+        if (!user.getIsApproved()) {
+            throw new BobJoolException(ErrorCode.USER_NOT_APPROVED);
+        }
+
+        String token = jwtUtil.createAccessToken(user);
+
+        return SignInResDto.from(token);
+    }
+
+    @Transactional
+    public void signUp(final SignUpDto request) {
+
+        validationService.validateDuplicateUsername(request.username());
+        validationService.validateDuplicateSlackEmail(request.slackEmail());
+        validationService.validateDuplicateNickname(request.nickname());
+        validationService.validateDuplicateEmail(request.email());
+        validationService.validateDuplicatePhoneNumber(request.phoneNumber());
+
+        String slackEmail = request.slackEmail();
+        String slackId = "";
+
+        if (slackEmail != null && !slackEmail.isEmpty()) {
+            try {
+                slackId = notificationClient.findSlackIdByEmail(slackEmail).data().get("slack_id");
+            } catch (FeignException e) {
+                throw new BobJoolException(ErrorCode.INVALID_SLACK_EMAIL);
+            }
+        }
+
+        User user = User.create(
+                request.username(),
+                passwordEncoder.encode(request.password()),
+                request.name(),
+                request.nickname(),
+                request.email(),
+                request.slackEmail(),
+                slackId,
+                request.phoneNumber(),
+                request.role()
+        );
+
+        userRepository.save(user);
+    }
+
+    public void signOut(HttpServletRequest request) {
+
+        String token = jwtUtil.getTokenFromHeader("Authorization", request);
+
+        if (token == null || !jwtUtil.validateToken(token)) {
+            throw new BobJoolException(ErrorCode.INVALID_TOKEN);
+        }
+
+        String tokenType = jwtUtil.getTokenType(token);
+        if (tokenType == null) {
+            throw new BobJoolException(ErrorCode.UNKNOWN_TOKEN_TYPE);
+        }
+
+        long expiration = jwtUtil.getRemainingExpiration(token);
+
+        boolean isAccessToken = "access".equals(tokenType);
+
+        jwtBlacklistService.addToBlacklist(token, expiration, isAccessToken);
+    }
+
+    @Transactional
+    public UserResDto updateUserApproval(Long id, Boolean approved) {
+
+        User user = findUserById(id);
+
+        if (!user.isOwner()) {
+            throw new BobJoolException(ErrorCode.MISSING_OWNER_ROLE);
+        }
+
+        user.updateUserApproval(approved);
+
+        return UserResDto.from(user);
+    }
+
+    private User findUserById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new BobJoolException(ErrorCode.USER_NOT_FOUND));
+    }
+}

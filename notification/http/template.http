@@ -1,0 +1,29 @@
+### 템플릿 생성
+POST localhost:19050/api/v1/notifications/templates
+Content-Type: application/json
+
+{
+  "service_type": "QUEUE",
+  "channel": "SLACK",
+  "type": "REGISTERED",
+  "title": "밥줄에 웨이팅이 등록됐습니다!",
+  "template" : "${user_name}님, ${restaurant_name} 웨이팅이 등록되었습니다!\n\n웨이팅 정보\n인원: ${member}명\n순서: ${rank}번째\n번호: ${position}"
+}
+
+### 템플릿 조회
+GET localhost:19050/api/v1/notifications/templates
+
+### 템플릿 수정
+PUT localhost:19050/api/v1/notifications/templates/8c591d85-e0b7-4f47-a90d-3a85821ab645
+Content-Type: application/json
+
+{
+  "service_type": "RESERVATION",
+  "channel": "SLACK",
+  "type": "FAIL",
+  "title": "${restaurant_name} 웨이팅이 취소되었습니다.\n",
+  "template" : "${reason} ${name}님의 웨이팅이 취소되었어요.\n다음에 방문해주세요!"
+}
+
+### 템플릿 삭제
+DELETE localhost:19050/api/v1/notifications/templates/937e5b08-bd6d-4d39-bb12-083e0531dba5

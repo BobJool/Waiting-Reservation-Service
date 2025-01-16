@@ -1,0 +1,39 @@
+### 예약 요청
+POST localhost:19005/api/v1/reservations
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjdXN0b21lcjEyMzQiLCJ1c2VySWQiOiIzIiwicm9sZSI6IkNVU1RPTUVSIiwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaXNzIjoiYXV0aC1zZXJ2aWNlIiwiaWF0IjoxNzM2NDIzNTYwLCJleHAiOjE3MzY0MjM5MjB9.WTUVmVlun0ZMGpZINjq7tESUouqeLomUf13zbD4MBpY
+
+{
+  "user_id": 3,
+  "restaurant_id": "355b3d3a-2eee-4fa8-aab6-62f0f614d95f",
+  "restaurant_schedule_id": "09c6770d-0b14-4703-a614-83097bd0750e",
+  "guest_count": 4,
+  "reservation_date": "2025-01-22",
+  "reservation_time": "14:00"
+}
+
+
+### 예약 상태 변경
+PATCH localhost:19005/api/v1/reservations/status/e47cf394-4a51-416c-a2d7-1b45dd17477b
+Content-Type: application/json
+
+{
+  "status": "COMPLETE"
+}
+
+### 예약 취소
+POST localhost:19005/api/v1/reservations/cancel/e47cf394-4a51-416c-a2d7-1b45dd17477b
+Content-Type: application/json
+
+### 예약 상세 조회
+GET localhost:19005/api/v1/reservations/1762f55b-fe84-45bd-b122-9c64f05661d4
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJvd25lcjEyMzQiLCJ1c2VySWQiOiIyIiwicm9sZSI6Ik9XTkVSIiwidG9rZW5UeXBlIjoiYWNjZXNzIiwiaXNzIjoiYXV0aC1zZXJ2aWNlIiwiaWF0IjoxNzM2NDIzNzI4LCJleHAiOjE3MzY0MjQwODh9.NbvlsKn_tA1tE9UU3tPXEhdiArngwTMvF1SC0xzU7fQ
+
+### 예약 목록 검색
+GET localhost:19005/api/v1/reservations?page=0&size=5&sort=createdAt,DESC&status=PENDING
+Content-Type: application/json
+
+### 페인 테스트
+GET localhost:19005/api/v1/reservations/get-data-feign
+Content-Type: application/json

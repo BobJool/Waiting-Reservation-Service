@@ -24,7 +24,11 @@ spring:
         - id: reservation-service
           uri: lb://reservation-service
           predicates:
-            - Path=/api/v1/reservations/**, /api/v1/payments/**
+            - Path=/api/v1/reservations/**
+        - id: payment-service
+          uri: lb://payment-service
+          predicates:
+            - Path=/api/v1/payments/**
         - id: notification-service
           uri: lb://notification-service
           predicates:
@@ -33,6 +37,10 @@ spring:
       discovery:
         locator:
           enabled: true
+  data:
+    redis:
+      host: localhost
+      port: 6379
 
 eureka:
   client:
