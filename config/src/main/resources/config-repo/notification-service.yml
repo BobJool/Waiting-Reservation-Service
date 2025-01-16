@@ -5,7 +5,7 @@ spring:
   application:
     name: notification-service
   config:
-      import: classpath:config-repo/application-key.yml
+    import: classpath:config-repo/application-key.yml
   datasource:
     driver-class-name: org.postgresql.Driver
     url: ${DB_URL}/notification_db
@@ -29,6 +29,17 @@ spring:
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       group-id: ${spring.application.name}-group
     bootstrap-servers: ${KAFKA_SERVER_URL}
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${SENDER_ACCOUNT}
+    password: ${SENDER_PASSWORD}
+    properties:
+      mail.smtp.debug: true
+      mail.smtp.connectiontimeout: 1000 #1초
+      mail.starttls.enable: true
+      mail.smtp.auth: true
+
 
 notification:
   template-mapping:

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class MessagingService {
     private final SlackService slackService;
+    private final MailService mailService;
 
     @Transactional
     public void postNotification(NotificationDto dto) {
@@ -32,8 +33,8 @@ public class MessagingService {
         slackService.chatPostMessage(channelId, message);
     }
 
-    private void sendEmail(String email, String title, String content) {
-        // TODO. Email 라이브러리 적용
+    public void sendEmail(String email, String title, String content) {
+        mailService.sendEmailNotification(email, title, content);
     }
 
 }
