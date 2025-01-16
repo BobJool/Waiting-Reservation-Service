@@ -48,7 +48,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: build-libs
-          path: build/libs/*.jar
+          path: eureka-server/build/libs/*.jar # 정확한 빌드 결과물 경로 지정
 
 
   deploy:
