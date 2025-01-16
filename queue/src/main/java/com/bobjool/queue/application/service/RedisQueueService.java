@@ -84,7 +84,8 @@ public class RedisQueueService {
 		} catch (Exception e) {
 			log.error("Error during processing: {}", e.getMessage(), e);
 			log.info("Rolling back changes...");
-			rollBackDelayOperations(dto.restaurantId(), dto.userId(), originalScore, originalStatus, originalDelayCount);
+			rollBackDelayOperations(dto.restaurantId(), dto.userId(), originalScore, originalStatus,
+				originalDelayCount);
 
 			throw new BobJoolException(ErrorCode.TRANSACTION_FAILED);
 		}
@@ -158,7 +159,8 @@ public class RedisQueueService {
 		rollBackDelayCount(restaurantId, userId, originalDelayCount);
 	}
 
-	private void rollBackCancelOperations(UUID restaurantId, Long userId, Double originalScore, QueueStatus originalStatus) {
+	private void rollBackCancelOperations(UUID restaurantId, Long userId, Double originalScore,
+		QueueStatus originalStatus) {
 		updateQueueStatus(restaurantId, userId, originalStatus);
 		markUserAsWaiting(userId, restaurantId);
 		String waitingListKey = RedisKeyUtil.getWaitingListKey(restaurantId);
@@ -174,7 +176,7 @@ public class RedisQueueService {
 		try {
 			String waitingListKey = RedisKeyUtil.getWaitingListKey(dto.restaurantId());
 			Long position = getPosition(dto.restaurantId());
-			double uniqueScore = (double) position;
+			double uniqueScore = (double)position;
 			boolean addedToQueue = Boolean.TRUE.equals(
 				redisTemplate.opsForZSet().add(waitingListKey, String.valueOf(dto.userId()), uniqueScore)
 			);
@@ -362,7 +364,8 @@ public class RedisQueueService {
 			DiningOption diningOption = DiningOption.valueOf(
 				userQueueDataMap.getOrDefault("dining_option", DiningOption.IN_STORE).toString());
 			QueueType type = QueueType.valueOf(userQueueDataMap.getOrDefault("type", QueueType.ONLINE).toString());
-			QueueStatus status = QueueStatus.valueOf(userQueueDataMap.getOrDefault("status", QueueStatus.WAITING).toString());
+			QueueStatus status = QueueStatus.valueOf(
+				userQueueDataMap.getOrDefault("status", QueueStatus.WAITING).toString());
 			long createdAt = Long.parseLong(userQueueDataMap.getOrDefault("created_at", "0").toString());
 			LocalDateTime createdAtDateTime = null;
 			if (createdAt > 0) {
@@ -370,7 +373,8 @@ public class RedisQueueService {
 			}
 			Long delayCount = Long.valueOf(userQueueDataMap.getOrDefault("delay_count", "0").toString());
 
-			return new UserQueueData(userId, restaurantId, position, member, diningOption, type, status, delayCount, createdAtDateTime);
+			return new UserQueueData(userId, restaurantId, position, member, diningOption, type, status, delayCount,
+				createdAtDateTime);
 		} catch (NumberFormatException e) {
 			throw new BobJoolException(ErrorCode.INVALID_DATA_FORMAT);
 		}

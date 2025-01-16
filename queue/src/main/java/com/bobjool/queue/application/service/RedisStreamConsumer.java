@@ -44,7 +44,6 @@ public class RedisStreamConsumer implements StreamListener<String, MapRecord<Str
 		}
 	}
 
-
 	private void createConsumerGroupIfNotExists(String streamKey, String groupName) {
 		try {
 			redisTemplate.opsForStream().createGroup(streamKey, groupName);
@@ -65,13 +64,13 @@ public class RedisStreamConsumer implements StreamListener<String, MapRecord<Str
 		log.info("Sanitized Data: {}", sanitizedData);
 		switch (sanitizedType) {
 			case "register":
-					QueueRegisterDto registerDto = EventSerializer.deserialize(sanitizedData, QueueRegisterDto.class);
-					queueService.registerQueue(registerDto);
+				QueueRegisterDto registerDto = EventSerializer.deserialize(sanitizedData, QueueRegisterDto.class);
+				queueService.registerQueue(registerDto);
 				break;
 
 			case "delay":
 				QueueDelayDto delayDto = EventSerializer.deserialize(sanitizedData, QueueDelayDto.class);
-				log.info("delay에서 파싱하려고 한거야? 파싱한 dto: "+delayDto);
+				log.info("delay에서 파싱하려고 한거야? 파싱한 dto: " + delayDto);
 				queueService.delayUserRank(delayDto);
 				break;
 

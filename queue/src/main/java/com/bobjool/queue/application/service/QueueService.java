@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
 import com.bobjool.common.presentation.ApiResponse;
+import com.bobjool.queue.application.client.RestaurantClient;
 import com.bobjool.queue.application.dto.QueueStatusResDto;
 import com.bobjool.queue.application.dto.RestaurantCheckOwnerReqDto;
 import com.bobjool.queue.application.dto.RestaurantCheckValidReqDto;
@@ -23,7 +24,6 @@ import com.bobjool.queue.application.dto.redis.QueueCheckInDto;
 import com.bobjool.queue.application.dto.redis.QueueDelayDto;
 import com.bobjool.queue.application.dto.redis.QueueRegisterDto;
 import com.bobjool.queue.infrastructure.messaging.QueueKafkaProducer;
-import com.bobjool.queue.application.client.RestaurantClient;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -52,7 +52,7 @@ public class QueueService {
 			}
 			case "delay" -> {
 				if (isUserWaiting && isUserInQueue) {
-					QueueDelayDto delayDto = (QueueDelayDto) dto;
+					QueueDelayDto delayDto = (QueueDelayDto)dto;
 					redisQueueService.validateNotLastInQueue(delayDto.restaurantId(), delayDto.userId());
 					redisQueueService.validateDelayCount(delayDto.restaurantId(), delayDto.userId());
 					redisStreamProducer.produceMessage(restaurantId, dto, processType);
@@ -124,8 +124,7 @@ public class QueueService {
 	public void isExistRestaurant(UUID restaurantId) {
 		RestaurantCheckValidReqDto reqDto = RestaurantCheckValidReqDto.from(restaurantId);
 		ApiResponse<RestaurantValidResDto> response = restaurantClient.restaurantValidCheck(reqDto);
-		log.info("식당존재검사 : dto- "+reqDto+ "response.data().isDeleted()"+response.data().isDeleted());
-		if(response.data().isDeleted()) {
+		if (response.data().isDeleted()) {
 			throw new BobJoolException(ErrorCode.NOT_AVAILABLE_RESTAURANT);
 		}
 	}
