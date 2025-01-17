@@ -160,7 +160,7 @@ public class AuthService {
         String token = jwtUtil.getTokenFromHeader("Authorization", request);
 
         if (token == null || !jwtUtil.validateRefreshToken(token)) {
-            System.err.println("서비스 1");
+
             throw new BobJoolException(ErrorCode.INVALID_TOKEN);
         }
 
@@ -168,7 +168,7 @@ public class AuthService {
         long expiration = jwtUtil.getRemainingExpiration(token);
 
         boolean isRefreshToken = "refresh".equals(tokenType);
-        System.err.println("서비스 2");
+
         // 블랙리스트에 추가
         jwtBlacklistService.addToBlacklist(token, expiration, isRefreshToken);
     }
