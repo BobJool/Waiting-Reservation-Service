@@ -65,7 +65,10 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: build-libs
-          path: build/libs
+          path: eureka-server/build/libs
+
+      - name: Copy Build Artifacts to Docker Context
+        run: cp eureka-server/build/libs/*.jar .
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -85,7 +88,7 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
         run: |
           # Build a docker container and push it to ECR so that it can be deployed to ECS.
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f eureka-server/Dockerfile eureka-server
+          docker build --build-arg JAR_FILE=*.jar -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f eureka-server/Dockerfile .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
