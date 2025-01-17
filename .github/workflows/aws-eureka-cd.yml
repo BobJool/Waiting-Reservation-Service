@@ -1,14 +1,11 @@
 name: Deploy to Amazon ECS eureka
 
 on:
-  pull_request:
-    branches:
-      - main
-    types:
-      - closed
   push:
     branches:
       - main
+    paths:
+      - 'eureka-server/**'
 
 env:
   AWS_REGION: ap-northeast-2                  # set this to your preferred AWS region, e.g. us-west-1
@@ -19,6 +16,8 @@ env:
   # file, e.g. .aws/task-definition.json
   CONTAINER_NAME: bobjool-eureka-container           # set this to the name of the container in the
   # containerDefinitions section of your task definition
+  EUREKA_HOSTNAME: bobjool-eureka-lb-160323905.ap-northeast-2.elb.amazonaws.com
+  EUREKA_PORT: 19000
 
 permissions:
   contents: read
@@ -86,8 +85,8 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}
-          EUREKA_HOSTNAME: ${{ secrets.EUREKA_HOSTNAME }}
-          EUREKA_PORT: ${{ secrets.EUREKA_PORT }}
+          EUREKA_HOSTNAME: ${{ env.EUREKA_HOSTNAME }}
+          EUREKA_PORT: ${{ env.EUREKA_PORT }}
         run: |
           # Build a docker container and push it to ECR so that it can be deployed to ECS.
           docker build --build-arg SPRING_PROFILES_ACTIVE=prod \
