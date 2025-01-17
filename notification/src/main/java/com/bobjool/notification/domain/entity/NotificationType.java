@@ -32,7 +32,7 @@ public enum NotificationType {
             case "ALERTED" -> ALERTED;
             case "RUSH" -> RUSH;
             case "REMIND" -> REMIND;
-            default -> throw new BobJoolException(ErrorCode.UNSUPPORTED_NOTIFICATION_TYPE);
+            default -> throw new BobJoolException(ErrorCode.UNSUPPORTED_NOTIFICATION);
         };
     }
 }

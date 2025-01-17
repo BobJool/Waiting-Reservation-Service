@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: reservation-service
+  cloud:
+    config:
+      discovery:
+        enabled: true
+        service-id: config-service # Eureka에 등록된 Config 서버의 서비스 ID
+  profiles:
+    active: prod
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://eureka-server:19000/eureka/
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh

@@ -36,12 +36,10 @@ public class TemplateService {
         Template template = this.getTemplateById(id);
         log.info("selected template: {}", template);
 
-        return TemplateDto.from(
-                templateRepository.save(template)
-        );
+        return TemplateDto.from(template);
     }
 
-    public Template selectTemplateEntity(UUID id){
+    public Template selectTemplateEntity(UUID id) {
         return this.getTemplateById(id);
     }
 

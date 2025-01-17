@@ -68,7 +68,7 @@ public class SlackService {
         if (!success) {
             String error = json.getAsJsonObject().get("error").getAsString();
             log.error(error);
-            throw new BobJoolException(ErrorCode.SLACK_MESSAGE_FAIL);
+            throw new BobJoolException(ErrorCode.SLACK_MESSAGE_SEND_FAILED);
         }
 
         JsonElement user = json.getAsJsonObject().get("channel");
@@ -95,7 +95,7 @@ public class SlackService {
         if (!success) {
             String error = json.getAsJsonObject().get("error").getAsString();
             log.error(error);
-            throw new BobJoolException(ErrorCode.SLACK_MESSAGE_FAIL);
+            throw new BobJoolException(ErrorCode.SLACK_MESSAGE_SEND_FAILED);
         }
 
         return true;
