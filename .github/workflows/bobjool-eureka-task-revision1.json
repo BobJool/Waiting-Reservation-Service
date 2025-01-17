@@ -15,16 +15,7 @@
         }
       ],
       "essential": true,
-      "environment": [
-        {
-          "name": "EUREKA_HOSTNAME",
-          "value": "bobjool-eureka-lb-160323905.ap-northeast-2.elb.amazonaws.com"
-        },
-        {
-          "name": "EUREKA_PORT",
-          "value": "19000"
-        }
-      ],
+      "environment": [],
       "environmentFiles": [],
       "mountPoints": [],
       "volumesFrom": [],
