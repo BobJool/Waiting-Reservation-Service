@@ -1,4 +1,4 @@
-name: Deploy to Amazon ECS eureka
+name: Deploy to Amazon ECS gateway
 
 on:
   pull_request:
@@ -12,12 +12,12 @@ on:
 
 env:
   AWS_REGION: ap-northeast-2                  # set this to your preferred AWS region, e.g. us-west-1
-  ECR_REPOSITORY: bobjool/eureka         # set this to your Amazon ECR repository name
-  ECS_SERVICE: bobjool-eureka-service                 # set this to your Amazon ECS service name
+  ECR_REPOSITORY: bobjool/gateway         # set this to your Amazon ECR repository name
+  ECS_SERVICE: bobjool-gateway-service                 # set this to your Amazon ECS service name
   ECS_CLUSTER: bobjool-cluster                # set this to your Amazon ECS cluster name
-  ECS_TASK_DEFINITION: .github/workflows/bobjool-eureka-task-revision1.json # set this to the path to your Amazon ECS task definition
+  ECS_TASK_DEFINITION: .github/workflows/bobjool-gateway-task-revision1.json # set this to the path to your Amazon ECS task definition
   # file, e.g. .aws/task-definition.json
-  CONTAINER_NAME: bobjool-eureka-container           # set this to the name of the container in the
+  CONTAINER_NAME: bobjool-gateway-container           # set this to the name of the container in the
   # containerDefinitions section of your task definition
 
 permissions:
@@ -42,13 +42,13 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build with Gradle
-        run: ./gradlew clean build -p eureka-server # eureka-server 서브프로젝트 빌드
+        run: ./gradlew clean build -p gateway
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v3
         with:
           name: build-libs
-          path: eureka-server/build/libs/*.jar # 정확한 빌드 결과물 경로 지정
+          path: gateway/build/libs/*.jar # 정확한 빌드 결과물 경로 지정
 
 
   deploy:
@@ -65,10 +65,10 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: build-libs
-          path: eureka-server/build/libs
+          path: gateway/build/libs
 
       - name: Copy Build Artifacts to Docker Context
-        run: cp eureka-server/build/libs/*.jar .
+        run: cp gateway/build/libs/*.jar .
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -87,14 +87,14 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}
           EUREKA_HOSTNAME: ${{ secrets.EUREKA_HOSTNAME }}
-          EUREKA_PORT: ${{ secrets.EUREKA_PORT }}
+          GATEWAY_SERVICE_PORT: ${{ secrets.GATEWAY_SERVICE_PORT }}
         run: |
           # Build a docker container and push it to ECR so that it can be deployed to ECS.
           docker build --build-arg SPRING_PROFILES_ACTIVE=prod \
                        --build-arg EUREKA_HOSTNAME=$EUREKA_HOSTNAME \
-                       --build-arg EUREKA_PORT=$EUREKA_PORT \
-                       -t ${{ steps.login-ecr.outputs.registry }}/bobjool/eureka:$GITHUB_SHA \
-                       -f eureka-server/Dockerfile .
+                       --build-arg GATEWAY_SERVICE_PORT=$GATEWAY_SERVICE_PORT \
+                       -t ${{ steps.login-ecr.outputs.registry }}/bobjool/gateway:$GITHUB_SHA \
+                       -f gateway/Dockerfile .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
