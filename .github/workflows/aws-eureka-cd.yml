@@ -104,3 +104,4 @@ jobs:
           service: ${{ env.ECS_SERVICE }}
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
+          timeout: 600 # 안정화 대기 시간을 초 단위로 설정 (예: 10분)
