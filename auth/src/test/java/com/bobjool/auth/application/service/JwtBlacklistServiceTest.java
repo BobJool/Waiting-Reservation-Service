@@ -46,13 +46,13 @@ class JwtBlacklistServiceTest {
 
         // Given
         String token = "testToken"; // 테스트용 토큰
-        when(redisService.hasKey("blacklist:accessToken:" + token)).thenReturn(true); // Redis에서 키가 존재한다고 설정
+        when(redisService.hasKey("blacklist:token:refresh:" + token)).thenReturn(true); // Redis에서 키가 존재한다고 설정
 
         // When: 블랙리스트 확인
         boolean isBlacklisted = jwtBlacklistService.isBlacklisted(token, true);
 
         // Then: 반환 값이 true인지 확인하고, RedisService의 hasKey 메서드 호출 검증
         assertTrue(isBlacklisted);
-        verify(redisService, times(1)).hasKey("blacklist:accessToken:" + token);
+        verify(redisService, times(1)).hasKey("blacklist:token:refresh:" + token);
     }
 }

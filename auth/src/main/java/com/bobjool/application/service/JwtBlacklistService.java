@@ -11,20 +11,20 @@ public class JwtBlacklistService {
 
     private final RedisService redisService;
 
-    private static final String ACCESS_TOKEN_PREFIX = "blacklist:accessToken:";
-    private static final String REFRESH_TOKEN_PREFIX = "blacklist:refreshToken:";
+    private static final String ACCESS_TOKEN_PREFIX = "blacklist:token:access:";
+    private static final String REFRESH_TOKEN_PREFIX = "blacklist:token:refresh:";
 
-    public void addToBlacklist(String token, long expirationInMillis, boolean isAccessToken) {
-        String key = getKey(token, isAccessToken);
+    public void addToBlacklist(String token, long expirationInMillis, boolean isRefreshToken) {
+        String key = getKey(token, isRefreshToken);
         redisService.set(key, "blacklisted", Duration.ofMillis(expirationInMillis));
     }
 
-    public boolean isBlacklisted(String token, boolean isAccessToken) {
-        String key = getKey(token, isAccessToken);
+    public boolean isBlacklisted(String token, boolean isRefreshToken) {
+        String key = getKey(token, isRefreshToken);
         return redisService.hasKey(key);
     }
 
-    private String getKey(String token, boolean isAccessToken) {
-        return (isAccessToken ? ACCESS_TOKEN_PREFIX : REFRESH_TOKEN_PREFIX) + token;
+    private String getKey(String token, boolean isRefreshToken) {
+        return (isRefreshToken ? REFRESH_TOKEN_PREFIX : ACCESS_TOKEN_PREFIX) + token;
     }
 }
