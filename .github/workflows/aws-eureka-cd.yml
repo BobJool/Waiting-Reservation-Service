@@ -65,7 +65,10 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: build-libs
-          path: build/libs
+          path: eureka-server/build/libs
+
+      - name: Copy Build Artifacts to Docker Context
+        run: cp eureka-server/build/libs/*.jar .
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -83,9 +86,15 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}
+          EUREKA_HOSTNAME: ${{ secrets.EUREKA_HOSTNAME }}
+          EUREKA_PORT: ${{ secrets.EUREKA_PORT }}
         run: |
           # Build a docker container and push it to ECR so that it can be deployed to ECS.
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f eureka-server/Dockerfile eureka-server
+          docker build --build-arg SPRING_PROFILES_ACTIVE=prod \
+                       --build-arg EUREKA_HOSTNAME=$EUREKA_HOSTNAME \
+                       --build-arg EUREKA_PORT=$EUREKA_PORT \
+                       -t ${{ steps.login-ecr.outputs.registry }}/bobjool/eureka:$GITHUB_SHA \
+                       -f eureka-server/Dockerfile .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
@@ -104,3 +113,4 @@ jobs:
           service: ${{ env.ECS_SERVICE }}
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
+          timeout: 600 # 안정화 대기 시간을 초 단위로 설정 (예: 10분)

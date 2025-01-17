@@ -1,5 +1,5 @@
 {
-  "taskDefinitionArn": "arn:aws:ecs:ap-northeast-2:120569603428:task-definition/bobjool-eureka-task:1",
+  "family": "bobjool-eureka-task",
   "containerDefinitions": [
     {
       "name": "bobjool-eureka-container",
@@ -15,10 +15,7 @@
         }
       ],
       "essential": true,
-      "environment": [
-        {"name": "EUREKA_HOSTNAME", "value": "bobjool-eureka-lb-160323905.ap-northeast-2.elb.amazonaws.com"},
-        {"name": "EUREKA_PORT", "value": "19000"}
-      ],
+      "environment": [],
       "environmentFiles": [],
       "mountPoints": [],
       "volumesFrom": [],
@@ -38,46 +35,10 @@
       "systemControls": []
     }
   ],
-  "family": "bobjool-eureka-task",
   "executionRoleArn": "arn:aws:iam::120569603428:role/ecsTaskExecutionRole",
   "networkMode": "awsvpc",
-  "revision": 1,
   "volumes": [],
-  "status": "ACTIVE",
-  "requiresAttributes": [
-    {
-      "name": "com.amazonaws.ecs.capability.logging-driver.awslogs"
-    },
-    {
-      "name": "ecs.capability.execution-role-awslogs"
-    },
-    {
-      "name": "com.amazonaws.ecs.capability.ecr-auth"
-    },
-    {
-      "name": "com.amazonaws.ecs.capability.docker-remote-api.1.19"
-    },
-    {
-      "name": "com.amazonaws.ecs.capability.docker-remote-api.1.28"
-    },
-    {
-      "name": "ecs.capability.execution-role-ecr-pull"
-    },
-    {
-      "name": "com.amazonaws.ecs.capability.docker-remote-api.1.18"
-    },
-    {
-      "name": "ecs.capability.task-eni"
-    },
-    {
-      "name": "com.amazonaws.ecs.capability.docker-remote-api.1.29"
-    }
-  ],
   "placementConstraints": [],
-  "compatibilities": [
-    "EC2",
-    "FARGATE"
-  ],
   "requiresCompatibilities": [
     "FARGATE"
   ],
@@ -87,7 +48,5 @@
     "cpuArchitecture": "X86_64",
     "operatingSystemFamily": "LINUX"
   },
-  "registeredAt": "2025-01-16T11:54:10.634Z",
-  "registeredBy": "arn:aws:iam::120569603428:root",
   "tags": []
 }
