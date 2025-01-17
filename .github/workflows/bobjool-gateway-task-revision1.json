@@ -1,15 +1,15 @@
 {
-  "family": "bobjool-eureka-task",
+  "family": "bobjool-gateway-task",
   "containerDefinitions": [
     {
-      "name": "bobjool-eureka-container",
+      "name": "bobjool-gateway-container",
       "image": "120569603428.dkr.ecr.ap-northeast-2.amazonaws.com/bobjool/eureka",
       "cpu": 0,
       "portMappings": [
         {
-          "name": "bobjool-eureka-container-19000-tcp",
-          "containerPort": 19000,
-          "hostPort": 19000,
+          "name": "bobjool-gateway-container-19005-tcp",
+          "containerPort": 19005,
+          "hostPort": 19005,
           "protocol": "tcp",
           "appProtocol": "http"
         }
@@ -21,8 +21,8 @@
           "value": "bobjool-eureka-lb-160323905.ap-northeast-2.elb.amazonaws.com"
         },
         {
-          "name": "EUREKA_PORT",
-          "value": "19000"
+          "name": "GATEWAY_SERVICE_PORT",
+          "value": "19005"
         }
       ],
       "environmentFiles": [],
@@ -32,7 +32,7 @@
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
-          "awslogs-group": "/ecs/bobjool-eureka-task",
+          "awslogs-group": "/ecs/bobjool-gateway-task",
           "mode": "non-blocking",
           "awslogs-create-group": "true",
           "max-buffer-size": "25m",
