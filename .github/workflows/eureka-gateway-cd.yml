@@ -152,14 +152,14 @@ jobs:
           source: "./docker/docker-compose.eureka-gateway.yml"
           target: "/home/ec2-user"
 
-#      - name: Copy .env file to EC2
-#        uses: appleboy/scp-action@v0.1.7
-#        with:
-#          host: ${{ env.EUREKA_HOSTNAME }}
-#          username: ec2-user
-#          key: ${{ secrets.EC2_KEY }}
-#          source: "./docker/.env"
-#          target: "/home/ec2-user"
+      - name: Copy .env file to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ env.EUREKA_HOSTNAME }}
+          username: ec2-user
+          key: ${{ secrets.EC2_KEY }}
+          source: "./docker/.env"
+          target: "/home/ec2-user"
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.3
@@ -183,10 +183,4 @@ jobs:
             aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
             docker compose -f ./docker/docker-compose.eureka-gateway.yml down
             docker compose -f ./docker/docker-compose.eureka-gateway.yml pull
-            # 환경 변수 설정 후 Docker Compose 실행
-            EUREKA_PORT=$EUREKA_PORT \
-            EUREKA_HOSTNAME=$EUREKA_HOSTNAME \
-            GATEWAY_SERVER_PORT=$GATEWAY_SERVER_PORT \
-            REDIS_HOST=$REDIS_HOST \
-            SHARED_REDIS_PORT=$SHARED_REDIS_PORT \
             docker compose -f ./docker/docker-compose.eureka-gateway.yml up -d
