@@ -13,7 +13,7 @@ dependencies {
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     //redis 분산락 적용 라이브러리
-    implementation 'org.redisson:redisson-spring-boot-starter:3.27.0'
+    implementation 'org.redisson:redisson:3.42.0'
     implementation 'org.springframework.kafka:spring-kafka'
     //config server 사용
     implementation 'org.springframework.cloud:spring-cloud-starter-config'
