@@ -1,0 +1,151 @@
+name: Deploy Gateway, Eureka to AWS ECR
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'gateway/**'
+      - 'eureka-server/**'
+
+env:
+  EUREKA_PORT: 19000
+  EUREKA_HOSTNAME: 43.203.114.68
+  GATEWAY_SERVER_PORT: 19005
+  REDIS_HOST: 52.79.241.24
+  SHARED_REDIS_PORT: 6379
+
+
+jobs:
+  build:
+    name: Deploy to ECR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Main Repo
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+
+      - name: Grant execute permission for Gradle Wrapper in gateway directory
+        run: chmod +x gradlew
+
+      - name: Build gateway with Gradle Wrapper
+        run: ./gradlew :gateway:bootJar
+
+      - name: Build eureka-server with Gradle Wrapper
+        run: ./gradlew :eureka-server:bootJar
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+#      - name: Download .env file from private repo
+#        uses: actions/checkout@v4
+#        with:
+#          repository: pickple-ecommerce/config-secrets
+#          token: ${{ secrets.ACCESS_TOKEN }}
+#          path: temp-config-secrets
+#
+#      - name: Move .env file to docker folder
+#        run: |
+#          cp temp-config-secrets/.env docker/.env
+
+      - name: Build, Tag and Push docker image to AWS ECR
+
+        run: |
+          # Set Variables
+          EUREKA_HOSTNAME=${{ env.EUREKA_HOSTNAME }}
+          EUREKA_PORT=${{ env.EUREKA_PORT }}
+          GATEWAY_SERVER_PORT=${{ env.GATEWAY_SERVER_PORT }}
+          REDIS_HOST=${{ env.REDIS_HOST }}
+          SHARED_REDIS_PORT=${{ env.SHARED_REDIS_PORT}}
+          
+          # Build and push images for each service without .env file
+          services=("eureka" "gateway")
+          for service in "${services[@]}"; do
+            docker compose -f docker/docker-compose.eureka-gateway.yml build \
+                --build-arg EUREKA_HOSTNAME=$EUREKA_HOSTNAME \
+                --build-arg EUREKA_PORT=$EUREKA_PORT \
+                --build-arg GATEWAY_SERVER_PORT=$GATEWAY_SERVER_PORT \
+                --build-arg REDIS_HOST=$REDIS_HOST \
+                --build-arg SHARED_REDIS_PORT=$SHARED_REDIS_PORT
+            
+            # Tag and push the image to ECR
+            docker tag ${ECR_REGISTRY}/${ECR_NAMESPACE}/$service:latest $ECR_REGISTRY/${ECR_NAMESPACE}/$service:$IMAGE_TAG
+            docker push $ECR_REGISTRY/${ECR_NAMESPACE}/$service:$IMAGE_TAG
+            echo "$service image is built and pushed to AWS ECR with tag $IMAGE_TAG"
+          done
+
+        env:
+          ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+          ECR_NAMESPACE: ${{ secrets.ECR_NAMESPACE }}
+          IMAGE_TAG: "latest"
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out main repository
+        uses: actions/checkout@v4
+
+#      - name: Download .env file from private repo
+#        uses: actions/checkout@v4
+#        with:
+#          repository: pickple-ecommerce/config-secrets
+#          token: ${{ secrets.ACCESS_TOKEN }}
+#          path: temp-config-secrets
+#
+#      - name: Move .env file to docker folder
+#        run: |
+#          cp temp-config-secrets/.env docker/.env
+
+      - name: Copy Docker compose file to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ env.EUREKA_HOSTNAME }}
+          username: ec2-user
+          key: ${{ secrets.EC2_KEY }}
+          source: "./docker/docker-compose.eureka-gateway.yml"
+          target: "/home/ec2-user"
+
+#      - name: Copy .env file to EC2
+#        uses: appleboy/scp-action@v0.1.7
+#        with:
+#          host: ${{ env.EUREKA_HOSTNAME }}
+#          username: ec2-user
+#          key: ${{ secrets.EC2_KEY }}
+#          source: "./docker/.env"
+#          target: "/home/ec2-user"
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+        with:
+          host: ${{ env.EUREKA_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_KEY }}
+          port: 22
+          envs: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, ECR_REGISTRY, ECR_NAMESPACE
+          script: |
+            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
+            docker compose -f ./docker/docker-compose.eureka-gateway.yml down
+            docker compose -f ./docker/docker-compose.eureka-gateway.yml pull
+            docker compose -f ./docker/docker-compose.eureka-gateway.yml up -d

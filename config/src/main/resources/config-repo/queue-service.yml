@@ -4,15 +4,17 @@ server:
 spring:
   application:
     name: queue-service
+  config:
+    import: classpath:config-repo/application-key.yml
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/queue_db
-    username: postgres
-    password: password
+    url: ${DB_URL}/queue_db
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   data:
     redis:
-      host: localhost
-      port: 6380
+      host: ${QUEUE_REDIS_HOSTNAME}
+      port: ${QUEUE_REDIS_PORT}
       username: default
       password: password
   jpa:
@@ -27,7 +29,7 @@ spring:
   jackson:
     property-naming-strategy: SNAKE_CASE
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${KAFKA_SERVER_URL}
     consumer: # TODO kafka consumer, producer에 대한 설정값 수정은 여기에서
       group-id: ${spring.application.name}-group
       auto-offset-reset: earliest
