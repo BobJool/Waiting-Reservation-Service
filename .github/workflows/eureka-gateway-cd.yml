@@ -168,12 +168,17 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
           ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+          EUREKA_PORT: ${{ env.EUREKA_PORT }}
+          EUREKA_HOSTNAME: ${{ env.EUREKA_HOSTNAME }}
+          GATEWAY_SERVER_PORT: ${{ env.GATEWAY_SERVER_PORT }}
+          REDIS_HOST: ${{ env.REDIS_HOST }}
+          SHARED_REDIS_PORT: ${{ env.SHARED_REDIS_PORT }}
         with:
           host: ${{ env.EUREKA_HOST }}
           username: ec2-user
           key: ${{ secrets.EC2_KEY }}
           port: 22
-          envs: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, ECR_REGISTRY, ECR_NAMESPACE
+          envs: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, ECR_REGISTRY, ECR_NAMESPACE, EUREKA_PORT, EUREKA_HOSTNAME, GATEWAY_SERVER_PORT, REDIS_HOST, SHARED_REDIS_PORT
           script: |
             aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
             docker compose -f ./docker/docker-compose.eureka-gateway.yml down
