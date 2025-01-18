@@ -1,6 +1,6 @@
 FROM openjdk:17-jdk-slim
 
-ARG JAR_FILE=gateway/build/libs/*.jar
+ARG JAR_FILE=build/libs/*.jar
 
 COPY ${JAR_FILE} app.jar
 

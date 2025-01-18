@@ -44,32 +44,32 @@ jobs:
       - name: Upload gateway Build Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: build-libs
+          name: gateway-build-libs
           path: gateway/build/libs/*.jar # 정확한 빌드 결과물 경로 지정
 
       - name: Upload eureka Build Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: build-libs
-          path: eureka-server/build/libs/*.jar # 정확한 빌드 결과물 경로 지정
+          name: eureka-build-libs
+          path: eureka-server/build/libs/*.jar  # 정확한 빌드 결과물 경로 지정
 
       - name: Download gateway Build Artifacts
         uses: actions/download-artifact@v3
         with:
-          name: build-libs
+          name: gateway-build-libs
           path: gateway/build/libs
 
       - name: Copy gateway Build Artifacts to Docker Context
-        run: cp gateway/build/libs/*.jar .
+        run: cp gateway/build/libs/*.jar ./docker
 
       - name: Download eureka Build Artifacts
         uses: actions/download-artifact@v3
         with:
-          name: build-libs
+          name: eureka-build-libs
           path: eureka-server/build/libs
 
       - name: Copy eureak Build Artifacts to Docker Context
-        run: cp eureka-server/build/libs/*.jar .
+        run: cp eureka-server/build/libs/*.jar ./docker
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
