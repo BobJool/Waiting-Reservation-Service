@@ -164,7 +164,7 @@ jobs:
       - name: Create .env file on EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ env.EC2_HOST }}
+          host: ${{ env.EUREKA_HOSTNAME }}
           username: ec2-user
           key: ${{ secrets.EC2_KEY }}
           port: 22
