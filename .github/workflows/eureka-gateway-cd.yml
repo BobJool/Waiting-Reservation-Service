@@ -142,7 +142,7 @@ jobs:
 #      - name: Move .env file to docker folder
 #        run: |
 #          cp temp-config-secrets/.env docker/.env
-
+#     EC2_KEY 수정
       - name: Copy Docker compose file to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
