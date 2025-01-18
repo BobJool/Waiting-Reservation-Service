@@ -169,11 +169,11 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           port: 22
           script: |
-            echo "EUREKA_PORT=$EUREKA_PORT" >> /home/ec2-user/docker/.env
-            echo "EUREKA_HOSTNAME=$EUREKA_HOSTNAME" >> /home/ec2-user/docker/.env
-            echo "GATEWAY_SERVER_PORT=$GATEWAY_SERVER_PORT" >> /home/ec2-user/docker/.env
-            echo "REDIS_HOST=$REDIS_HOST" >> /home/ec2-user/docker/.env
-            echo "SHARED_REDIS_PORT=$SHARED_REDIS_PORT" >> /home/ec2-user/docker/.env
+            echo "EUREKA_PORT=${{ env.EUREKA_PORT }}" >> /home/ec2-user/docker/.env
+            echo "EUREKA_HOSTNAME=${{ env.EUREKA_HOSTNAME }}" >> /home/ec2-user/docker/.env
+            echo "GATEWAY_SERVER_PORT=${{ env.GATEWAY_SERVER_PORT }}" >> /home/ec2-user/docker/.env
+            echo "REDIS_HOST=${{ env.REDIS_HOST }}" >> /home/ec2-user/docker/.env
+            echo "SHARED_REDIS_PORT=${{ env.SHARED_REDIS_PORT }}" >> /home/ec2-user/docker/.env
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.3
