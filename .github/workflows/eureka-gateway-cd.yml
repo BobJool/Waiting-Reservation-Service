@@ -174,7 +174,8 @@ jobs:
             echo "GATEWAY_SERVER_PORT=${{ env.GATEWAY_SERVER_PORT }}" >> /home/ec2-user/docker/.env
             echo "REDIS_HOST=${{ env.REDIS_HOST }}" >> /home/ec2-user/docker/.env
             echo "SHARED_REDIS_PORT=${{ env.SHARED_REDIS_PORT }}" >> /home/ec2-user/docker/.env
-
+      
+      # EC2 인스턴스에 docker-compose 깔고 다시 CI/CD 태우기
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.3
         env:
