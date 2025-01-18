@@ -3,9 +3,9 @@ name: Deploy Gateway, Eureka to AWS ECR
 on:
   push:
     branches: [ "main" ]
-    paths:
-      - 'gateway/**'
-      - 'eureka-server/**'
+#    paths:
+#      - 'gateway/**'
+#      - 'eureka-server/**'
 
 env:
   EUREKA_PORT: 19000
@@ -40,6 +40,18 @@ jobs:
 
       - name: Build eureka-server with Gradle Wrapper
         run: ./gradlew :eureka-server:bootJar
+
+      - name: Upload gateway Build Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-libs
+          path: gateway/build/libs/*.jar # 정확한 빌드 결과물 경로 지정
+
+      - name: Upload eureka Build Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-libs
+          path: eureka-server/build/libs/*.jar # 정확한 빌드 결과물 경로 지정
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
