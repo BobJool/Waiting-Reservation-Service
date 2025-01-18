@@ -188,7 +188,7 @@ jobs:
           REDIS_HOST: ${{ env.REDIS_HOST }}
           SHARED_REDIS_PORT: ${{ env.SHARED_REDIS_PORT }}
         with:
-          host: ${{ env.EUREKA_HOST }}
+          host: ${{ env.EUREKA_HOSTNAME }}
           username: ec2-user
           key: ${{ secrets.EC2_KEY }}
           port: 22
