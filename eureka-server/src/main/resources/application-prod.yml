@@ -10,5 +10,16 @@ eureka:
     register-with-eureka: false
     fetch-registry: false
   instance:
-    hostname: ${EUREKA_HOSTNAME:bobjool-eureka-lb-160323905.ap-northeast-2.elb.amazonaws.com}
+    hostname: ${EUREKA_HOSTNAME}
     prefer-ip-address: true
+
+#management:
+#  endpoints:
+#    web:
+#      exposure:
+#        include: prometheus
+#  endpoint:
+#    health:
+#      show-details: always
+#    prometheus:
+#      enabled: true
