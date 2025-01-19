@@ -25,6 +25,7 @@ dependencies {
 
 
     //redis 분산락 적용 라이브러리
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.redisson:redisson-spring-boot-starter:3.42.0'
 }
 
