@@ -3,9 +3,9 @@ name: Deploy Gateway, Eureka to AWS ECR
 on:
   push:
     branches: [ "main" ]
-#    paths:
-#      - 'gateway/**'
-#      - 'eureka-server/**'
+    paths:
+      - 'gateway/**'
+      - 'eureka-server/**'
 
 env:
   EUREKA_PORT: 19000

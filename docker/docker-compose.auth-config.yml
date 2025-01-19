@@ -1,0 +1,44 @@
+services:
+  auth:
+    image: ${ECR_REGISTRY}/${ECR_NAMESPACE}/auth:latest
+    build:
+      context: ../auth
+      dockerfile: Dockerfile
+    container_name: auth
+    ports:
+      - "${AUTH_SERVER_PORT}:${AUTH_SERVER_PORT}"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - EUREKA_HOSTNAME=${EUREKA_HOSTNAME}
+    depends_on:
+      - config
+
+  config:
+    image: ${ECR_REGISTRY}/${ECR_NAMESPACE}/config:latest
+    build:
+      context: ../config
+      dockerfile: Dockerfile
+    container_name: config
+    ports:
+      - "${CONFIG_SERVER_PORT}:${CONFIG_SERVER_PORT}"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - CONFIG_SERVER_PORT=${CONFIG_SERVER_PORT}
+      - EUREKA_HOSTNAME=${EUREKA_HOSTNAME}
+      - AUTH_SERVER_PORT=${AUTH_SERVER_PORT}
+      - NOTIFICATION_SERVER_PORT=${NOTIFICATION_SERVER_PORT}
+      - PAYMENT_SERVER_PORT=${PAYMENT_SERVER_PORT}
+      - QUEUE_SERVER_PORT=${QUEUE_SERVER_PORT}
+      - RESERVATION_SERVER_PORT=${RESERVATION_SERVER_PORT}
+      - RESTAURANT_SERVER-PORT=${RESTAURANT_SERVER_PORT}
+      - REDIS_HOST=${REDIS_HOST}
+      - SHARED_REDIS_PORT=${SHARED_REDIS_PORT}
+      - QUEUE_REDIS_PORT=${QUEUE_REDIS_PORT}
+      - DB_URL=${DB_URL}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - KAFKA_SERVER_URL=${KAFKA_SERVER_URL}
+      - AUTH_SECRET_KEY=${AUTH_SECRET_KEY}
+      - SENDER_ACCOUNT=${SENDER_ACCOUNT}
+      - SENDER_PASSWORD=${SENDER_PASSWORD}
+      - SLACK_OAUTH_TOKEN=${SLACK_OAUTH_TOKEN}
