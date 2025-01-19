@@ -97,6 +97,7 @@ jobs:
           # Build and push images for each service without .env file
           services=("auth" "config")
           for service in "${services[@]}"; do
+            echo "Building service: $service"
             docker compose -f docker/docker-compose.auth-config.yml build \
                 --build-arg EUREKA_HOSTNAME=${EUREKA_HOSTNAME} \
                 --build-arg AUTH_SERVER_PORT=${AUTH_SERVER_PORT} \
@@ -116,7 +117,7 @@ jobs:
                 --build-arg SENDER_PASSWORD=${SENDER_PASSWORD} \
                 --build-arg DB_USERNAME=${DB_USERNAME} \
                 --build-arg DB_PASSWORD=${DB_PASSWORD} \
-                --build-arg SLACK_OAUTH_TOKEN=${SLACK_OAUTH_TOKEN} \
+                --build-arg SLACK_OAUTH_TOKEN=${SLACK_OAUTH_TOKEN} 
           
             # Tag and push the image to ECR
             docker tag ${ECR_REGISTRY}/${ECR_NAMESPACE}/$service:latest $ECR_REGISTRY/${ECR_NAMESPACE}/$service:$IMAGE_TAG
