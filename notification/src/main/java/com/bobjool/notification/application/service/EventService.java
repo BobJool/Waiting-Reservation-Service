@@ -33,14 +33,13 @@ public class EventService {
     private final RestaurantClient restaurantClient;
     private final CircuitBreakerRegistry circuitBreakerRegistry;
 
-    public void processNotification(NotificationDetails details) throws Exception {
+    public void processNotification(NotificationDetails details) {
         loadContacts(details);
         bindToTemplate(details);
         UUID notificationId = saveHistory(details);
         pushNotificationToSlack(notificationId, details);
     }
 
-    @Transactional(readOnly = true)
     protected void bindToTemplate(NotificationDetails details) {
         TemplateDto template = templateService.selectTemplate(details.getTemplateId());
         String messageContent = templateConvertService.templateBinding(template.template(), details.getMetaData());
@@ -50,7 +49,6 @@ public class EventService {
         details.applyMessageTitleStyle();
     }
 
-    @Transactional
     protected UUID saveHistory(NotificationDetails details) {
         return historyService.saveNotification(
                 details.getTemplateId(),
