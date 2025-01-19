@@ -7,6 +7,7 @@ import com.bobjool.notification.application.client.UserClient;
 import com.bobjool.notification.application.dto.RestaurantContactDto;
 import com.bobjool.notification.application.dto.TemplateDto;
 import com.bobjool.notification.application.dto.UserContactDto;
+import com.bobjool.notification.domain.entity.NotificationStatus;
 import com.bobjool.notification.domain.service.NotificationDetails;
 import com.bobjool.notification.domain.service.TemplateConvertService;
 import feign.FeignException;
@@ -16,6 +17,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
 
 @Slf4j(topic = "EventService")
 @Service
@@ -33,8 +36,8 @@ public class EventService {
     public void processNotification(NotificationDetails details) throws Exception {
         loadContacts(details);
         bindToTemplate(details);
-        saveHistory(details);
-        pushNotificationToSlack(details);
+        UUID notificationId = saveHistory(details);
+        pushNotificationToSlack(notificationId, details);
     }
 
     @Transactional(readOnly = true)
@@ -48,21 +51,32 @@ public class EventService {
     }
 
     @Transactional
-    protected void saveHistory(NotificationDetails details) {
-        historyService.saveNotification(
+    protected UUID saveHistory(NotificationDetails details) {
+        return historyService.saveNotification(
                 details.getTemplateId(),
                 details.getUserId(),
                 details.getJsonMetaData(),
                 details.getMessageTitle().concat(details.getMessageContent()),
                 details.getUserContact()
         );
-        log.info("Notification history saved complete");
     }
 
-    public void pushNotificationToSlack(NotificationDetails details) throws Exception {
+    @Transactional
+    protected void updateNotificationStateFailed(UUID id) {
+        historyService.updateNotificationState(id, NotificationStatus.FAILED);
+    }
+
+    @Transactional
+    protected void updateNotificationStateSent(UUID id) {
+        historyService.updateNotificationState(id, NotificationStatus.SENT);
+    }
+
+    @Transactional
+    public void pushNotificationToSlack(UUID id, NotificationDetails details) {
         CircuitBreaker circuitBreaker = circuitBreakerRegistry.circuitBreaker("pushNotificationToSlack");
         log.info("Circuit status: {}", circuitBreaker.getState());
 
+        updateNotificationStateFailed(id);
         try {
             circuitBreaker.executeRunnable(() -> {
                 messagingService.sendDirectMessage(
@@ -77,6 +91,8 @@ public class EventService {
             log.error("Slack server has a problem", e);
             pushNotificationToMail(details, e);
         }
+        updateNotificationStateSent(id);
+
     }
 
     public void pushNotificationToMail(NotificationDetails details, Throwable t) {

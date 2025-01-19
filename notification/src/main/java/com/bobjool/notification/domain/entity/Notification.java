@@ -45,7 +45,12 @@ public class Notification extends BaseEntity {
                 .jsonData(jsonData)
                 .message(message)
                 .contact(contact)
-                .status(NotificationStatus.SENT)
+                .status(NotificationStatus.PENDING)
                 .build();
     }
+
+    public void updateStatus(NotificationStatus status) {
+        this.status = status;
+    }
+
 }
