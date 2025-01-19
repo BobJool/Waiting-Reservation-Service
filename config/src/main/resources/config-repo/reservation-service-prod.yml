@@ -1,5 +1,5 @@
 server:
-  port: ${RESERVATION_SERVICE_PORT:19040}
+  port: ${RESERVATION_SERVER_PORT:19040}
 
 spring:
   application:
@@ -22,7 +22,7 @@ spring:
     property-naming-strategy: SNAKE_CASE
   kafka:
     bootstrap-servers: ${KAFKA_SERVER_URL}
-    consumer: # TODO kafka consumer, producer에 대한 설정값 수정은 여기에서
+    consumer:
       group-id: ${spring.application.name}-group
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
@@ -36,7 +36,7 @@ spring:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://eureka-server:19000/eureka/
+      defaultZone: http://${EUREKA_HOSTNAME}:19000/eureka/
 
 management:
 #  zipkin:
@@ -48,4 +48,4 @@ management:
   endpoints:
     web:
       exposure:
-        include: refresh
+        include: "*"

@@ -105,7 +105,7 @@ public class RestaurantSchedule extends BaseEntity {
    * @return true: 수용 가능, false: 초과
    */
   public boolean isCapacityExceeded(int requestedCapacity) {
-    return this.maxCapacity > requestedCapacity;
+    return this.maxCapacity >= requestedCapacity;
   }
 
 }

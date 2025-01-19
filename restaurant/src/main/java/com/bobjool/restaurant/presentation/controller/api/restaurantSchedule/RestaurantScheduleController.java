@@ -68,7 +68,6 @@ public class RestaurantScheduleController {
   public ResponseEntity<ApiResponse<RestaurantScheduleResDto>> reserveSchedule2(
           @Valid @RequestBody RestaurantScheduleReserveReqDto scheduleReserveReqDto,
           @PathVariable("scheduleId") UUID scheduleId) {
-    log.info("update.RestaurantUpdateReqDto={}", scheduleReserveReqDto);
     RestaurantScheduleResDto response = scheduleService.reserveSchedule(scheduleId,
             scheduleReserveReqDto.toServiceDto());
     return ApiResponse.success(SuccessCode.SUCCESS_UPDATE, response);
@@ -103,7 +102,6 @@ public class RestaurantScheduleController {
   public ResponseEntity<ApiResponse<PageResponse<RestaurantScheduleResDto>>> readAllSchedule(
       @SortDefault(sort = "createdAt", direction = Direction.DESC)
       Pageable pageable) {
-    log.info("getAllRestaurantsSchedule");
 
     Page<RestaurantScheduleResDto> resPage
         = scheduleService.AllSchedules(pageable);
@@ -117,7 +115,6 @@ public class RestaurantScheduleController {
       @SortDefault(sort = "createdAt", direction = Direction.DESC)
       Pageable pageable,
       @PathVariable("restaurantId") UUID restaurantId) {
-    log.info("getAllRestaurants");
 
     Page<RestaurantScheduleResDto> resPage
         = scheduleService.readForOneRestaurant(restaurantId, pageable);
@@ -132,7 +129,6 @@ public class RestaurantScheduleController {
       @PathVariable("restaurantId") UUID restaurantId,
       @PathVariable("date") LocalDate date
       ) {
-    log.info("getAllRestaurants");
 
     Page<RestaurantScheduleResDto> resPage
         = scheduleService.findAllByRestaurantIdAndDate(restaurantId, date, pageable);

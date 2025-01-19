@@ -12,7 +12,7 @@ spring:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://eureka-server:19000/eureka/
+      defaultZone: http://${EUREKA_HOSTNAME}:19000/eureka/
 
 management:
   endpoints:
