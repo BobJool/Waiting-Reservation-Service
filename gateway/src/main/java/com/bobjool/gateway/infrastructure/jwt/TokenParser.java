@@ -57,7 +57,8 @@ public class TokenParser {
 
 	private String getClaims(String token, String claimKey) {
 		try {
-			if (redisService.isBlackList(token)) {
+			String tokenType = getTokenType(token);
+			if (redisService.isBlacklisted(token, tokenType)) {
 				throw new TokenException(ErrorCode.TOKEN_BLACKLISTED);
 			}
 
@@ -90,5 +91,10 @@ public class TokenParser {
 		} catch (Exception e) {
 			throw new TokenException(ErrorCode.TOKEN_INVALID);
 		}
+	}
+
+	public String getTokenType(String token) {
+		Claims claims = parseClaims(token);
+		return claims.get("tokenType", String.class);
 	}
 }

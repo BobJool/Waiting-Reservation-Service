@@ -4,11 +4,13 @@ server:
 spring:
   application:
     name: auth-service
+  config:
+    import: classpath:config-repo/application-key.yml
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/user_db
-    username: postgres
-    password: password
+    url: ${DB_URL}/user_db
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update
@@ -20,8 +22,8 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
   data:
     redis:
-      host: shared-redis
-      port: 6379
+      host: ${SHARED_REDIS_HOSTNAME}
+      port: ${SHARED_REDIS_PORT}
   jackson:
     property-naming-strategy: SNAKE_CASE
 

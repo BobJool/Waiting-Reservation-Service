@@ -32,9 +32,11 @@ public enum ErrorCode {
     DUPLICATE_SLACK_EMAIL(HttpStatus.BAD_REQUEST, "이미 존재하는 Slack 이메일입니다."),
     TOKEN_MISSING(HttpStatus.UNAUTHORIZED, "토큰이 누락되었습니다."),
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
+    INVALID_TOKEN_TYPE(HttpStatus.UNAUTHORIZED, "토큰 타입이 올바르지 않습니다."),
     EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "만료된 JWT 토큰입니다."),
     UNSUPPORTED_TOKEN(HttpStatus.UNAUTHORIZED, "지원하지 않는 JWT 토큰 형식입니다."),
     UNKNOWN_TOKEN_TYPE(HttpStatus.BAD_REQUEST, "토큰 타입이 확인되지 않았습니다."),
+    TOKEN_BLACKLISTED(HttpStatus.FORBIDDEN, "해당 토큰은 블랙리스트에 등록되어 있습니다."),
     MISSING_OWNER_ROLE(HttpStatus.FORBIDDEN, "해당 사용자는 권한이 OWNER가 아닙니다."),
 
     // 레스토랑
