@@ -8,12 +8,13 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class RedisService {
 
-	private static final String ACCESS_TOKEN_PREFIX = "blacklist:accessToken:";
+	private static final String ACCESS_TOKEN_PREFIX = "blacklist:token:access:";
+	private static final String REFRESH_TOKEN_PREFIX = "blacklist:token:refresh:";
 
 	private final RedisTemplate<String, Object> redisTemplate;
 
-	public Boolean isBlackList(String token) {
-		return Boolean.TRUE.equals(redisTemplate.hasKey(ACCESS_TOKEN_PREFIX + token));
+	public boolean isBlacklisted(String token, String tokenType) {
+		String key = (tokenType.equals("refresh") ? REFRESH_TOKEN_PREFIX : ACCESS_TOKEN_PREFIX) + token;
+		return redisTemplate.hasKey(key);
 	}
-
 }

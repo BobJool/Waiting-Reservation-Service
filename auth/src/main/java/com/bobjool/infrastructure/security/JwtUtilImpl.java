@@ -1,6 +1,7 @@
 package com.bobjool.infrastructure.security;
 
 import com.bobjool.application.interfaces.JwtUtil;
+import com.bobjool.application.service.JwtBlacklistService;
 import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
 import com.bobjool.domain.entity.User;
@@ -27,6 +28,7 @@ import java.util.*;
 public class JwtUtilImpl implements JwtUtil {
 
     private final RedisTemplate<String, Object> redisTemplate;
+    private final JwtBlacklistService jwtBlacklistService;
     private static final String BEARER_PREFIX = "Bearer ";
     private static final long REFRESH_TOKEN_TIME = 14 * 24 * 60 * 60 * 1000L; // 14 days
 
@@ -50,26 +52,32 @@ public class JwtUtilImpl implements JwtUtil {
 
     @Override
     public String createAccessToken(User user) {
-        // Redis에 AccessToken 저장
-//        String redisKey = "token:" + user.getUsername() + ":access";
-//        redisTemplate.opsForValue().set(redisKey, token, Duration.ofMillis(accessExpiration));
-        return generateToken(user, "access", accessExpiration);
+        return generateCreateToken(user, accessExpiration);
     }
 
     @Override
     public String createRefreshToken(User user) {
-        // Redis에 RefreshToken 저장
-//        String redisKey = "token:" + username + ":refresh";
-//        redisTemplate.opsForValue().set(redisKey, token, Duration.ofMillis(REFRESH_TOKEN_TIME));
-        return generateToken(user, "refresh", REFRESH_TOKEN_TIME);
+        return generateRefreshToken(user, REFRESH_TOKEN_TIME);
     }
 
-    private String generateToken(User user, String tokenType, long expiration) {
+
+    private String generateCreateToken(User user, long expiration) {
         return BEARER_PREFIX + Jwts.builder()
                 .setSubject(user.getUsername())
                 .claim("userId", String.valueOf(user.getId()))
                 .claim("role", user.getRole())
-                .claim("tokenType", tokenType)
+                .claim("tokenType", "access")
+                .setIssuer(issuer)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .signWith(key, signatureAlgorithm)
+                .compact();
+    }
+
+    private String generateRefreshToken(User user, long expiration) {
+        return Jwts.builder()
+                .setSubject(user.getUsername())
+                .claim("tokenType", "refresh")
                 .setIssuer(issuer)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
@@ -84,6 +92,29 @@ public class JwtUtilImpl implements JwtUtil {
             return true;
         } catch (JwtException e) {
             log.error("JWT validation error: {}", e.getMessage());
+            throw new BobJoolException(ErrorCode.INVALID_TOKEN);
+        }
+    }
+
+    @Override
+    public boolean validateRefreshToken(String refreshToken) {
+        try {
+            Claims claims = validateAndGetClaims(refreshToken);
+
+            String tokenType = claims.get("tokenType", String.class);
+            boolean isRefreshToken = tokenType.equals("refresh");
+
+            if (!isRefreshToken) {
+                throw new BobJoolException(ErrorCode.INVALID_TOKEN_TYPE);
+            }
+
+            if (jwtBlacklistService.isBlacklisted(refreshToken, isRefreshToken)) {
+                throw new BobJoolException(ErrorCode.TOKEN_BLACKLISTED);
+            }
+
+            return true;
+        } catch (JwtException e) {
+            System.err.println("여기2");
             throw new BobJoolException(ErrorCode.INVALID_TOKEN);
         }
     }
@@ -105,12 +136,14 @@ public class JwtUtilImpl implements JwtUtil {
     @Override
     public String getTokenFromHeader(String headerName, HttpServletRequest request) {
         String header = request.getHeader(headerName);
+
         if (!StringUtils.hasText(header)) {
             throw new BobJoolException(ErrorCode.TOKEN_MISSING);
         }
         if (!header.startsWith(BEARER_PREFIX)) {
             throw new BobJoolException(ErrorCode.INVALID_TOKEN);
         }
+
         return header.substring(BEARER_PREFIX.length());
     }
 
@@ -130,9 +163,23 @@ public class JwtUtilImpl implements JwtUtil {
     @Override
     public List<String> getAllActiveTokens(String username) {
         Set<String> keys = redisTemplate.keys("token:" + username + ":*");
+
         if (keys == null || keys.isEmpty()) {
             return Collections.emptyList();
         }
+
         return new ArrayList<>(keys);
+    }
+
+    @Override
+    public String extractUsernameFromRefreshToken(String refreshToken) {
+        Claims claims = validateAndGetClaims(refreshToken);
+
+        String tokenType = claims.get("tokenType", String.class);
+        if (!"refresh".equals(tokenType)) {
+            throw new BobJoolException(ErrorCode.INVALID_TOKEN_TYPE);
+        }
+
+        return claims.getSubject();
     }
 }
