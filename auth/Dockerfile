@@ -6,4 +6,6 @@ COPY ${JAR_FILE} app.jar
 
 EXPOSE 19010
 
+ENV SPRING_PROFILES_ACTIVE=prod
+
 ENTRYPOINT ["java", "-jar", "app.jar"]
