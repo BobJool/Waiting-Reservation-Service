@@ -4,13 +4,14 @@ import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
 import com.bobjool.notification.application.client.RestaurantClient;
 import com.bobjool.notification.application.client.UserClient;
-import com.bobjool.notification.application.dto.NotificationDto;
 import com.bobjool.notification.application.dto.RestaurantContactDto;
 import com.bobjool.notification.application.dto.TemplateDto;
 import com.bobjool.notification.application.dto.UserContactDto;
 import com.bobjool.notification.domain.service.NotificationDetails;
 import com.bobjool.notification.domain.service.TemplateConvertService;
 import feign.FeignException;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,12 +28,66 @@ public class EventService {
 
     private final UserClient userClient;
     private final RestaurantClient restaurantClient;
+    private final CircuitBreakerRegistry circuitBreakerRegistry;
 
-    public void processNotification(NotificationDetails details) {
+    public void processNotification(NotificationDetails details) throws Exception {
         loadContacts(details);
         bindToTemplate(details);
         saveHistory(details);
-        pushNotification(details);
+        pushNotificationToSlack(details);
+    }
+
+    @Transactional(readOnly = true)
+    protected void bindToTemplate(NotificationDetails details) {
+        TemplateDto template = templateService.selectTemplate(details.getTemplateId());
+        String messageContent = templateConvertService.templateBinding(template.template(), details.getMetaData());
+        String messageTitle = templateConvertService.templateBinding(template.title(), details.getMetaData());
+        details.updateMessage(messageTitle, messageContent);
+        details.updateTemplateData(template.variables());
+        details.applyMessageTitleStyle();
+    }
+
+    @Transactional
+    protected void saveHistory(NotificationDetails details) {
+        historyService.saveNotification(
+                details.getTemplateId(),
+                details.getUserId(),
+                details.getJsonMetaData(),
+                details.getMessageTitle().concat(details.getMessageContent()),
+                details.getUserContact()
+        );
+        log.info("Notification history saved complete");
+    }
+
+    public void pushNotificationToSlack(NotificationDetails details) throws Exception {
+        CircuitBreaker circuitBreaker = circuitBreakerRegistry.circuitBreaker("pushNotificationToSlack");
+        log.info("Circuit status: {}", circuitBreaker.getState());
+
+        try {
+            circuitBreaker.executeRunnable(() -> {
+                messagingService.sendDirectMessage(
+                        details.getUserSlack(),
+                        details.getMessageTitle().concat(
+                                details.getMessageContent()
+                        )
+                );
+                log.info("Successfully sent a Slack message");
+            });
+        } catch (Exception e) {
+            log.error("Slack server has a problem", e);
+            pushNotificationToMail(details, e);
+        }
+    }
+
+    public void pushNotificationToMail(NotificationDetails details, Throwable t) {
+        log.error("Send a notification by replacing it with a mail instead of a slack", t);
+        changeEmailChannel(details);
+
+        messagingService.sendEmail(
+                details.getUserEmail(),
+                details.getMessageTitle(),
+                details.getMessageContent()
+        );
     }
 
     private void loadContacts(NotificationDetails details) {
@@ -75,38 +130,9 @@ public class EventService {
         }
     }
 
-    @Transactional(readOnly = true)
-    protected void bindToTemplate(NotificationDetails details) {
-        TemplateDto template = templateService.selectTemplate(details.getTemplateId());
-        String messageContent = templateConvertService.templateBinding(template.template(), details.getMetaData());
-        String messageTitle = templateConvertService.templateBinding(template.title(), details.getMetaData());
-        details.updateMessage(messageTitle, messageContent);
-        details.updateTemplateData(template.variables());
-        details.applyMessageTitleStyle();
-    }
-
-    private void pushNotification(NotificationDetails details) {
-        NotificationDto dto = NotificationDto.from(details);
-        messagingService.postNotification(dto);
-        log.info("Notification posted successfully");
-
-//        details.updateEmailChannel();
-//        details.applyMessageTypeMail();
-//        NotificationDto dto = NotificationDto.from(details);
-//        messagingService.postNotification(dto);
-
-    }
-
-    @Transactional
-    protected void saveHistory(NotificationDetails details) {
-        historyService.saveNotification(
-                details.getTemplateId(),
-                details.getUserId(),
-                details.getJsonMetaData(),
-                details.getMessageTitle().concat(details.getMessageContent()),
-                details.getUserContact()
-        );
-        log.info("Notification history saved complete");
+    private void changeEmailChannel(NotificationDetails details) {
+        details.updateEmailChannel();
+        details.applyMessageTypeMail();
     }
 
 }
