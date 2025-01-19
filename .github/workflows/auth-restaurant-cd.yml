@@ -98,11 +98,7 @@ jobs:
           DB_USERNAME=${{ secrets.DB_USERNAME}}
           DB_PASSWORD=${{ secrets.DB_PASSWORD}}
           
-          # Build and push images for each service without .env file
-          services=("auth" "restaurant")
-          for service in "${services[@]}"; do
-            echo "Building service: $service"
-            docker compose -f docker/docker-compose.auth-restaurant.yml build \
+          docker compose -f docker/docker-compose.auth-restaurant.yml build \
                 --build-arg EUREKA_HOSTNAME=$EUREKA_HOSTNAME \
                 --build-arg AUTH_SERVER_PORT=$AUTH_SERVER_PORT \
                 --build-arg RESTAURANT_SERVER_PORT=$RESTAURANT_SERVER_PORT \
@@ -111,9 +107,12 @@ jobs:
                 --build-arg DB_URL=$DB_URL \
                 --build-arg AUTH_SECRET_KEY=$AUTH_SECRET_KEY \
                 --build-arg DB_USERNAME=$DB_USERNAME \
-                --build-arg DB_PASSWORD=$DB_PASSWORD \
-            echo "after docker compose build : $service"
-          
+                --build-arg DB_PASSWORD=$DB_PASSWORD 
+          # Build and push images for each service without .env file
+          services=("auth" "restaurant")
+          for service in "${services[@]}"; do
+            echo "Building service: $service"
+            
             # Tag and push the image to ECR
             docker tag ${ECR_REGISTRY}/${ECR_NAMESPACE}/$service:latest $ECR_REGISTRY/${ECR_NAMESPACE}/$service:$IMAGE_TAG
             docker push $ECR_REGISTRY/${ECR_NAMESPACE}/$service:$IMAGE_TAG
