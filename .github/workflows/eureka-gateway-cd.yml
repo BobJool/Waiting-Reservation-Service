@@ -3,9 +3,9 @@ name: Deploy Gateway, Eureka to AWS ECR
 on:
   push:
     branches: [ "main" ]
-    paths:
-      - 'gateway/**'
-      - 'eureka-server/**'
+#    paths:
+#      - 'gateway/**'
+#      - 'eureka-server/**'
 
 env:
   EUREKA_PORT: 19000
@@ -13,6 +13,7 @@ env:
   GATEWAY_SERVER_PORT: 19005
   REDIS_HOST: 52.79.241.24
   SHARED_REDIS_PORT: 6379
+  SPRING_PROFILES_ACTIVE: prod
 
 
 jobs:
@@ -97,6 +98,7 @@ jobs:
 
         run: |
           # Set Variables
+          SPRING_PROFILES_ACTIVE=${{ env.SPRING_PROFILES_ACTIVE }}
           EUREKA_HOSTNAME=${{ env.EUREKA_HOSTNAME }}
           EUREKA_PORT=${{ env.EUREKA_PORT }}
           GATEWAY_SERVER_PORT=${{ env.GATEWAY_SERVER_PORT }}
@@ -107,6 +109,7 @@ jobs:
           services=("eureka" "gateway")
           for service in "${services[@]}"; do
             docker compose -f docker/docker-compose.eureka-gateway.yml build \
+                --build-arg SPRING_PROFILES_ACTIVE=$SPRING_PROFILES_ACTIVE \
                 --build-arg EUREKA_HOSTNAME=$EUREKA_HOSTNAME \
                 --build-arg EUREKA_PORT=$EUREKA_PORT \
                 --build-arg GATEWAY_SERVER_PORT=$GATEWAY_SERVER_PORT \
@@ -169,6 +172,7 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           port: 22
           script: |
+            echo "SPRING_PROFILES_ACTIVE=${{ env.SPRING_PROFILES_ACTIVE }}" >> /home/ec2-user/docker/.env
             echo "EUREKA_PORT=${{ env.EUREKA_PORT }}" >> /home/ec2-user/docker/.env
             echo "EUREKA_HOSTNAME=${{ env.EUREKA_HOSTNAME }}" >> /home/ec2-user/docker/.env
             echo "GATEWAY_SERVER_PORT=${{ env.GATEWAY_SERVER_PORT }}" >> /home/ec2-user/docker/.env
@@ -182,6 +186,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
           ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+          SPRING_PROFILES_ACTIVE: ${{ env.SPRING_PROFILES_ACTIVE }}
           EUREKA_PORT: ${{ env.EUREKA_PORT }}
           EUREKA_HOSTNAME: ${{ env.EUREKA_HOSTNAME }}
           GATEWAY_SERVER_PORT: ${{ env.GATEWAY_SERVER_PORT }}
@@ -192,9 +197,9 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_KEY }}
           port: 22
-          envs: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, ECR_REGISTRY, ECR_NAMESPACE, EUREKA_PORT, EUREKA_HOSTNAME, GATEWAY_SERVER_PORT, REDIS_HOST, SHARED_REDIS_PORT
+          envs: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, ECR_REGISTRY, ECR_NAMESPACE, SPRING_PROFILES_ACTIVE, EUREKA_PORT, EUREKA_HOSTNAME, GATEWAY_SERVER_PORT, REDIS_HOST, SHARED_REDIS_PORT
           script: |
             aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
             docker-compose -f ./docker/docker-compose.eureka-gateway.yml down
             docker-compose -f ./docker/docker-compose.eureka-gateway.yml pull
-            docker-compose -f ./docker/docker-compose.eureka-gateway.yml up -d
+            docker-compose -f ./docker/docker-compose.eureka-gateway.yml up

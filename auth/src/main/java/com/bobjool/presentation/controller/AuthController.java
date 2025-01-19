@@ -1,5 +1,6 @@
 package com.bobjool.presentation.controller;
 
+import com.bobjool.application.dto.TokensResDto;
 import com.bobjool.application.dto.UserResDto;
 import com.bobjool.application.service.AuthService;
 import com.bobjool.common.infra.aspect.RequireRole;
@@ -67,6 +68,19 @@ public class AuthController {
         return ApiResponse.success(
                 SuccessCode.SUCCESS_UPDATE,
                 response
+        );
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<ApiResponse<TokensResDto>> refreshAccessToken(
+            HttpServletRequest request
+    ) {
+
+        TokensResDto tokens = authService.refreshToken(request);
+
+        return ApiResponse.success(
+                SuccessCode.SUCCESS,
+                tokens
         );
     }
 }
