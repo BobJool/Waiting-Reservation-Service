@@ -94,30 +94,51 @@ jobs:
       - name: Build, Tag and Push docker image to AWS ECR
 
         run: |
+          # Set Variables
+          EUREKA_HOSTNAME=${{ env.EUREKA_HOSTNAME }}
+          AUTH_SERVER_PORT=${{ env.AUTH_SERVER_PORT }}
+          CONFIG_SERVER_PORT: ${{ env.CONFIG_SERVER_PORT }}
+          RESTAURANT_SERVER_PORT: ${{ env.RESTAURANT_SERVER_PORT }}
+          QUEUE_SERVER_PORT: ${{ env.QUEUE_SERVER_PORT }}
+          RESERVATION_SERVER_PORT: ${{ env.RESERVATION_SERVER_PORT }}
+          NOTIFICATION_SERVER_PORT: ${{ env.NOTIFICATION_SERVER_PORT }}
+          PAYMENT_SERVER_PORT: ${{ env.PAYMENT_SERVER_PORT }} 
+          REDIS_HOST: ${{ env.REDIS_HOST }}
+          SHARED_REDIS_HOST: ${{ env.SHARED_REDIS_PORT }}
+          QUEUE_REDIS_HOST: ${{ env.QUEUE_REDIS_PORT }}
+          DB_URL: ${{ env.DB_URL }}
+          KAFKA_SERVER_URL: ${{ env.KAFKA_SERVER_URL }}
+          AUTH_SECRET_KEY: ${{ secrets.AUTH_SECRET_KEY }}
+          SENDER_ACCOUNT: ${{ secrets.SENDER_ACCOUNT }}
+          SENDER_PASSWORD: ${{ secrets.SENDER_PASSWORD }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME}}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD}}
+          SLACK_OAUTH_TOKEN: ${{ secrets.SLACK_OAUTH_TOKEN }}
+          
           # Build and push images for each service without .env file
           services=("auth" "config")
           for service in "${services[@]}"; do
             echo "Building service: $service"
             docker compose -f docker/docker-compose.auth-config.yml build \
-                --build-arg EUREKA_HOSTNAME=${EUREKA_HOSTNAME} \
-                --build-arg AUTH_SERVER_PORT=${AUTH_SERVER_PORT} \
-                --build-arg CONFIG_SERVER_PORT=${CONFIG_SERVER_PORT} \
-                --build-arg RESTAURANT_SERVER_PORT=${RESTAURANT_SERVER_PORT} \
-                --build-arg QUEUE_SERVER_PORT=${QUEUE_SERVER_PORT} \
-                --build-arg RESERVATION_SERVER_PORT=${RESERVATION_SERVER_PORT} \
-                --build-arg NOTIFICATION_SERVER_PORT=${NOTIFICATION_SERVER_PORT} \
-                --build-arg PAYMENT_SERVER_PORT=${PAYMENT_SERVER_PORT} \
-                --build-arg REDIS_HOST=${REDIS_HOST} \
-                --build-arg SHARED_REDIS_PORT=${SHARED_REDIS_PORT} \
-                --build-arg QUEUE_REDIS_PORT=${QUEUE_REDIS_PORT} \
-                --build-arg DB_URL=${DB_URL} \
-                --build-arg KAFKA_SERVER_URL=${KAFKA_SERVER_URL} \
-                --build-arg AUTH_SECRET_KEY=${AUTH_SECRET_KEY} \
-                --build-arg SENDER_ACCOUNT=${SENDER_ACCOUNT} \
-                --build-arg SENDER_PASSWORD=${SENDER_PASSWORD} \
-                --build-arg DB_USERNAME=${DB_USERNAME} \
-                --build-arg DB_PASSWORD=${DB_PASSWORD} \
-                --build-arg SLACK_OAUTH_TOKEN=${SLACK_OAUTH_TOKEN} 
+                --build-arg EUREKA_HOSTNAME=$EUREKA_HOSTNAME \
+                --build-arg AUTH_SERVER_PORT=$AUTH_SERVER_PORT \
+                --build-arg CONFIG_SERVER_PORT=$CONFIG_SERVER_PORT \
+                --build-arg RESTAURANT_SERVER_PORT=$RESTAURANT_SERVER_PORT \
+                --build-arg QUEUE_SERVER_PORT=$QUEUE_SERVER_PORT \
+                --build-arg RESERVATION_SERVER_PORT=$RESERVATION_SERVER_PORT \
+                --build-arg NOTIFICATION_SERVER_PORT=$NOTIFICATION_SERVER_PORT \
+                --build-arg PAYMENT_SERVER_PORT=$PAYMENT_SERVER_PORT \
+                --build-arg REDIS_HOST=$REDIS_HOST \
+                --build-arg SHARED_REDIS_PORT=$SHARED_REDIS_PORT \
+                --build-arg QUEUE_REDIS_PORT=$QUEUE_REDIS_PORT \
+                --build-arg DB_URL=$DB_URL \
+                --build-arg KAFKA_SERVER_URL=$KAFKA_SERVER_URL \
+                --build-arg AUTH_SECRET_KEY=$AUTH_SECRET_KEY \
+                --build-arg SENDER_ACCOUNT=$SENDER_ACCOUNT \
+                --build-arg SENDER_PASSWORD=$SENDER_PASSWORD \
+                --build-arg DB_USERNAME=$DB_USERNAME \
+                --build-arg DB_PASSWORD=$DB_PASSWORD \
+                --build-arg SLACK_OAUTH_TOKEN=$SLACK_OAUTH_TOKEN 
             echo "after docker compose build : $service"
           
             # Tag and push the image to ECR
@@ -127,28 +148,9 @@ jobs:
           done
 
         env:
-          EUREKA_HOSTNAME: ${{ env.EUREKA_HOSTNAME }}
-          AUTH_SERVER_PORT: ${{ env.AUTH_SERVER_PORT }}
-          CONFIG_SERVER_PORT: ${{ env.CONFIG_SERVER_PORT }}
-          RESTAURANT_SERVER_PORT: ${{ env.RESTAURANT_SERVER_PORT }}
-          QUEUE_SERVER_PORT: ${{ env.QUEUE_SERVER_PORT }}
-          RESERVATION_SERVER_PORT: ${{ env.RESERVATION_SERVER_PORT }}
-          NOTIFICATION_SERVER_PORT: ${{ env.NOTIFICATION_SERVER_PORT }}
-          PAYMENT_SERVER_PORT: ${{ env.PAYMENT_SERVER_PORT }}
-          REDIS_HOST: ${{ env.REDIS_HOST }}
-          SHARED_REDIS_HOST: ${{ env.SHARED_REDIS_PORT }}
-          QUEUE_REDIS_HOST: ${{ env.QUEUE_REDIS_PORT }}
-          DB_URL: ${{ env.DB_URL }}
-          KAFKA_SERVER_URL: ${{ env.KAFKA_SERVER_URL }}
           ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
           ECR_NAMESPACE: ${{ secrets.ECR_NAMESPACE }}
           IMAGE_TAG: "latest"
-          AUTH_SECRET_KEY: ${{ secrets.AUTH_SECRET_KEY }}
-          SENDER_ACCOUNT: ${{ secrets.SENDER_ACCOUNT }}
-          SENDER_PASSWORD: ${{ secrets.SENDER_PASSWORD }}
-          DB_USERNAME: ${{ secrets.DB_USERNAME}}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD}}
-          SLACK_OAUTH_TOKEN: ${{ secrets.SLACK_OAUTH_TOKEN }}
 
   deploy:
     name: Deploy
