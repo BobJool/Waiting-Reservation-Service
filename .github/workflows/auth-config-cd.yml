@@ -148,6 +148,7 @@ jobs:
           DB_USERNAME: ${{ secrets.DB_USERNAME}}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD}}
           SLACK_OAUTH_TOKEN: ${{ secrets.SLACK_OAUTH_TOKEN }}
+
   deploy:
     name: Deploy
     needs: build
