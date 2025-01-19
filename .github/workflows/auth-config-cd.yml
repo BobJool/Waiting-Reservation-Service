@@ -107,16 +107,16 @@ jobs:
                 --build-arg NOTIFICATION_SERVER_PORT=${NOTIFICATION_SERVER_PORT} \
                 --build-arg PAYMENT_SERVER_PORT=${PAYMENT_SERVER_PORT} \
                 --build-arg REDIS_HOST=${REDIS_HOST} \
-                --build-arg SHARED_REDIS_PORT=${SHARED_REDIS_PORT}
-                --build-arg QUEUE_REDIS_PORT=${QUEUE_REDIS_PORT}
-                --build-arg DB_URL=${DB_URL}
-                --build-arg KAFKA_SERVER_URL=${KAFKA_SERVER_URL}
-                --build-arg AUTH_SECRET_KEY=${AUTH_SECRET_KEY}
-                --build-arg SENDER_ACCOUNT=${SENDER_ACCOUNT}
-                --build-arg SENDER_PASSWORD=${SENDER_PASSWORD}
-                --build-arg DB_USERNAME=${DB_USERNAME}
-                --build-arg DB_PASSWORD=${DB_PASSWORD}
-                --build-arg SLACK_OAUTH_TOKEN=${SLACK_OAUTH_TOKEN}
+                --build-arg SHARED_REDIS_PORT=${SHARED_REDIS_PORT} \
+                --build-arg QUEUE_REDIS_PORT=${QUEUE_REDIS_PORT} \
+                --build-arg DB_URL=${DB_URL} \
+                --build-arg KAFKA_SERVER_URL=${KAFKA_SERVER_URL} \
+                --build-arg AUTH_SECRET_KEY=${AUTH_SECRET_KEY} \
+                --build-arg SENDER_ACCOUNT=${SENDER_ACCOUNT} \
+                --build-arg SENDER_PASSWORD=${SENDER_PASSWORD} \
+                --build-arg DB_USERNAME=${DB_USERNAME} \
+                --build-arg DB_PASSWORD=${DB_PASSWORD} \
+                --build-arg SLACK_OAUTH_TOKEN=${SLACK_OAUTH_TOKEN} \
           
             # Tag and push the image to ECR
             docker tag ${ECR_REGISTRY}/${ECR_NAMESPACE}/$service:latest $ECR_REGISTRY/${ECR_NAMESPACE}/$service:$IMAGE_TAG
