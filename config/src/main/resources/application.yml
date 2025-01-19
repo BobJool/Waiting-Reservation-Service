@@ -9,8 +9,10 @@ spring:
       server:
         native:
           search-locations: classpath:/config-repo  # 리소스 폴더의 디렉토리 경로
-  profiles:
-    active: native
+        git:
+          uri: git@github.com:BobJool/config-repo.git
+          private-key: ~/.ssh/id_rsa
+          clone-on-start: true
 
 eureka:
   client:
