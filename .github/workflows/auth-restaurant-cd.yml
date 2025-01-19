@@ -11,16 +11,9 @@ env:
   EUREKA_HOSTNAME: ${{ vars.EUREKA_HOSTNAME }}
   AUTH_HOSTNAME: ${{ vars.AUTH_HOSTNAME }}
   AUTH_SERVER_PORT: ${{ vars.AUTH_SERVER_PORT }}
-  CONFIG_SERVER_PORT: ${{ vars.CONFIG_SERVER_PORT }}
   RESTAURANT_SERVER_PORT: ${{ vars.RESTAURANT_SERVER_PORT }}
-  QUEUE_SERVER_PORT: ${{ vars.QUEUE_SERVER_PORT }}
-  RESERVATION_SERVER_PORT: ${{ vars.RESERVATION_SERVER_PORT }}
-  NOTIFICATION_SERVER_PORT: ${{ vars.NOTIFICATION_SERVER_PORT }}
-  PAYMENT_SERVER_PORT: ${{ vars.PAYMENT_SERVER_PORT }}
   REDIS_HOST: ${{ vars.REDIS_HOST}}
   SHARED_REDIS_PORT: ${{ vars.SHARED_REDIS_PORT }}
-  QUEUE_REDIS_PORT: ${{ vars.QUEUE_REDIS_PORT }}
-  KAFKA_SERVER_URL: ${{ vars.KAFKA_SERVER_URL }}
   DB_URL: ${{ vars.DB_URL }}
 
 
@@ -47,8 +40,8 @@ jobs:
       - name: Build auth with Gradle Wrapper
         run: ./gradlew :auth:bootJar
 
-      - name: Build config with Gradle Wrapper
-        run: ./gradlew :config:bootJar
+      - name: Build restaurant with Gradle Wrapper
+        run: ./gradlew :restaurant:bootJar
 
       - name: Upload auth Build Artifacts
         uses: actions/upload-artifact@v3
@@ -56,11 +49,11 @@ jobs:
           name: auth-build-libs
           path: auth/build/libs/*.jar # 정확한 빌드 결과물 경로 지정
 
-      - name: Upload config Build Artifacts
+      - name: Upload restaurant Build Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: config-build-libs
-          path: config/build/libs/*.jar  # 정확한 빌드 결과물 경로 지정
+          name: restaurant-build-libs
+          path: restaurant/build/libs/*.jar  # 정확한 빌드 결과물 경로 지정
 
       - name: Download auth Build Artifacts
         uses: actions/download-artifact@v3
@@ -71,14 +64,14 @@ jobs:
       - name: Copy auth Build Artifacts to Docker Context
         run: cp auth/build/libs/*.jar ./docker
 
-      - name: Download config Build Artifacts
+      - name: Download restaurant Build Artifacts
         uses: actions/download-artifact@v3
         with:
-          name: config-build-libs
-          path: config/build/libs
+          name: restaurant-build-libs
+          path: restaurant/build/libs
 
-      - name: Copy config Build Artifacts to Docker Context
-        run: cp config/build/libs/*.jar ./docker
+      - name: Copy restaurant Build Artifacts to Docker Context
+        run: cp restaurant/build/libs/*.jar ./docker
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -97,48 +90,28 @@ jobs:
           # Set Variables
           EUREKA_HOSTNAME=${{ env.EUREKA_HOSTNAME }}
           AUTH_SERVER_PORT=${{ env.AUTH_SERVER_PORT }}
-          CONFIG_SERVER_PORT=${{ env.CONFIG_SERVER_PORT }}
           RESTAURANT_SERVER_PORT=${{ env.RESTAURANT_SERVER_PORT }}
-          QUEUE_SERVER_PORT=${{ env.QUEUE_SERVER_PORT }}
-          RESERVATION_SERVER_PORT=${{ env.RESERVATION_SERVER_PORT }}
-          NOTIFICATION_SERVER_PORT=${{ env.NOTIFICATION_SERVER_PORT }}
-          PAYMENT_SERVER_PORT=${{ env.PAYMENT_SERVER_PORT }} 
           REDIS_HOST=${{ env.REDIS_HOST }}
           SHARED_REDIS_HOST=${{ env.SHARED_REDIS_PORT }}
-          QUEUE_REDIS_HOST=${{ env.QUEUE_REDIS_PORT }}
           DB_URL=${{ env.DB_URL }}
-          KAFKA_SERVER_URL=${{ env.KAFKA_SERVER_URL }}
           AUTH_SECRET_KEY=${{ secrets.AUTH_SECRET_KEY }}
-          SENDER_ACCOUNT=${{ secrets.SENDER_ACCOUNT }}
-          SENDER_PASSWORD=${{ secrets.SENDER_PASSWORD }}
           DB_USERNAME=${{ secrets.DB_USERNAME}}
           DB_PASSWORD=${{ secrets.DB_PASSWORD}}
-          SLACK_OAUTH_TOKEN=${{ secrets.SLACK_OAUTH_TOKEN }}
           
           # Build and push images for each service without .env file
-          services=("auth" "config")
+          services=("auth" "restaurant")
           for service in "${services[@]}"; do
             echo "Building service: $service"
-            docker compose -f docker/docker-compose.auth-config.yml build \
+            docker compose -f docker/docker-compose.auth-restaurant.yml build \
                 --build-arg EUREKA_HOSTNAME=$EUREKA_HOSTNAME \
                 --build-arg AUTH_SERVER_PORT=$AUTH_SERVER_PORT \
-                --build-arg CONFIG_SERVER_PORT=$CONFIG_SERVER_PORT \
                 --build-arg RESTAURANT_SERVER_PORT=$RESTAURANT_SERVER_PORT \
-                --build-arg QUEUE_SERVER_PORT=$QUEUE_SERVER_PORT \
-                --build-arg RESERVATION_SERVER_PORT=$RESERVATION_SERVER_PORT \
-                --build-arg NOTIFICATION_SERVER_PORT=$NOTIFICATION_SERVER_PORT \
-                --build-arg PAYMENT_SERVER_PORT=$PAYMENT_SERVER_PORT \
                 --build-arg REDIS_HOST=$REDIS_HOST \
                 --build-arg SHARED_REDIS_PORT=$SHARED_REDIS_PORT \
-                --build-arg QUEUE_REDIS_PORT=$QUEUE_REDIS_PORT \
                 --build-arg DB_URL=$DB_URL \
-                --build-arg KAFKA_SERVER_URL=$KAFKA_SERVER_URL \
                 --build-arg AUTH_SECRET_KEY=$AUTH_SECRET_KEY \
-                --build-arg SENDER_ACCOUNT=$SENDER_ACCOUNT \
-                --build-arg SENDER_PASSWORD=$SENDER_PASSWORD \
                 --build-arg DB_USERNAME=$DB_USERNAME \
                 --build-arg DB_PASSWORD=$DB_PASSWORD \
-                --build-arg SLACK_OAUTH_TOKEN=$SLACK_OAUTH_TOKEN 
             echo "after docker compose build : $service"
           
             # Tag and push the image to ECR
@@ -167,7 +140,7 @@ jobs:
           host: ${{ env.AUTH_HOSTNAME }}
           username: ec2-user
           key: ${{ secrets.EC2_KEY }}
-          source: "./docker/docker-compose.auth-config.yml"
+          source: "./docker/docker-compose.auth-restaurant.yml"
           target: "/home/ec2-user"
 
       - name: Create .env file on EC2
@@ -180,35 +153,25 @@ jobs:
           script: |
             echo "EUREKA_HOSTNAME=${{ env.EUREKA_HOSTNAME }}" >> /home/ec2-user/docker/.env
             echo "AUTH_SERVER_PORT=${{ env.AUTH_SERVER_PORT }}" >> /home/ec2-user/docker/.env
-            echo "CONFIG_SERVER_PORT=${{ env.CONFIG_SERVER_PORT }}" >> /home/ec2-user/docker/.env
             echo "RESTAURANT_SERVER_PORT=${{ env.RESTAURANT_SERVER_PORT }}" >> /home/ec2-user/docker/.env
-            echo "QUEUE_SERVER_PORT=${{ env.QUEUE_SERVER_PORT }}" >> /home/ec2-user/docker/.env
-            echo "RESERVATION_SERVER_PORT=${{ env.RESERVATION_SERVER_PORT }}" >> /home/ec2-user/docker/.env
-            echo "NOTIFICATION_SERVER_PORT=${{ env.NOTIFICATION_SERVER_PORT }}" >> /home/ec2-user/docker/.env
-            echo "PAYMENT_SERVER_PORT=${{ env.PAYMENT_SERVER_PORT }}" >> /home/ec2-user/docker/.env
             echo "REDIS_HOST=${{ env.REDIS_HOST }}" >> /home/ec2-user/docker/.env
             echo "SHARED_REDIS_PORT=${{ env.SHARED_REDIS_PORT }}" >> /home/ec2-user/docker/.env
-            echo "QUEUE_REDIS_PORT=${{ env.QUEUE_REDIS_PORT }}" >> /home/ec2-user/docker/.env
             echo "DB_URL=${{ env.DB_URL }}" >> /home/ec2-user/docker/.env
-            echo "KAFKA_SERVER_URL=${{ env.KAFKA_SERVER_URL }}" >> /home/ec2-user/docker/.env
             echo "ECR_REGISTRY=${{ secrets.ECR_REGISTRY }}" >> /home/ec2-user/docker/.env
             echo "ECR_NAMESPACE=${{ secrets.ECR_NAMESPACE }}" >> /home/ec2-user/docker/.env
             echo "AUTH_SECRET_KEY=${{ secrets.AUTH_SECRET_KEY }}" >> /home/ec2-user/docker/.env
-            echo "SENDER_ACCOUNT=${{ secrets.SENDER_ACCOUNT }}" >> /home/ec2-user/docker/.env
-            echo "SENDER_PASSWORD=${{ secrets.SENDER_PASSWORD }}" >> /home/ec2-user/docker/.env
             echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> /home/ec2-user/docker/.env
             echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> /home/ec2-user/docker/.env
-            echo "SLACK_OAUTH_TOKEN=${{ secrets.SLACK_OAUTH_TOKEN }}" >> /home/ec2-user/docker/.env
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ env.EUREKA_HOSTNAME }}
+          host: ${{ env.AUTH_HOSTNAME }}
           username: ec2-user
           key: ${{ secrets.EC2_KEY }}
           port: 22
           script: |
             aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
-            docker-compose -f ./docker/docker-compose.auth-config.yml down
-            docker-compose -f ./docker/docker-compose.auth-config.yml pull
-            docker-compose -f ./docker/docker-compose.auth-config.yml up -d
+            docker-compose -f ./docker/docker-compose.auth-restaurant.yml down
+            docker-compose -f ./docker/docker-compose.auth-restaurant.yml pull
+            docker-compose -f ./docker/docker-compose.auth-restaurant.yml up -d
