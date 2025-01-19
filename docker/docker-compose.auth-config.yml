@@ -1,6 +1,6 @@
 services:
   auth:
-    image: 120569603428.dkr.ecr.ap-northeast-2.amazonaws.com/bobjool/auth:latest
+    image: ${ECR_REGISTRY}/${ECR_NAMESPACE}/auth:latest
     build:
       context: ../auth
       dockerfile: Dockerfile
@@ -14,7 +14,7 @@ services:
       - config
 
   config:
-    image: 120569603428.dkr.ecr.ap-northeast-2.amazonaws.com/bobjool/config:latest
+    image: ${ECR_REGISTRY}/${ECR_NAMESPACE}/config:latest
     build:
       context: ../config
       dockerfile: Dockerfile

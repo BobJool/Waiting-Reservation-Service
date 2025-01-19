@@ -118,6 +118,7 @@ jobs:
                 --build-arg DB_USERNAME=${DB_USERNAME} \
                 --build-arg DB_PASSWORD=${DB_PASSWORD} \
                 --build-arg SLACK_OAUTH_TOKEN=${SLACK_OAUTH_TOKEN} 
+            echo "after docker compose build : $service"
           
             # Tag and push the image to ECR
             docker tag ${ECR_REGISTRY}/${ECR_NAMESPACE}/$service:latest $ECR_REGISTRY/${ECR_NAMESPACE}/$service:$IMAGE_TAG
