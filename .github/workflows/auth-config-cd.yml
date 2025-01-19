@@ -97,23 +97,23 @@ jobs:
           # Set Variables
           EUREKA_HOSTNAME=${{ env.EUREKA_HOSTNAME }}
           AUTH_SERVER_PORT=${{ env.AUTH_SERVER_PORT }}
-          CONFIG_SERVER_PORT: ${{ env.CONFIG_SERVER_PORT }}
-          RESTAURANT_SERVER_PORT: ${{ env.RESTAURANT_SERVER_PORT }}
-          QUEUE_SERVER_PORT: ${{ env.QUEUE_SERVER_PORT }}
-          RESERVATION_SERVER_PORT: ${{ env.RESERVATION_SERVER_PORT }}
-          NOTIFICATION_SERVER_PORT: ${{ env.NOTIFICATION_SERVER_PORT }}
-          PAYMENT_SERVER_PORT: ${{ env.PAYMENT_SERVER_PORT }} 
-          REDIS_HOST: ${{ env.REDIS_HOST }}
-          SHARED_REDIS_HOST: ${{ env.SHARED_REDIS_PORT }}
-          QUEUE_REDIS_HOST: ${{ env.QUEUE_REDIS_PORT }}
-          DB_URL: ${{ env.DB_URL }}
-          KAFKA_SERVER_URL: ${{ env.KAFKA_SERVER_URL }}
-          AUTH_SECRET_KEY: ${{ secrets.AUTH_SECRET_KEY }}
-          SENDER_ACCOUNT: ${{ secrets.SENDER_ACCOUNT }}
-          SENDER_PASSWORD: ${{ secrets.SENDER_PASSWORD }}
-          DB_USERNAME: ${{ secrets.DB_USERNAME}}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD}}
-          SLACK_OAUTH_TOKEN: ${{ secrets.SLACK_OAUTH_TOKEN }}
+          CONFIG_SERVER_PORT=${{ env.CONFIG_SERVER_PORT }}
+          RESTAURANT_SERVER_PORT=${{ env.RESTAURANT_SERVER_PORT }}
+          QUEUE_SERVER_PORT=${{ env.QUEUE_SERVER_PORT }}
+          RESERVATION_SERVER_PORT=${{ env.RESERVATION_SERVER_PORT }}
+          NOTIFICATION_SERVER_PORT=${{ env.NOTIFICATION_SERVER_PORT }}
+          PAYMENT_SERVER_PORT=${{ env.PAYMENT_SERVER_PORT }} 
+          REDIS_HOST=${{ env.REDIS_HOST }}
+          SHARED_REDIS_HOST=${{ env.SHARED_REDIS_PORT }}
+          QUEUE_REDIS_HOST=${{ env.QUEUE_REDIS_PORT }}
+          DB_URL=${{ env.DB_URL }}
+          KAFKA_SERVER_URL=${{ env.KAFKA_SERVER_URL }}
+          AUTH_SECRET_KEY=${{ secrets.AUTH_SECRET_KEY }}
+          SENDER_ACCOUNT=${{ secrets.SENDER_ACCOUNT }}
+          SENDER_PASSWORD=${{ secrets.SENDER_PASSWORD }}
+          DB_USERNAME=${{ secrets.DB_USERNAME}}
+          DB_PASSWORD=${{ secrets.DB_PASSWORD}}
+          SLACK_OAUTH_TOKEN=${{ secrets.SLACK_OAUTH_TOKEN }}
           
           # Build and push images for each service without .env file
           services=("auth" "config")
