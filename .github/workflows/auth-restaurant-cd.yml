@@ -12,7 +12,7 @@ env:
   AUTH_HOSTNAME: ${{ vars.AUTH_HOSTNAME }}
   AUTH_SERVER_PORT: ${{ vars.AUTH_SERVER_PORT }}
   RESTAURANT_SERVER_PORT: ${{ vars.RESTAURANT_SERVER_PORT }}
-  REDIS_HOST: ${{ vars.REDIS_HOST}}
+  REDIS_HOST: ${{ vars.REDIS_HOST }}
   SHARED_REDIS_PORT: ${{ vars.SHARED_REDIS_PORT }}
   DB_URL: ${{ vars.DB_URL }}
   SPRING_PROFILES_ACTIVE: prod
@@ -103,8 +103,8 @@ jobs:
           SHARED_REDIS_HOST=${{ env.SHARED_REDIS_PORT }}
           DB_URL=${{ env.DB_URL }}
           AUTH_SECRET_KEY=${{ secrets.AUTH_SECRET_KEY }}
-          DB_USERNAME=${{ secrets.DB_USERNAME}}
-          DB_PASSWORD=${{ secrets.DB_PASSWORD}}
+          DB_USERNAME=${{ secrets.DB_USERNAME }}
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
           
           docker compose -f docker/docker-compose.auth-restaurant.yml build \
                 --build-arg SPRING_PROFILES_ACTIVE=$SPRING_PROFILES_ACTIVE \
