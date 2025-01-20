@@ -45,12 +45,6 @@ jobs:
       - name: Build payment with Gradle Wrapper
         run: ./gradlew :payment:clean :payment:build --no-build-cache --rerun-tasks
 
-      - name: build lists console
-        run: |
-          cd auth/build/libs
-          pwd
-          ls -al
-
       - name: Upload reservation Build Artifacts
         uses: actions/upload-artifact@v3
         with:
