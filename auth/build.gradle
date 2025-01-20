@@ -1,5 +1,4 @@
 bootJar.enabled = true
-jar.enabled = true
 
 ext {
     set('querydslVersion', "5.0.0")

@@ -44,6 +44,11 @@ jobs:
       - name: Build restaurant with Gradle Wrapper
         run: ./gradlew :restaurant:clean :restaurant:build --no-build-cache --rerun-tasks
 
+      - name: build lists console
+        run: |
+          cd auth/build/libs
+          ls -al
+
       - name: Upload auth Build Artifacts
         uses: actions/upload-artifact@v3
         with:

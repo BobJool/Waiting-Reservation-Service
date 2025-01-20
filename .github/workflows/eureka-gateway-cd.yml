@@ -42,6 +42,11 @@ jobs:
       - name: Build eureka-server with Gradle Wrapper
         run: ./gradlew :eureka-server:clean :eureka-server:bootJar --no-build-cache --rerun-tasks
 
+      - name: build lists console
+        run: |
+          cd auth/build/libs
+          ls -al
+
       - name: Upload gateway Build Artifacts
         uses: actions/upload-artifact@v3
         with:
