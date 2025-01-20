@@ -8,12 +8,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * 도메인 관점 인터페이스
  */
 public interface NotificationRepository {
     Notification save(Notification notification);
+
+    Optional<Notification> findById(UUID id);
 
     Page<Notification> search(
             Long userId,

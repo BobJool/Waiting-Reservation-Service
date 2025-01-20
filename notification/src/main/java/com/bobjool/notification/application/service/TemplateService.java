@@ -94,7 +94,8 @@ public class TemplateService {
         return TemplateDto.from(template);
     }
 
-    private Template getTemplateById(UUID templateId) {
+    @Transactional(readOnly = true)
+    protected Template getTemplateById(UUID templateId) {
         return templateRepository.findByIdAndDeletedAtIsNull(templateId)
                 .orElseThrow(
                         () -> new BobJoolException(ErrorCode.ENTITY_NOT_FOUND)
