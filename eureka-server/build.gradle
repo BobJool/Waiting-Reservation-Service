@@ -1,4 +1,5 @@
 bootJar.enabled = true
+jar.enabled = true
 
 dependencies {
     api 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-server'
