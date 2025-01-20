@@ -39,10 +39,10 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build auth with Gradle Wrapper
-        run: ./gradlew :auth:clean :auth:build
+        run: ./gradlew :auth:clean :auth:build --no-build-cache
 
       - name: Build restaurant with Gradle Wrapper
-        run: ./gradlew :restaurant:clean :restaurant:build
+        run: ./gradlew :restaurant:clean :restaurant:build --no-build-cache
 
       - name: Upload auth Build Artifacts
         uses: actions/upload-artifact@v3

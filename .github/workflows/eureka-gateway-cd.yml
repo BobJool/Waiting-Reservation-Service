@@ -37,10 +37,10 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build gateway with Gradle Wrapper
-        run: ./gradlew :gateway:clean :gateway:bootJar
+        run: ./gradlew :gateway:clean :gateway:bootJar --no-build-cache
 
       - name: Build eureka-server with Gradle Wrapper
-        run: ./gradlew :eureka-server:clean :eureka-server:bootJar
+        run: ./gradlew :eureka-server:clean :eureka-server:bootJar --no-build-cache
 
       - name: Upload gateway Build Artifacts
         uses: actions/upload-artifact@v3
