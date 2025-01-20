@@ -4,6 +4,9 @@ server:
 spring:
   application:
     name: restaurant-service
+  config:
+    activate:
+      on-profile: prod
   datasource:
     url: ${DB_URL}/restaurant_db
     username: ${DB_USERNAME}

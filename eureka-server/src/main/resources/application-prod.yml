@@ -4,6 +4,9 @@ server:
 spring:
   application:
     name: eureka-server
+  config:
+    activate:
+      on-profile: prod
 
 eureka:
   client:

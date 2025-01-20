@@ -4,4 +4,4 @@ spring:
   main:
     web-application-type: reactive
   profiles:
-    active: dev
+    default: dev
