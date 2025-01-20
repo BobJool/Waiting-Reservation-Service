@@ -25,6 +25,10 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
   jackson:
     property-naming-strategy: SNAKE_CASE
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${SHARED_REDIS_PORT:6379}
 
 eureka:
   client:
