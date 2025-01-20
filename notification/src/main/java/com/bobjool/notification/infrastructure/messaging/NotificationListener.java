@@ -1,14 +1,15 @@
 package com.bobjool.notification.infrastructure.messaging;
 
-import com.bobjool.notification.domain.service.NotificationDetails;
 import com.bobjool.notification.application.factory.NotificationDetailsFactory;
 import com.bobjool.notification.application.service.EventService;
 import com.bobjool.notification.domain.entity.BobjoolServiceType;
 import com.bobjool.notification.domain.entity.NotificationChannel;
 import com.bobjool.notification.domain.entity.NotificationType;
+import com.bobjool.notification.domain.service.NotificationDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
@@ -19,20 +20,31 @@ public class NotificationListener {
     private final EventService eventService;
     private final NotificationDetailsFactory notificationDetailsFactory;
 
-    @KafkaListener(topics = {
-            "queue.registered",
-            "queue.delayed",
-            "queue.canceled",
-            "queue.remind",
-            "queue.alerted",
-            "queue.rush"
-    })
-    public void handleQueueEvent(String message,
-                                 @Header("kafka_receivedTopic") String topic) {
+    @KafkaListener(
+            topics = {
+                    "queue.registered",
+                    "queue.delayed",
+                    "queue.canceled",
+                    "queue.remind",
+                    "queue.alerted",
+                    "queue.rush"
+            })
+    public void handleQueueEvent(
+            @Header("kafka_receivedTopic") String topic,
+            Acknowledgment acknowledgment,
+            String message
+    ) {
         NotificationDetails details = getNotificationDetails(
                 NotificationChannel.SLACK, message, topic
         );
-        eventService.processNotification(details);
+
+        try {
+            eventService.processNotification(details);
+            acknowledgment.acknowledge();
+        } catch (Exception e) {
+            log.error("Error processing kafka message. Retry or fallback processing.", e);
+        }
+
     }
 
     @KafkaListener(topics = {
@@ -42,8 +54,9 @@ public class NotificationListener {
             "reservation.remind"
     })
     public void handleReservationEvent(
-            String message,
-            @Header("kafka_receivedTopic") String topic
+            @Header("kafka_receivedTopic") String topic,
+            Acknowledgment acknowledgment,
+            String message
     ) {
         NotificationDetails details = getNotificationDetails(
                 NotificationChannel.SLACK, message, topic
@@ -51,11 +64,17 @@ public class NotificationListener {
         details.applyDateFormat();
         details.applyTimeFormat();
 
-        eventService.processNotification(details);
+        try {
+            eventService.processNotification(details);
+            acknowledgment.acknowledge();
+        } catch (Exception e) {
+            log.error("Error processing kafka message. Retry or fallback processing.", e);
+        }
+
     }
 
     private NotificationDetails getNotificationDetails(NotificationChannel channel, String message, String topic) {
-        log.debug("Get kafka message. topic: {}, message: {}", topic, message);
+        log.debug("kafka message received. topic={}, message={}", topic, message);
 
         NotificationDetails details = notificationDetailsFactory.builder()
                 .channel(channel)

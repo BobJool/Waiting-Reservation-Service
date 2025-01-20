@@ -28,7 +28,13 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       group-id: ${spring.application.name}-group
+      enable:
+        auto:
+          commit: false
     bootstrap-servers: ${KAFKA_SERVER_URL}
+    listener:
+      concurrency: 3
+      ack-mode: manual
   mail:
     host: smtp.gmail.com
     port: 587
@@ -60,6 +66,27 @@ token:
   slack:
     oauth: ${SLACK_OAUTH_TOKEN}
 
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        registerHealthIndicator: true             # actuator - 매트릭 추가 여부
+        eventConsumerBufferSize: 10               # actuator - 발생한 이벤트 버퍼 크기
+        slidingWindowType: COUNT_BASED            # 알고리즘 - 타입
+        slidingWindowSize: 10                     # 알고리즘 - 범위, 최근 n회 기준
+        failureRateThreshold: 20                  # 실패 - 임계 값 퍼센트
+        minimumNumberOfCalls: 10                  # 실패 - 집계에 필요한 최소 호출 수
+        slowCallRateThreshold: 80                 # 지연 - 느린 호출의 비율 %
+        slowCallDurationThreshold: 30000          # 지연 - 느린 호출의 기준 (밀리초)
+        permittedNumberOfCallsInHalfOpenState: 3  # Half-open 상태에서 최대 호출 수
+        waitDurationInOpenState: 60s              # Half-open 전환 대기 시간
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+#        record-exceptions:
+#          - com.bobjool.common.exception.BobJoolException
+    instances:
+      pushNotificationToSlack:
+        baseConfig: default
+
 management:
   zipkin:
     tracing:
@@ -71,3 +98,9 @@ management:
     web:
       exposure:
         include: "*"
+
+logging:
+  level:
+    io.github.resilience4j: DEBUG
+    org.springframework.kafka: DEBUG
+    com.bobjool: DEBUG

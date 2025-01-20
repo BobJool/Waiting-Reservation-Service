@@ -30,10 +30,13 @@ dependencies {
     // Mail
     implementation 'org.springframework.boot:spring-boot-starter-mail'
 
-    //config server
+    // config server
     implementation 'org.springframework.cloud:spring-cloud-starter-config'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
+    // Resilience4j
+    implementation 'io.github.resilience4j:resilience4j-spring-boot3:2.2.0'
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
 }
 
 def querydslSrcDir = 'src/main/generated'
