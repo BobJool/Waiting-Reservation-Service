@@ -201,4 +201,4 @@ jobs:
             aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
             docker-compose -f ./docker/docker-compose.auth-restaurant.yml down
             docker-compose -f ./docker/docker-compose.auth-restaurant.yml pull
-            docker-compose -f ./docker/docker-compose.auth-restaurant.yml up
+            docker-compose -f ./docker/docker-compose.auth-restaurant.yml up -d
