@@ -1,4 +1,4 @@
-name: Deploy Auth, Config to AWS ECR
+name: Deploy Auth, restaurant to AWS ECR
 
 on:
   push:
