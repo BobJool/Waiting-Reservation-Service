@@ -1,3 +1,5 @@
 spring:
+  application:
+    name: payment-service
   profiles:
-    active: dev
+    default: dev
