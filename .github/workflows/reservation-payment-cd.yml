@@ -12,10 +12,10 @@ env:
   RESERVATION_HOSTNAME: ${{ vars.RESERVATION_HOSTNAME }}
   RESERVATION_SERVER_PORT: ${{ vars.RESERVATION_SERVER_PORT }}
   PAYMENT_SERVER_PORT: ${{ vars.PAYMENT_SERVER_PORT }}
-  REDIS_HOST: ${{ vars.REDIS_HOST}}
+  REDIS_HOST: ${{ vars.REDIS_HOST }}
   SHARED_REDIS_PORT: ${{ vars.SHARED_REDIS_PORT }}
   DB_URL: ${{ vars.DB_URL }}
-  KAFKA_SERVER_URL: ${{ vars.KAFKA_SERVER_URL}}
+  KAFKA_SERVER_URL: ${{ vars.KAFKA_SERVER_URL }}
   SPRING_PROFILES_ACTIVE: prod
 
 
@@ -97,8 +97,8 @@ jobs:
           REDIS_HOST=${{ env.REDIS_HOST }}
           SHARED_REDIS_HOST=${{ env.SHARED_REDIS_PORT }}
           DB_URL=${{ env.DB_URL }}
-          DB_USERNAME=${{ secrets.DB_USERNAME}}
-          DB_PASSWORD=${{ secrets.DB_PASSWORD}}
+          DB_USERNAME=${{ secrets.DB_USERNAME }}
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
           KAFKA_SERVER_URL=${{ env.KAFKA_SERVER_URL }}
           
           docker compose -f docker/docker-compose.reservation-payment.yml build \
