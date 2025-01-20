@@ -7,6 +7,7 @@ spring:
   config:
     activate:
       on-profile: prod
+    import: "optional:configserver:"
   datasource:
     driver-class-name: org.postgresql.Driver
     url: ${DB_URL}/user_db
