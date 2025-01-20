@@ -47,6 +47,7 @@ jobs:
       - name: build lists console
         run: |
           cd auth/build/libs
+          pwd
           ls -al
 
       - name: Upload auth Build Artifacts

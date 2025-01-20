@@ -44,7 +44,8 @@ jobs:
 
       - name: build lists console
         run: |
-          cd auth/build/libs
+          cd eureka-server/build/libs
+          pwd
           ls -al
 
       - name: Upload gateway Build Artifacts
