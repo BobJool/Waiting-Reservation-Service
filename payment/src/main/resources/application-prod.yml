@@ -38,7 +38,7 @@ spring:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
   data:
     redis:
-      host: ${REDIS_HOST:52.79.241.24}
+      host: ${REDIS_HOST}
       port: ${SHARED_REDIS_PORT:6379}
 
 eureka:
