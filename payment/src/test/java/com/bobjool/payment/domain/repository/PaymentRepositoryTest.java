@@ -1,6 +1,7 @@
 package com.bobjool.payment.domain.repository;
 
 
+import com.bobjool.payment.EmbeddedRedisConfig;
 import com.bobjool.payment.domain.entity.Payment;
 import com.bobjool.payment.domain.enums.PaymentMethod;
 import com.bobjool.payment.domain.enums.PaymentStatus;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,7 +27,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
-@Disabled
+@Import(EmbeddedRedisConfig.class)
 @ActiveProfiles("test")
 @Transactional
 @SpringBootTest

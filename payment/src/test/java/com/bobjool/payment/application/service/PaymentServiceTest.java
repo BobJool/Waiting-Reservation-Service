@@ -2,6 +2,7 @@ package com.bobjool.payment.application.service;
 
 import com.bobjool.common.exception.BobJoolException;
 import com.bobjool.common.exception.ErrorCode;
+import com.bobjool.payment.EmbeddedRedisConfig;
 import com.bobjool.payment.application.dto.PaymentResDto;
 import com.bobjool.payment.application.dto.PaymentSearchDto;
 import com.bobjool.payment.application.dto.PaymentUpdateDto;
@@ -19,6 +20,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -33,7 +35,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 
-@Disabled
+@Import(EmbeddedRedisConfig.class) // Embedded Redis 설정 추가
 @ActiveProfiles("test")
 @Transactional
 @SpringBootTest
