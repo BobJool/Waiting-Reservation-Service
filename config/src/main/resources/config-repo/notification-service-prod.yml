@@ -1,5 +1,5 @@
 server:
-  port: ${NOTIFICATION_SERVICE_PORT:19050}
+  port: ${NOTIFICATION_SERVER_PORT:19050}
 
 spring:
   application:
@@ -53,6 +53,11 @@ notification:
       failed: fb348681-f0ae-42ec-970d-c9b5d4bb6ff0
       refund: 237c2474-2509-4dfa-aeb2-4eb9f421ef9d
       remind: 14e786a6-7757-4809-87fb-d7665e79d141
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://${EUREKA_HOSTNAME}:19000/eureka/
 
 token:
   slack:

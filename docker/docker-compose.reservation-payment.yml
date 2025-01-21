@@ -1,0 +1,36 @@
+services:
+  reservation:
+    image: ${ECR_REGISTRY}/${ECR_NAMESPACE}/reservation:latest
+    build:
+      context: ../reservation
+      dockerfile: Dockerfile
+    container_name: reservation
+    ports:
+      - "${RESERVATION_SERVER_PORT}:${RESERVATION_SERVER_PORT}"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - EUREKA_HOSTNAME=${EUREKA_HOSTNAME}
+      - RESERVATION_SERVER_PORT=${RESERVATION_SERVER_PORT}
+      - DB_URL=${DB_URL}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - KAFKA_SERVER_URL=${KAFKA_SERVER_URL}
+
+  payment:
+    image: ${ECR_REGISTRY}/${ECR_NAMESPACE}/payment:latest
+    build:
+      context: ../payment
+      dockerfile: Dockerfile
+    container_name: payment
+    ports:
+      - "${PAYMENT_SERVER_PORT}:${PAYMENT_SERVER_PORT}"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - EUREKA_HOSTNAME=${EUREKA_HOSTNAME}
+      - PAYMENT_SERVER_PORT=${PAYMENT_SERVER_PORT}
+      - DB_URL=${DB_URL}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REDIS_HOST=${REDIS_HOST}
+      - SHARED_REDIS_PORT=${SHARED_REDIS_PORT}
+      - KAFKA_SERVER_URL=${KAFKA_SERVER_URL}

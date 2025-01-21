@@ -13,3 +13,27 @@ eureka:
       defaultZone: http://localhost:19000/eureka/
   instance:
     hostname: localhost
+
+
+management:
+  zipkin:
+    tracing:
+      endpoint: "http://localhost:9411/api/v2/spans"
+  tracing:
+    sampling:
+      probability: 1.0
+
+  #모든 엔드포인트 노출 설정
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+    #헬스 체크 엔드포인트 상세 정보 표시 설정
+    health:
+      show-details: always
+
+    #프로메테우스 사용활성화
+    metrics:
+      export:
+        prometheus:
+          enabled: true

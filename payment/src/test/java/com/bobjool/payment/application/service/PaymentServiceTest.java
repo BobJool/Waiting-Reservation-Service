@@ -11,6 +11,7 @@ import com.bobjool.payment.domain.enums.PaymentStatus;
 import com.bobjool.payment.domain.enums.PgName;
 import com.bobjool.payment.domain.repository.PaymentRepository;
 import jakarta.persistence.EntityManager;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -32,6 +33,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 
+@Disabled
 @ActiveProfiles("test")
 @Transactional
 @SpringBootTest

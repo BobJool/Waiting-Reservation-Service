@@ -1,0 +1,204 @@
+name: Deploy Auth, restaurant to AWS ECR
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'auth/**'
+      - 'restaurant/**'
+
+env:
+  EUREKA_HOSTNAME: ${{ vars.EUREKA_HOSTNAME }}
+  AUTH_HOSTNAME: ${{ vars.AUTH_HOSTNAME }}
+  AUTH_SERVER_PORT: ${{ vars.AUTH_SERVER_PORT }}
+  RESTAURANT_SERVER_PORT: ${{ vars.RESTAURANT_SERVER_PORT }}
+  REDIS_HOST: ${{ vars.REDIS_HOST }}
+  SHARED_REDIS_PORT: ${{ vars.SHARED_REDIS_PORT }}
+  DB_URL: ${{ vars.DB_URL }}
+  SPRING_PROFILES_ACTIVE: prod
+
+
+jobs:
+  build:
+    name: Deploy to ECR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Main Repo
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+
+      - name: Grant execute permission for Gradle Wrapper in gateway directory
+        run: chmod +x gradlew
+
+      - name: Build auth with Gradle Wrapper
+        run: ./gradlew :auth:clean :auth:build --no-build-cache --rerun-tasks
+
+      - name: Build restaurant with Gradle Wrapper
+        run: ./gradlew :restaurant:clean :restaurant:build --no-build-cache --rerun-tasks
+
+      - name: build lists console
+        run: |
+          cd auth/build/libs
+          pwd
+          ls -al
+
+      - name: Upload auth Build Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: auth-build-libs
+          path: auth/build/libs/*.jar # 정확한 빌드 결과물 경로 지정
+
+      - name: Upload restaurant Build Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: restaurant-build-libs
+          path: restaurant/build/libs/*.jar  # 정확한 빌드 결과물 경로 지정
+
+      - name: Download auth Build Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: auth-build-libs
+          path: auth/build/libs
+
+      - name: Copy auth Build Artifacts to Docker Context
+        run: cp auth/build/libs/*.jar ./docker
+
+      - name: Download restaurant Build Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: restaurant-build-libs
+          path: restaurant/build/libs
+
+      - name: Copy restaurant Build Artifacts to Docker Context
+        run: cp restaurant/build/libs/*.jar ./docker
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, Tag and Push docker image to AWS ECR
+
+        run: |
+          # Set Variables
+          SPRING_PROFILES_ACTIVE=${{ env.SPRING_PROFILES_ACTIVE }}
+          EUREKA_HOSTNAME=${{ env.EUREKA_HOSTNAME }}
+          AUTH_SERVER_PORT=${{ env.AUTH_SERVER_PORT }}
+          RESTAURANT_SERVER_PORT=${{ env.RESTAURANT_SERVER_PORT }}
+          REDIS_HOST=${{ env.REDIS_HOST }}
+          SHARED_REDIS_HOST=${{ env.SHARED_REDIS_PORT }}
+          DB_URL=${{ env.DB_URL }}
+          AUTH_SECRET_KEY=${{ secrets.AUTH_SECRET_KEY }}
+          DB_USERNAME=${{ secrets.DB_USERNAME }}
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          
+          docker compose -f docker/docker-compose.auth-restaurant.yml build \
+                --build-arg SPRING_PROFILES_ACTIVE=$SPRING_PROFILES_ACTIVE \
+                --build-arg EUREKA_HOSTNAME=$EUREKA_HOSTNAME \
+                --build-arg AUTH_SERVER_PORT=$AUTH_SERVER_PORT \
+                --build-arg RESTAURANT_SERVER_PORT=$RESTAURANT_SERVER_PORT \
+                --build-arg REDIS_HOST=$REDIS_HOST \
+                --build-arg SHARED_REDIS_PORT=$SHARED_REDIS_PORT \
+                --build-arg DB_URL=$DB_URL \
+                --build-arg AUTH_SECRET_KEY=$AUTH_SECRET_KEY \
+                --build-arg DB_USERNAME=$DB_USERNAME \
+                --build-arg DB_PASSWORD=$DB_PASSWORD 
+          # Build and push images for each service without .env file
+          services=("auth" "restaurant")
+          for service in "${services[@]}"; do
+            echo "Building service: $service"
+            
+            # Tag and push the image to ECR
+            docker tag ${ECR_REGISTRY}/${ECR_NAMESPACE}/$service:latest $ECR_REGISTRY/${ECR_NAMESPACE}/$service:$IMAGE_TAG
+            docker push $ECR_REGISTRY/${ECR_NAMESPACE}/$service:$IMAGE_TAG
+            echo "$service image is built and pushed to AWS ECR with tag $IMAGE_TAG"
+          done
+
+        env:
+          ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+          ECR_NAMESPACE: ${{ secrets.ECR_NAMESPACE }}
+          IMAGE_TAG: "latest"
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out main repository
+        uses: actions/checkout@v4
+
+      - name: Copy Docker compose file to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ env.AUTH_HOSTNAME }}
+          username: ec2-user
+          key: ${{ secrets.EC2_KEY }}
+          source: "./docker/docker-compose.auth-restaurant.yml"
+          target: "/home/ec2-user"
+
+      - name: Create .env file on EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ env.AUTH_HOSTNAME }}
+          username: ec2-user
+          key: ${{ secrets.EC2_KEY }}
+          port: 22
+          script: |
+            echo "SPRING_PROFILES_ACTIVE=${{ env.SPRING_PROFILES_ACTIVE }}" >> /home/ec2-user/docker/.env
+            echo "EUREKA_HOSTNAME=${{ env.EUREKA_HOSTNAME }}" >> /home/ec2-user/docker/.env
+            echo "AUTH_SERVER_PORT=${{ env.AUTH_SERVER_PORT }}" >> /home/ec2-user/docker/.env
+            echo "RESTAURANT_SERVER_PORT=${{ env.RESTAURANT_SERVER_PORT }}" >> /home/ec2-user/docker/.env
+            echo "REDIS_HOST=${{ env.REDIS_HOST }}" >> /home/ec2-user/docker/.env
+            echo "SHARED_REDIS_PORT=${{ env.SHARED_REDIS_PORT }}" >> /home/ec2-user/docker/.env
+            echo "DB_URL=${{ env.DB_URL }}" >> /home/ec2-user/docker/.env
+            echo "ECR_REGISTRY=${{ secrets.ECR_REGISTRY }}" >> /home/ec2-user/docker/.env
+            echo "ECR_NAMESPACE=${{ secrets.ECR_NAMESPACE }}" >> /home/ec2-user/docker/.env
+            echo "AUTH_SECRET_KEY=${{ secrets.AUTH_SECRET_KEY }}" >> /home/ec2-user/docker/.env
+            echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> /home/ec2-user/docker/.env
+            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> /home/ec2-user/docker/.env
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+          ECR_NAMESPACE: ${{ secrets.ECR_NAMESPACE }}
+          SPRING_PROFILES_ACTIVE: ${{ env.SPRING_PROFILES_ACTIVE }}
+          EUREKA_HOSTNAME: ${{ env.EUREKA_HOSTNAME }}
+          AUTH_SERVER_PORT: ${{ env.AUTH_SERVER_PORT }}
+          RESTAURANT_SERVER_PORT: ${{ env.RESTAURANT_SERVER_PORT }}
+          REDIS_HOST: ${{ env.REDIS_HOST }}
+          SHARED_REDIS_PORT: ${{ env.SHARED_REDIS_PORT }}
+          DB_URL: ${{ env.DB_URL }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          AUTH_SECRET_KEY: ${{secrets.AUTH_SECRET_KEY }}
+
+        with:
+          host: ${{ env.AUTH_HOSTNAME }}
+          username: ec2-user
+          key: ${{ secrets.EC2_KEY }}
+          port: 22
+          envs: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, ECR_REGISTRY, ECR_NAMESPACE, SPRING_PROFILES_ACTIVE, EUREKA_HOSTNAME, AUTH_SERVER_PORT, RESTAURANT_SERVER_PORT, REDIS_HOST, SHARED_REDIS_PORT, DB_URL, DB_USERNAME, DB_PASSWORD, AUTH_SECRET_KEY
+          script: |
+            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
+            docker-compose -f ./docker/docker-compose.auth-restaurant.yml down
+            docker-compose -f ./docker/docker-compose.auth-restaurant.yml pull
+            docker-compose -f ./docker/docker-compose.auth-restaurant.yml up -d

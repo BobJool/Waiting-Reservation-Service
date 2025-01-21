@@ -1,0 +1,199 @@
+name: Deploy Reservation, Payment to AWS ECR
+
+on:
+  push:
+    branches: [ "main" ]
+#    paths:
+#      - 'reservation/**'
+#      - 'payment/**'
+
+env:
+  EUREKA_HOSTNAME: ${{ vars.EUREKA_HOSTNAME }}
+  RESERVATION_HOSTNAME: ${{ vars.RESERVATION_HOSTNAME }}
+  RESERVATION_SERVER_PORT: ${{ vars.RESERVATION_SERVER_PORT }}
+  PAYMENT_SERVER_PORT: ${{ vars.PAYMENT_SERVER_PORT }}
+  REDIS_HOST: ${{ vars.REDIS_HOST }}
+  SHARED_REDIS_PORT: ${{ vars.SHARED_REDIS_PORT }}
+  DB_URL: ${{ vars.DB_URL }}
+  KAFKA_SERVER_URL: ${{ vars.KAFKA_SERVER_URL }}
+  SPRING_PROFILES_ACTIVE: prod
+
+
+jobs:
+  build:
+    name: Deploy to ECR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Main Repo
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+
+      - name: Grant execute permission for Gradle Wrapper in gateway directory
+        run: chmod +x gradlew
+
+      - name: Build reservation with Gradle Wrapper
+        run: ./gradlew :reservation:clean :reservation:build --no-build-cache --rerun-tasks
+
+      - name: Build payment with Gradle Wrapper
+        run: ./gradlew :payment:clean :payment:build --no-build-cache --rerun-tasks
+
+      - name: Upload reservation Build Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: reservation-build-libs
+          path: reservation/build/libs/*.jar # 정확한 빌드 결과물 경로 지정
+
+      - name: Upload payment Build Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: payment-build-libs
+          path: payment/build/libs/*.jar  # 정확한 빌드 결과물 경로 지정
+
+      - name: Download reservation Build Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: reservation-build-libs
+          path: reservation/build/libs
+
+      - name: Copy reservation Build Artifacts to Docker Context
+        run: cp reservation/build/libs/*.jar ./docker
+
+      - name: Download payment Build Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: payment-build-libs
+          path: payment/build/libs
+
+      - name: Copy payment Build Artifacts to Docker Context
+        run: cp payment/build/libs/*.jar ./docker
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, Tag and Push docker image to AWS ECR
+
+        run: |
+          # Set Variables
+          SPRING_PROFILES_ACTIVE=${{ env.SPRING_PROFILES_ACTIVE }}
+          EUREKA_HOSTNAME=${{ env.EUREKA_HOSTNAME }}
+          RESERVATION_SERVER_PORT=${{ env.RESERVATION_SERVER_PORT }}
+          PAYMENT_SERVER_PORT=${{ env.PAYMENT_SERVER_PORT }}
+          REDIS_HOST=${{ env.REDIS_HOST }}
+          SHARED_REDIS_HOST=${{ env.SHARED_REDIS_PORT }}
+          DB_URL=${{ env.DB_URL }}
+          DB_USERNAME=${{ secrets.DB_USERNAME }}
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          KAFKA_SERVER_URL=${{ env.KAFKA_SERVER_URL }}
+          
+          docker compose -f docker/docker-compose.reservation-payment.yml build \
+                --build-arg SPRING_PROFILES_ACTIVE=$SPRING_PROFILES_ACTIVE \
+                --build-arg EUREKA_HOSTNAME=$EUREKA_HOSTNAME \
+                --build-arg RESERVATION_SERVER_PORT=$RESERVATION_SERVER_PORT \
+                --build-arg PAYMENT_SERVER_PORT=$PAYMENT_SERVER_PORT \
+                --build-arg REDIS_HOST=$REDIS_HOST \
+                --build-arg SHARED_REDIS_PORT=$SHARED_REDIS_PORT \
+                --build-arg DB_URL=$DB_URL \
+                --build-arg DB_USERNAME=$DB_USERNAME \
+                --build-arg DB_PASSWORD=$DB_PASSWORD \
+                --build-arg KAFKA_SERVER_URL=$KAFKA_SERVER_URL 
+          # Build and push images for each service without .env file
+          services=("reservation" "payment")
+          for service in "${services[@]}"; do
+            echo "Building service: $service"
+          
+            # Tag and push the image to ECR
+            docker tag ${ECR_REGISTRY}/${ECR_NAMESPACE}/$service:latest $ECR_REGISTRY/${ECR_NAMESPACE}/$service:$IMAGE_TAG
+            docker push $ECR_REGISTRY/${ECR_NAMESPACE}/$service:$IMAGE_TAG
+            echo "$service image is built and pushed to AWS ECR with tag $IMAGE_TAG"
+          done
+
+        env:
+          ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+          ECR_NAMESPACE: ${{ secrets.ECR_NAMESPACE }}
+          IMAGE_TAG: "latest"
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out main repository
+        uses: actions/checkout@v4
+
+      - name: Copy Docker compose file to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ env.RESERVATION_HOSTNAME }}
+          username: ec2-user
+          key: ${{ secrets.EC2_KEY }}
+          source: "./docker/docker-compose.reservation-payment.yml"
+          target: "/home/ec2-user"
+
+      - name: Create .env file on EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ env.RESERVATION_HOSTNAME }}
+          username: ec2-user
+          key: ${{ secrets.EC2_KEY }}
+          port: 22
+          script: |
+            echo "SPRING_PROFILES_ACTIVE=${{ env.SPRING_PROFILES_ACTIVE }}" >> /home/ec2-user/docker/.env
+            echo "EUREKA_HOSTNAME=${{ env.EUREKA_HOSTNAME }}" >> /home/ec2-user/docker/.env
+            echo "RESERVATION_SERVER_PORT=${{ env.RESERVATION_SERVER_PORT }}" >> /home/ec2-user/docker/.env
+            echo "PAYMENT_SERVER_PORT=${{ env.PAYMENT_SERVER_PORT }}" >> /home/ec2-user/docker/.env
+            echo "REDIS_HOST=${{ env.REDIS_HOST }}" >> /home/ec2-user/docker/.env
+            echo "SHARED_REDIS_PORT=${{ env.SHARED_REDIS_PORT }}" >> /home/ec2-user/docker/.env
+            echo "DB_URL=${{ env.DB_URL }}" >> /home/ec2-user/docker/.env
+            echo "ECR_REGISTRY=${{ secrets.ECR_REGISTRY }}" >> /home/ec2-user/docker/.env
+            echo "ECR_NAMESPACE=${{ secrets.ECR_NAMESPACE }}" >> /home/ec2-user/docker/.env
+            echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> /home/ec2-user/docker/.env
+            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> /home/ec2-user/docker/.env
+            echo "KAFKA_SERVER_URL=${{ env.KAFKA_SERVER_URL }}" >> /home/ec2-user/docker/.env
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+          ECR_NAMESPACE: ${{ secrets.ECR_NAMESPACE }}
+          SPRING_PROFILES_ACTIVE: ${{ env.SPRING_PROFILES_ACTIVE }}
+          EUREKA_HOSTNAME: ${{ env.EUREKA_HOSTNAME }}
+          RESERVATION_SERVER_PORT: ${{ env.RESERVATION_SERVER_PORT }}
+          PAYMENT_SERVER_PORT: ${{ env.PAYMENT_SERVER_PORT }}
+          REDIS_HOST: ${{ env.REDIS_HOST }}
+          SHARED_REDIS_PORT: ${{ env.SHARED_REDIS_PORT }}
+          DB_URL: ${{ env.DB_URL }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          KAFKA_SERVER_URL: ${{ env.KAFKA_SERVER_URL }}
+
+        with:
+          host: ${{ env.RESERVATION_HOSTNAME }}
+          username: ec2-user
+          key: ${{ secrets.EC2_KEY }}
+          port: 22
+          envs: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, ECR_REGISTRY, ECR_NAMESPACE, SPRING_PROFILES_ACTIVE, EUREKA_HOSTNAME, RESERVATION_SERVER_PORT, PAYMENT_SERVER_PORT, REDIS_HOST, SHARED_REDIS_PORT, DB_URL, DB_USERNAME, DB_PASSWORD, KAFKA_SERVER_URL
+          script: |
+            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
+            docker-compose -f ./docker/docker-compose.reservation-payment.yml down
+            docker-compose -f ./docker/docker-compose.reservation-payment.yml pull
+            docker-compose -f ./docker/docker-compose.reservation-payment.yml up

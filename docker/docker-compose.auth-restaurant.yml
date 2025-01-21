@@ -1,0 +1,37 @@
+services:
+  auth:
+    image: ${ECR_REGISTRY}/${ECR_NAMESPACE}/auth:latest
+    build:
+      context: ../auth
+      dockerfile: Dockerfile
+    container_name: auth
+    ports:
+      - "${AUTH_SERVER_PORT}:${AUTH_SERVER_PORT}"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - EUREKA_HOSTNAME=${EUREKA_HOSTNAME}
+      - AUTH_SERVER_PORT=${AUTH_SERVER_PORT}
+      - DB_URL=${DB_URL}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REDIS_HOST=${REDIS_HOST}
+      - SHARED_REDIS_PORT=${SHARED_REDIS_PORT}
+      - AUTH_SECRET_KEY=${AUTH_SECRET_KEY}
+
+  restaurant:
+    image: ${ECR_REGISTRY}/${ECR_NAMESPACE}/restaurant:latest
+    build:
+      context: ../restaurant
+      dockerfile: Dockerfile
+    container_name: restaurant
+    ports:
+      - "${RESTAURANT_SERVER_PORT}:${RESTAURANT_SERVER_PORT}"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - EUREKA_HOSTNAME=${EUREKA_HOSTNAME}
+      - RESTAURANT_SERVER_PORT=${RESTAURANT_SERVER_PORT}
+      - DB_URL=${DB_URL}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REDIS_HOST=${REDIS_HOST}
+      - SHARED_REDIS_PORT=${SHARED_REDIS_PORT}
