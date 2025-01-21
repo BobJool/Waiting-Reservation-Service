@@ -1,106 +1,117 @@
-server:
-  port: 19050
-
-spring:
-  application:
-    name: notification-service
-  config:
-    import: classpath:config-repo/application-key.yml
-  datasource:
-    driver-class-name: org.postgresql.Driver
-    url: ${DB_URL}/notification_db
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-  jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    properties:
-      format-sql: true
-      use_sql_comments: true
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-  jackson:
-    property-naming-strategy: SNAKE_CASE
-  kafka:
-    consumer:
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      group-id: ${spring.application.name}-group
-      enable:
-        auto:
-          commit: false
-    bootstrap-servers: ${KAFKA_SERVER_URL}
-    listener:
-      concurrency: 3
-      ack-mode: manual
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: ${SENDER_ACCOUNT}
-    password: ${SENDER_PASSWORD}
-    properties:
-      mail.smtp.debug: true
-      mail.smtp.connectiontimeout: 1000 #1초
-      mail.starttls.enable: true
-      mail.smtp.auth: true
-
-
-notification:
-  template-mapping:
-    queue:
-      registered: 9d5b1a23-eb4c-44b8-8f20-d7f19254b364
-      delayed: 0a6aab9f-7656-45d8-97c3-63b9cc9eac35
-      remind: b64b7920-68ea-470f-adba-2c4a0a5af031
-      alerted: 33c5002a-8041-496f-80af-b4953b987c90
-      rush: 0297236f-4b16-4ffa-8614-ce60a073a857
-      canceled: 35733f44-8e0b-4c0a-bff8-03390fb0c39f
-    reservation:
-      completed: d2fae87a-60eb-4684-9fb6-c6a53a78f8e7
-      failed: fb348681-f0ae-42ec-970d-c9b5d4bb6ff0
-      refund: 237c2474-2509-4dfa-aeb2-4eb9f421ef9d
-      remind: 14e786a6-7757-4809-87fb-d7665e79d141
-
-token:
-  slack:
-    oauth: ${SLACK_OAUTH_TOKEN}
-
-resilience4j:
-  circuitbreaker:
-    configs:
-      default:
-        registerHealthIndicator: true             # actuator - 매트릭 추가 여부
-        eventConsumerBufferSize: 10               # actuator - 발생한 이벤트 버퍼 크기
-        slidingWindowType: COUNT_BASED            # 알고리즘 - 타입
-        slidingWindowSize: 10                     # 알고리즘 - 범위, 최근 n회 기준
-        failureRateThreshold: 20                  # 실패 - 임계 값 퍼센트
-        minimumNumberOfCalls: 10                  # 실패 - 집계에 필요한 최소 호출 수
-        slowCallRateThreshold: 80                 # 지연 - 느린 호출의 비율 %
-        slowCallDurationThreshold: 30000          # 지연 - 느린 호출의 기준 (밀리초)
-        permittedNumberOfCallsInHalfOpenState: 3  # Half-open 상태에서 최대 호출 수
-        waitDurationInOpenState: 60s              # Half-open 전환 대기 시간
-        automaticTransitionFromOpenToHalfOpenEnabled: true
-#        record-exceptions:
-#          - com.bobjool.common.exception.BobJoolException
-    instances:
-      pushNotificationToSlack:
-        baseConfig: default
-
-management:
-  zipkin:
-    tracing:
-      endpoint: "http://localhost:9411/api/v2/spans"
-  tracing:
-    sampling:
-      probability: 1.0
-  endpoints:
-    web:
-      exposure:
-        include: "*"
-
-logging:
-  level:
-    io.github.resilience4j: DEBUG
-    org.springframework.kafka: DEBUG
-    com.bobjool: DEBUG
+#server:
+#  port: 19050
+#
+#spring:
+#  application:
+#    name: notification-service
+#  config:
+#    import: classpath:config-repo/application-key.yml
+#  datasource:
+#    driver-class-name: org.postgresql.Driver
+#    url: ${DB_URL}/notification_db
+#    username: ${DB_USERNAME}
+#    password: ${DB_PASSWORD}
+#  jpa:
+#    database-platform: org.hibernate.dialect.PostgreSQLDialect
+#    hibernate:
+#      ddl-auto: update
+#    show-sql: true
+#    properties:
+#      format-sql: true
+#      use_sql_comments: true
+#      hibernate:
+#        dialect: org.hibernate.dialect.PostgreSQLDialect
+#  jackson:
+#    property-naming-strategy: SNAKE_CASE
+#  kafka:
+#    consumer:
+#      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+#      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+#      group-id: ${spring.application.name}-group
+#      enable:
+#        auto:
+#          commit: false
+#    bootstrap-servers: ${KAFKA_SERVER_URL}
+#    listener:
+#      concurrency: 3
+#      ack-mode: manual
+#  mail:
+#    host: smtp.gmail.com
+#    port: 587
+#    username: ${SENDER_ACCOUNT}
+#    password: ${SENDER_PASSWORD}
+#    properties:
+#      mail.smtp.debug: true
+#      mail.smtp.connectiontimeout: 1000 #1초
+#      mail.starttls.enable: true
+#      mail.smtp.auth: true
+#
+#
+#notification:
+#  template-mapping:
+#    queue:
+#      registered: 9d5b1a23-eb4c-44b8-8f20-d7f19254b364
+#      delayed: 0a6aab9f-7656-45d8-97c3-63b9cc9eac35
+#      remind: b64b7920-68ea-470f-adba-2c4a0a5af031
+#      alerted: 33c5002a-8041-496f-80af-b4953b987c90
+#      rush: 0297236f-4b16-4ffa-8614-ce60a073a857
+#      canceled: 35733f44-8e0b-4c0a-bff8-03390fb0c39f
+#    reservation:
+#      completed: d2fae87a-60eb-4684-9fb6-c6a53a78f8e7
+#      failed: fb348681-f0ae-42ec-970d-c9b5d4bb6ff0
+#      refund: 237c2474-2509-4dfa-aeb2-4eb9f421ef9d
+#      remind: 14e786a6-7757-4809-87fb-d7665e79d141
+#
+#token:
+#  slack:
+#    oauth: ${SLACK_OAUTH_TOKEN}
+#
+#resilience4j:
+#  circuitbreaker:
+#    configs:
+#      default:
+#        registerHealthIndicator: true             # actuator - 매트릭 추가 여부
+#        eventConsumerBufferSize: 10               # actuator - 발생한 이벤트 버퍼 크기
+#        slidingWindowType: COUNT_BASED            # 알고리즘 - 타입
+#        slidingWindowSize: 10                     # 알고리즘 - 범위, 최근 n회 기준
+#        failureRateThreshold: 20                  # 실패 - 임계 값 퍼센트
+#        minimumNumberOfCalls: 10                  # 실패 - 집계에 필요한 최소 호출 수
+#        slowCallRateThreshold: 80                 # 지연 - 느린 호출의 비율 %
+#        slowCallDurationThreshold: 30000          # 지연 - 느린 호출의 기준 (밀리초)
+#        permittedNumberOfCallsInHalfOpenState: 3  # Half-open 상태에서 최대 호출 수
+#        waitDurationInOpenState: 60s              # Half-open 전환 대기 시간
+#        automaticTransitionFromOpenToHalfOpenEnabled: true
+##        record-exceptions:
+##          - com.bobjool.common.exception.BobJoolException
+#    instances:
+#      pushNotificationToSlack:
+#        baseConfig: default
+#
+#management:
+#  zipkin:
+#    tracing:
+#      endpoint: "http://localhost:9411/api/v2/spans"
+#  tracing:
+#    sampling:
+#      probability: 1.0
+#
+#  #모든 엔드포인트 노출 설정
+#  endpoints:
+#    web:
+#      exposure:
+#        include: "*"
+#  #헬스 체크 엔드포인트 상세 정보 표시 설정
+#  health:
+#    show-details: always
+#
+#  #프로메테우스 사용활성화
+#  metrics:
+#    export:
+#      prometheus:
+#        enabled: true
+#
+#logging:
+#  level:
+#    io.github.resilience4j: DEBUG
+#    org.springframework.kafka: DEBUG
+#    com.bobjool: DEBUG

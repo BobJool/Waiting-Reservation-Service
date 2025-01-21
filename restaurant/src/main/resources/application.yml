@@ -1,3 +1,18 @@
 spring:
-  profiles:
-    default: dev
+  application:
+    name: restaurant-service
+  config:
+    import: "configserver:"
+  cloud:
+    config:
+      uri: http://localhost:19002 # Config Server 주소
+      label: dev # Git 브랜치
+      discovery:
+        service-id: config-service
+        enabled: true
+
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:19000/eureka/
