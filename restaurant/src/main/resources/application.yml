@@ -2,7 +2,7 @@ spring:
   application:
     name: restaurant-service
   config:
-    import: "configserver:"
+    import: "optional:configserver:"
   cloud:
     config:
       uri: http://localhost:19002 # Config Server 주소
