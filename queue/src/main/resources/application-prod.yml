@@ -1,21 +1,60 @@
+server:
+  port: ${QUEUE_SERVER_PORT:19030}
+
 spring:
   application:
     name: queue-service
-  cloud:
-    config:
-      discovery:
-        enabled: true
-        service-id: config-service # Eureka에 등록된 Config 서버의 서비스 ID
-  profiles:
-    active: prod
+  config:
+    activate:
+      on-profile: prod
+    import: "optional:configserver:"
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: ${DB_URL}/queue_db
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${QUEUE_REDIS_PORT:6380}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      format-sql: false
+      use_sql_comments: false
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+  kafka:
+    bootstrap-servers: ${KAFKA_SERVER_URL}
+    consumer:
+      group-id: ${spring.application.name}-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: '*'
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://eureka-server:19000/eureka/
+      defaultZone: http://${EUREKA_HOSTNAME}:19000/eureka/
+
 
 management:
+  #  zipkin:
+  #    tracing:
+  #      endpoint: "http://localhost:9411/api/v2/spans"
+  #  tracing:
+  #    sampling:
+  #      probability: 1.0
   endpoints:
     web:
       exposure:
-        include: refresh
+        include: "*"

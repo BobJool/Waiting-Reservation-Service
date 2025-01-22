@@ -1,0 +1,39 @@
+services:
+  queue:
+    image: ${ECR_REGISTRY}/${ECR_NAMESPACE}/queue:latest
+    build:
+      context: ../queue
+      dockerfile: Dockerfile
+    container_name: queue
+    ports:
+      - "${QUEUE_SERVER_PORT}:${QUEUE_SERVER_PORT}"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - EUREKA_HOSTNAME=${EUREKA_HOSTNAME}
+      - QUEUE_SERVER_PORT=${QUEUE_SERVER_PORT}
+      - DB_URL=${DB_URL}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REDIS_HOST=${REDIS_HOST}
+      - QUEUE_REDIS_PORT=${QUEUE_REDIS_PORT}
+      - KAFKA_SERVER_URL=${KAFKA_SERVER_URL}
+
+  notification:
+    image: ${ECR_REGISTRY}/${ECR_NAMESPACE}/notification:latest
+    build:
+      context: ../notification
+      dockerfile: Dockerfile
+    container_name: notification
+    ports:
+      - "${NOTIFICATION_SERVER_PORT}:${NOTIFICATION_SERVER_PORT}"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - EUREKA_HOSTNAME=${EUREKA_HOSTNAME}
+      - NOTIFICATION_SERVER_PORT=${NOTIFICATION_SERVER_PORT}
+      - DB_URL=${DB_URL}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - KAFKA_SERVER_URL=${KAFKA_SERVER_URL}
+      - SENDER_ACCOUNT=${SENDER_ACCOUNT}
+      - SENDER_PASSWORD=${SENDER_PASSWORD}
+      - SLACK_OAUTH_TOKEN=${SLACK_OAUTH_TOKEN}
