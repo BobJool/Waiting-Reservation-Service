@@ -3,9 +3,9 @@ name: Deploy Reservation, Payment to AWS ECR
 on:
   push:
     branches: [ "main" ]
-#    paths:
-#      - 'reservation/**'
-#      - 'payment/**'
+    paths:
+      - 'reservation/**'
+      - 'payment/**'
 
 env:
   EUREKA_HOSTNAME: ${{ vars.EUREKA_HOSTNAME }}
@@ -196,4 +196,4 @@ jobs:
             aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
             docker-compose -f ./docker/docker-compose.reservation-payment.yml down
             docker-compose -f ./docker/docker-compose.reservation-payment.yml pull
-            docker-compose -f ./docker/docker-compose.reservation-payment.yml up
+            docker-compose -f ./docker/docker-compose.reservation-payment.yml up -d
