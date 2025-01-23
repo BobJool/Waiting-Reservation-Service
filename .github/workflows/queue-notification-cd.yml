@@ -199,7 +199,7 @@ jobs:
           SLACK_OAUTH_TOKEN: ${{ secrets.SLACK_OAUTH_TOKEN }}
 
         with:
-          host: ${{ env.RESERVATION_HOSTNAME }}
+          host: ${{ env.QUEUE_HOSTNAME }}
           username: ec2-user
           key: ${{ secrets.EC2_KEY }}
           port: 22
