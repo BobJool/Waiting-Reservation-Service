@@ -128,7 +128,6 @@ public class RestaurantController {
   }
 
   //단일 음식점 정보 조회(for Customer)
-  @RequireRole(value = "CUSTOMER")
   @GetMapping("/customer/{restaurantId}")
   public ResponseEntity<ApiResponse<RestaurantForCustomerResDto>> getRestaurantsForCustomer(
       @Valid @PathVariable("restaurantId") UUID restaurantId) {
